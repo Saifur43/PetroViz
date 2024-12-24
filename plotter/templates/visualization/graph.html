@@ -1,0 +1,215 @@
+<!-- templates/visualization/visualize_data.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Core Data Visualization</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar {
+            height: calc(100vh - 2rem);
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+        }
+        .visualization-container {
+            height: calc(100vh - 2rem);
+            padding: 1rem;
+        }
+        .chart-wrapper {
+            display: flex;
+            height: 100%;
+            gap: 1rem;
+        }
+        .core-image-container {
+            width: 200px;
+            height: 100%;
+            position: relative;
+        }
+        .core-image {
+            padding-top: 40%;
+            width: 70%;
+            height: 95%;
+            object-fit: cover;
+        }
+        .chart-container {
+            width: 500px;
+            flex-grow: 0;
+            height: 100%;
+            position: relative;
+        }
+        .chart-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Sidebar -->
+            <div class="col-md-2 sidebar">
+                <h4 class="mb-4">Selection Controls</h4>
+                <form method="GET">
+                    <div class="mb-3">
+                        <label class="form-label">Select Well</label>
+                        <select name="well_name" class="form-select" onchange="this.form.submit()">
+                            <option value="">Choose Well</option>
+                            {% for well in well_names %}
+                            <option value="{{ well }}" {% if well == selected_well %}selected{% endif %}>
+                                {{ well }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if selected_well %}
+                    <div class="mb-3">
+                        <label class="form-label">Select Core</label>
+                        <select name="core_no" class="form-select" onchange="this.form.submit()">
+                            <option value="">Choose Core</option>
+                            {% for core in core_numbers %}
+                            <option value="{{ core }}" {% if core|stringformat:"i" == selected_core %}selected{% endif %}>
+                                Core {{ core }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Right Content Area -->
+            <div class="col-md-10 visualization-container">
+                {% if selected_well and selected_core %}
+                <div class="chart-wrapper">
+                    <div class="chart-container">
+                        <div class="chart-title">Core Properties</div>
+                        <canvas id="coreDataChart"></canvas>
+                    </div>
+                    {% if core_img_url %}
+                    <div class="core-image-container">
+                        <div class="chart-title">Core Image</div>
+                        <img src="{{ core_img_url }}" alt="Core Image" class="core-image">
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="h-100 d-flex justify-content-center align-items-center">
+                    <h3 class="text-muted">Please select a well and core to view data</h3>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if selected_well and selected_core %}
+    <script>
+        const ctx = document.getElementById('coreDataChart').getContext('2d');
+        const chartData = {{ chart_data|safe }};
+        
+        // Calculate the depth range for consistent scaling
+        const depthMin = Math.min(...chartData.depths);
+        const depthMax = Math.max(...chartData.depths);
+        const depthPadding = (depthMax - depthMin) * 0.01; // Reduced padding to match image style
+        
+        new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Porosity (%)',
+                    data: chartData.depths.map((depth, i) => ({
+                        x: chartData.porosity[i],
+                        y: depth
+                    })),
+                    yAxisID: 'y',
+                    xAxisID: 'x1',
+                    backgroundColor: 'rgba(255, 0, 0, 1)', // Solid red dots
+                    borderColor: 'rgba(255, 0, 0, 1)',
+                    pointRadius: 4,
+                    showLine: true,
+                    borderWidth: 1
+                }, {
+                    label: 'Permeability (mD)',
+                    data: chartData.depths.map((depth, i) => ({
+                        x: chartData.permeability[i],
+                        y: depth
+                    })),
+                    yAxisID: 'y',
+                    xAxisID: 'x2',
+                    backgroundColor: 'rgba(0, 0, 255, 1)', // Solid blue dots
+                    borderColor: 'rgba(0, 0, 255, 1)',
+                    pointRadius: 4,
+                    showLine: true,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        reverse: true,
+                        min: depthMin - depthPadding,
+                        max: depthMax + depthPadding,
+                        title: {
+                            display: true,
+                            text: 'Depth (m)'
+                        },
+                        grid: {
+                            color: '#ddd',
+                            drawBorder: true
+                        }
+                    },
+                    x1: {
+                        type: 'linear',
+                        position: 'top',
+                        title: {
+                            display: true,
+                            text: 'Porosity (%)'
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        ticks: {
+                            color: 'rgb(255, 0, 0)'
+                        }
+                    },
+                    x2: {
+                        type: 'logarithmic',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Permeability (mD)'
+                        },
+                        ticks: {
+                            color: 'rgb(0, 0, 255)'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const dataset = context.dataset.label;
+                                const value = context.parsed.x.toFixed(2);
+                                const depth = context.parsed.y.toFixed(2);
+                                return `${dataset}: ${value} at depth ${depth}m`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

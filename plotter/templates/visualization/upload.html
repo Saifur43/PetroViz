@@ -1,0 +1,23 @@
+<h2>Upload CSV and Images</h2>
+{% if message %}
+    <div style="color: red;" if "Error" in message else style="color: green;">
+        {{ message }}
+    </div>
+{% endif %}
+
+{% if error_rows %}
+    <h3>Skipped Rows</h3>
+    <ul>
+        {% for row in error_rows %}
+            <li>Row {{ row.0 }}: {{ row.1 }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <label for="image_files">Upload Core Images (corresponding to core numbers):</label>
+    <input type="file" name="image_files" multiple><br><br>
+    <button type="submit">Upload</button>
+</form>
