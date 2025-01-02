@@ -9,7 +9,7 @@ class CoreAdmin(admin.ModelAdmin):
     get_well_name.short_description = 'Well Name'  # Custom column header
 
 class WellDataAdmin(admin.ModelAdmin):
-    list_display = ('well_name', 'core_no', 'porosity', 'perm_kair', 'resistivity')  # Example fields to display
+    list_display = ('well_name', 'depth', 'core_no', 'porosity', 'perm_kair', 'resistivity')  # Example fields to display
 
 # Register the models
 admin.site.register(Core, CoreAdmin)

@@ -28,7 +28,7 @@
             position: relative;
         }
         .core-image {
-            padding-top: 40%;
+            padding-top: 37%;
             width: 70%;
             height: 95%;
             object-fit: cover;
@@ -78,6 +78,11 @@
                         </select>
                     </div>
                     {% endif %}
+
+                    <!-- Clear Selection Button -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'graph_view' %}" class="btn btn-secondary">Clear Selection</a>
+                    </div>
                 </form>
             </div>
 

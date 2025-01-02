@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class Core(models.Model):
@@ -22,6 +23,10 @@ class WellData(models.Model):
     perm_kair = models.FloatField(null=True, blank=True)
     grain_density = models.FloatField(null=True, blank=True)
     resistivity = models.FloatField(null=True, blank=True)
+
+    def clean(self):
+        if self.core_no != self.core.core_no:
+            raise ValidationError("Core number in WellData must match the core number in Core.")
 
     def __str__(self):
         return f"{self.well_name} - Core {self.core_no}"
