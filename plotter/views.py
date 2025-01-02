@@ -1,25 +1,11 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-from django.shortcuts import render, redirect
-from .models import WellData, Core
-from .forms import CSVUploadForm
-from io import BytesIO
-import base64
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import pandas as pd
-from io import BytesIO
 from django.shortcuts import render
 from .models import WellData, Core
-from django.shortcuts import render
+from .models import WellData, Core
 from .models import Core, WellData
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import pandas as pd
-import io
-import base64
-import numpy as np
 
+def dashboard(request):
+     
+     return render(request, 'visualization/dashboard.html')
 
 def graph_view(request):
     selected_well = request.GET.get('well_name')

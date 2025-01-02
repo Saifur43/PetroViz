@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}BAPEX Dashboard Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <h2 class="text-dark">Operations Dashboard</h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Key Performance Indicators -->
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h5 class="card-title">Daily Production</h5>
+                <h2 class="card-text">25,000 BBL</h2>
+                <p class="text-muted">Oil Production</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h5 class="card-title">Total Fields</h5>
+                <h2 class="card-text">12</h2>
+                <p class="text-muted">Operational Status</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h5 class="card-title">Active Wells</h5>
+                <h2 class="card-text">42</h2>
+                <p class="text-muted">Operational Status</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h5 class="card-title">Gas Production</h5>
+                <h2 class="card-text">150 MCF</h2>
+                <p class="text-muted">Daily Output</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h5 class="card-title">Field Efficiency</h5>
+                <h2 class="card-text">94%</h2>
+                <p class="text-muted">Operational Rate</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Operations Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Operations</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">নোয়াখালীর বেগমগঞ্জ গ্যাসক্ষেত্রে নতুন গ্যাসের স্তর পাওয়া গেছে। এখানে উত্তোলনযোগ্য গ্যাসের মজুত ১৮০ বিলিয়ন ঘনফুট (বিসিএফ) - 2 hours ago</li>
+                    <li class="list-group-item">ভোলায় ইলিশা-১ নামের আরেকটি নতুন গ্যাসকূপে গ্যাসের সন্ধান মিলেছে। এ কূপ থেকে দৈনিক ২০–২২ মিলিয়ন ঘনফুট গ্যাস উত্তোলন করা যাবে।  - 5 hours ago</li>
+                    <li class="list-group-item">New order received - 1 day ago</li>
+                    
+                </ul>
+            </div>
+        </div>
+</div>
+{% endblock %}
