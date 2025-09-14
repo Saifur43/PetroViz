@@ -1,0 +1,125 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <h2>Upload Production Data</h2>
+        
+        {% if messages %}
+        <ul class="messagelist">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="upload-form">
+            {% csrf_token %}
+            <div class="form-row" style="margin-bottom: 20px;">
+                <div style="margin-bottom: 10px;">
+                    <label for="excel_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Excel File:</label>
+                    <input type="file" name="excel_file" accept=".xlsx,.xls" required>
+                </div>
+                <div style="margin-top: 5px; color: #666;">
+                    Accepted formats: .xlsx, .xls
+                </div>
+            </div>
+            <div class="submit-row">
+                <input type="submit" value="Upload" class="default">
+            </div>
+        </form>
+
+        <div style="margin-top: 30px;">
+            <h3>Required Excel Format:</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th style="background-color: #f6f6f6; padding: 8px; border: 1px solid #ddd; text-align: left;">Column Name</th>
+                            <th style="background-color: #f6f6f6; padding: 8px; border: 1px solid #ddd; text-align: left;">Required</th>
+                            <th style="background-color: #f6f6f6; padding: 8px; border: 1px solid #ddd; text-align: left;">Example</th>
+                            <th style="background-color: #f6f6f6; padding: 8px; border: 1px solid #ddd; text-align: left;">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">well_name</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; color: #d32f2f;">Yes</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Well-A1</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Unique identifier for the well</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">gas_field</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">No</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">North Field</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Gas field name (defaults to "Default Field")</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">field_location</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">No</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">North Sea</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Location of the gas field</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">date</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; color: #d32f2f;">Yes</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">2024-03-15</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Production date (YYYY-MM-DD)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">flow_rate</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; color: #d32f2f;">Yes</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">150.5</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Daily flow rate</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">cumulative_flow_rate</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; color: #d32f2f;">Yes</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">10500.75</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Total production to date</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">water</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; color: #d32f2f;">Yes</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">25.3</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Water production</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">condensate</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; color: #d32f2f;">Yes</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">12.8</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Condensate production</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">location</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">No</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Block A</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Well location details</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+                <h4 style="margin-top: 0; color: #1353A3;">Notes:</h4>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>All numeric values should use decimal points (not commas)</li>
+                    <li>Dates should be in YYYY-MM-DD format</li>
+                    <li>Each well should have a unique name</li>
+                    <li>The Excel file should have headers matching the column names exactly</li>
+                    <li>If gas_field is not specified, wells will be assigned to "Default Field"</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h4 style="color: #1353A3;">Example Excel Structure:</h4>
+                <pre style="background-color: #f8f9fa; padding: 15px; overflow-x: auto; border-radius: 4px;">
+well_name  | gas_field  | field_location | date        | flow_rate | cumulative_flow_rate | water | condensate | location
+Well-A1    | North Field| North Sea      | 2024-03-15  | 150.5     | 10500.75             | 25.3  | 12.8       | Block A
+Well-B2    | South Field| South Sea      | 2024-03-15  | 175.2     | 12300.50             | 30.1  | 15.2       | Block B</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

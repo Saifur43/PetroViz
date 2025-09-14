@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load color_tags %}
+{% block title %}Exploration Timeline{% endblock %}
+
+
+{% block content %}
+<!-- Include TimelineJS CSS and JS -->
+<link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+<script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+
+<style>
+    .container {
+        display: flex;
+    }
+    .sidebar {
+        width: 20%;
+        padding: 5px;
+        background-color: #f9f9f9;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .timeline-container {
+        flex-grow: 1;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .timeline-title {
+        text-align: center;
+        margin: 30px;
+    }
+    #timeline-embed {
+        width: 100%;
+        height: 600px; /* Adjust height as needed */
+    }
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: 1px solid #1353A3;
+    }
+    .tl-timeline {
+        position: relative;
+    }
+    .tl-event {
+        display: block; /* Ensure events are visible by default */
+    }
+    .category-list {
+        list-style: none;
+        padding: 0;
+    }
+    .category-item {
+        padding: 10px;
+        margin: 5px 0;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        border-left: 4px solid transparent;
+    }
+    .category-item:hover {
+        background-color: #e0e0e0;
+    }
+    .category-item.active {
+        background-color: #1353A3;
+        color: white;
+    }
+    
+    {% for category in categories %}
+    .category-item[data-category="{{ category.id }}"] {
+        border-left-color: var(--category-{{ category.id }}-color, #1353A3);
+    }
+    .category-item[data-category="{{ category.id }}"].active {
+        background-color: var(--category-{{ category.id }}-color, #1353A3);
+        color: white;
+    }
+    {% endfor %}
+</style>
+
+<div class="container">
+    <div class="sidebar">
+        <h4>Categories</h4>
+        <ul class="category-list">
+            <li class="category-item active" data-category="all">All Categories</li>
+            {% for category in categories %}
+            <li class="category-item" data-category="{{ category.id }}">{{ category.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="timeline-container">
+        <div class="timeline-title">
+            <h2>Milestones of Exploration</h2>
+        </div>
+        <!-- TimelineJS Embed Container -->
+        <div id="timeline-embed"></div>
+    </div>
+</div>
+
+<script>
+    // Add this at the start of your script section
+    const categoryColors = {
+        {% for category in categories %}
+        "{{ category.id }}": "{{ forloop.counter0|colorize }}",
+        {% endfor %}
+    };
+
+    // Store all milestones data globally
+    const allMilestonesData = {
+        "events": [
+            {% for milestone in milestones %}
+            {
+                "start_date": {
+                    "year": "{{ milestone.year }}"
+                },
+                "text": {
+                    "headline": "{{ milestone.title }}",
+                    "text": `
+                        <p><strong>Category:</strong> {{ milestone.category.name }}</p>
+                        <p>{{ milestone.description }}</p>
+                        {% if milestone.remarks %}
+                        <p><em>{{ milestone.remarks }}</em></p>
+                        {% endif %}
+                    `
+                },
+                "group": "{{ milestone.category.id }}",
+                "background": {
+                    "color": categoryColors["{{ milestone.category.id }}"]
+                }
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+
+    // Function to initialize/reinitialize timeline with filtered data
+    function initializeTimeline(events) {
+        // Clear existing timeline
+        document.getElementById('timeline-embed').innerHTML = '';
+        // Create new timeline with filtered events
+        window.timeline = new TL.Timeline('timeline-embed', { events: events });
+    }
+
+    // Initialize timeline with all events initially
+    initializeTimeline(allMilestonesData.events);
+
+    // Filtering functionality
+    document.querySelectorAll('.category-item').forEach(item => {
+        item.addEventListener('click', function() {
+            // Update active state
+            document.querySelectorAll('.category-item').forEach(cat => cat.classList.remove('active'));
+            this.classList.add('active');
+
+            const selectedCategory = this.getAttribute('data-category');
+            
+            // Filter events based on category
+            const filteredEvents = selectedCategory === 'all' 
+                ? allMilestonesData.events 
+                : allMilestonesData.events.filter(event => event.group === selectedCategory);
+
+            // Reinitialize timeline with filtered events
+            initializeTimeline(filteredEvents);
+        });
+    });
+</script>
+{% endblock %}

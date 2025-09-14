@@ -3,24 +3,69 @@
 {% block title %}Core Data Visualization{% endblock %}
 
 {% block content %}
-<div class="container-fluid h-100">
-    <div class="row h-100">
-        <!-- Left Sidebar -->
-        <div class="col-lg-2 col-md-3 sidebar p-3" style="background-color: #f8f9fa; border-right: 1px solid #dee2e6;">
-            <div class="card border-0 bg-transparent">
-                <div class="card-header bg-primary text-white">
+<style>
+    .container-fluid {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+    }
+    .content-row {
+        display: flex;
+        flex-grow: 1;
+        height: 100%;
+        margin: 0;
+    }
+    .sidebar {
+        width: 20%;
+        background-color: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+        overflow-y: auto;
+        padding: 15px;
+    }
+    .graph-container {
+        width: 26.67%; /* 80% / 3 sections = 26.67% each */
+        padding: 10px;
+    }
+    .image-container {
+        width: 26.67%; /* 80% / 3 sections = 26.67% each */
+        padding: 10px;
+    }
+    .card {
+        height: 100%;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+    .image-container img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: cover;
+    }
+    .sidebar .card {
+        border: none;
+        background: transparent;
+    }
+    .sidebar .card-body {
+        padding: 15px 0;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="content-row">
+        <!-- Sidebar (20%) -->
+        <div class="sidebar">
+            <div class="card">
+                <div class="card-header text-white" style="background-color: #F59E0B; border-radius: 8px 8px 0 0;">
                     <h5 class="mb-0">Selection Controls</h5>
                 </div>
-                <div class="card-body px-0">
+                <div class="card-body">
                     <form method="GET">
                         <div class="mb-3">
                             <label class="form-label">Select Well</label>
                             <select name="well_name" class="form-select" onchange="this.form.submit()">
                                 <option value="">Choose Well</option>
                                 {% for well in well_names %}
-                                <option value="{{ well }}" {% if well == selected_well %}selected{% endif %}>
-                                    {{ well }}
-                                </option>
+                                <option value="{{ well }}" {% if well == selected_well %}selected{% endif %}>{{ well }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -47,51 +92,62 @@
             </div>
         </div>
 
-        <!-- Right Content Area -->
-        <div class="col-lg-10 col-md-9 p-3" style="width: 800px;">
-            {% if selected_well and selected_core %}
-            <div class="row h-100">
-                <!-- Graph Container -->
-                <div class="col-lg-9 h-100">
-                    <div class="card h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Core Analysis: {{ selected_well }} - Core {{ selected_core }}</h5>
-                        </div>
-                        <div class="card-body">
-                            <div style="height: calc(100vh - 200px); width: 400px;">
-                                <canvas id="coreDataChart"></canvas>
-                            </div>
-                        </div>
+        {% if selected_well and selected_core %}
+        <!-- Graph Container (26.67%) -->
+        <div class="graph-container">
+            <div class="card">
+                <div class="card-header text-white" style="background-color: #F59E0B;">
+                    <h5 class="mb-0">Core Analysis: {{ selected_well }} - Core {{ selected_core }}</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: calc(100vh - 200px); width: 100%;">
+                        <canvas id="coreDataChart"></canvas>
                     </div>
                 </div>
-                
-                <!-- Core Image Container -->
-                {% if core_img_url %}
-                <div class="col-lg-3 h-100">
-                    <div class="card h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Core Image</h5>
-                        </div>
-                        <div class="card-body d-flex align-items-center justify-content-center p-2">
-                            <div style="height: calc(100vh - 200px); width: 100%;">
-                                <img src="{{ core_img_url }}" 
-                                     alt="Core Image" 
-                                     class="h-100 w-100"
-                                     style="object-fit: contain;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
             </div>
-            {% else %}
-            <div class="card h-100">
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    <h3 class="text-muted">Please select a well and core to view data</h3>
-                </div>
-            </div>
-            {% endif %}
         </div>
+
+        <!-- Core Image (26.67%) -->
+        <div class="image-container">
+            <div class="card">
+                <div class="card-header text-white" style="background-color: #F59E0B;">
+                    <h5 class="mb-0">Core Image</h5>
+                </div>
+                <div class="card-body d-flex align-items-stretch justify-content-center" style="height: calc(100vh - 200px);">
+                    {% if core_img_url %}
+                    <img src="{{ core_img_url }}" alt="Core Image" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                    {% else %}
+                    <div class="d-flex align-items-center justify-content-center w-100">
+                        <p class="text-muted">No core image available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Litho Image (26.67%) -->
+        <div class="image-container">
+            <div class="card">
+                <div class="card-header text-white" style="background-color: #F59E0B;">
+                    <h5 class="mb-0">Litho Image</h5>
+                </div>
+                <div class="card-body d-flex align-items-stretch justify-content-center" style="height: calc(100vh - 200px);">
+                    {% if litho_image_url %}
+                    <img src="{{ litho_image_url }}" alt="Litho Image" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                    {% else %}
+                    <div class="d-flex align-items-center justify-content-center w-100">
+                        <p class="text-muted">No litho image available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="col text-center d-flex align-items-center justify-content-center">
+            <h3 class="text-muted">Please select a well and core to view data</h3>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -100,7 +156,7 @@
     const ctx = document.getElementById('coreDataChart').getContext('2d');
     const chartData = {{ chart_data|safe }};
     
-    // Calculate the depth range for consistent scaling
+    // Calculate depth range for scaling
     const depthMin = Math.min(...chartData.depths);
     const depthMax = Math.max(...chartData.depths);
     const depthPadding = (depthMax - depthMin) * 0.01;
@@ -116,8 +172,8 @@
                 })),
                 yAxisID: 'y',
                 xAxisID: 'x1',
-                backgroundColor: '#40826D',
-                borderColor: '#40826D',
+                backgroundColor: '#1353A3',
+                borderColor: '#1353A3',
                 pointRadius: 4,
                 showLine: true,
                 borderWidth: 1
@@ -129,8 +185,8 @@
                 })),
                 yAxisID: 'y',
                 xAxisID: 'x2',
-                backgroundColor: '#93C572',
-                borderColor: '#93C572',
+                backgroundColor: '#CA7007',
+                borderColor: '#CA7007',
                 pointRadius: 4,
                 showLine: true,
                 borderWidth: 1
@@ -139,7 +195,6 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            aspectRatio: 0.4, // Makes the chart more column-like
             interaction: {
                 mode: 'nearest',
                 intersect: false,
@@ -152,60 +207,21 @@
                     title: {
                         display: true,
                         text: 'Depth (m)',
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        }
+                        font: { size: 14, weight: 'bold' }
                     },
-                    grid: {
-                        color: '#ddd',
-                        drawBorder: true
-                    }
+                    grid: { color: '#ddd' }
                 },
                 x1: {
                     type: 'linear',
                     position: 'top',
-                    title: {
-                        display: true,
-                        text: 'Porosity (%)',
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        }
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    },
-                    ticks: {
-                        color: '#40826D'
-                    }
+                    title: { display: true, text: 'Porosity (%)' },
+                    ticks: { color: '#1353A3' }
                 },
                 x2: {
                     type: 'logarithmic',
                     position: 'bottom',
-                    title: {
-                        display: true,
-                        text: 'Permeability (mD)',
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        }
-                    },
-                    ticks: {
-                        color: '#93C572'
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const dataset = context.dataset.label;
-                            const value = context.parsed.x.toFixed(2);
-                            const depth = context.parsed.y.toFixed(2);
-                            return `${dataset}: ${value} at depth ${depth}m`;
-                        }
-                    }
+                    title: { display: true, text: 'Permeability (mD)' },
+                    ticks: { color: '#CA7007' }
                 }
             }
         }

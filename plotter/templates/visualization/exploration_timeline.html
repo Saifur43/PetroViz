@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Exploration Timeline{% endblock %}
+
+{% block content %}
+<style>
+    .container {
+        display: flex;
+    }
+    .sidebar {
+        width: 20%;
+        padding: 20px;
+        background-color: #f9f9f9;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .timeline-container {
+        flex-grow: 1;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .timeline-title {
+        text-align: center;
+        margin: 40px;
+    }
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        width: 2px;
+        height: 100%;
+        background-color: #1353A3;
+    }
+    .timeline-event {
+        position: relative;
+        margin: 40px 0;
+        width: 45%;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .timeline-event.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .timeline-event.left {
+        left: 0;
+    }
+    .timeline-event.right {
+        left: 55%;
+    }
+    .timeline-event::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        width: 20px;
+        height: 20px;
+        background-color: #CA7007;
+        border-radius: 50%;
+    }
+    .timeline-event.left::before {
+        left: -30px;
+    }
+    .timeline-event.right::before {
+        right: -30px;
+    }
+    .timeline-event h5 {
+        margin: 0;
+        font-size: 1.2em;
+        color: #1353A3;
+    }
+    .timeline-event p {
+        margin: 5px 0;
+        color: #333;
+    }
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: 1px solid #1353A3;
+    }
+</style>
+
+<div class="container">
+    <div class="sidebar">
+        <h4>Filter by Category</h4>
+        <form id="categoryForm" method="GET" action="{% url 'exploration_timeline' %}">
+            <select id="categoryFilter" name="category" onchange="this.form.submit()">
+                <option value="all" {% if request.GET.category == 'all' %}selected{% endif %}>All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id|stringformat:"s" == request.GET.category %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    <div class="timeline-container">
+        <div class="timeline-title">
+            <h2>Milestones of Exploration</h2>
+        </div>
+        <div class="timeline">
+            {% for milestone in milestones %}
+            <div class="timeline-event {% cycle 'left' 'right' %}" data-category="{{ milestone.category.id }}">
+                <h5>{{ milestone.year }} - {{ milestone.title }}</h5>
+                <p><strong>Category:</strong> {{ milestone.category.name }}</p>
+                <p>{{ milestone.description }}</p>
+                {% if milestone.remarks %}
+                <p><em>{{ milestone.remarks }}</em></p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Filtering functionality
+    document.getElementById('categoryFilter').addEventListener('change', function() {
+        var selectedCategory = this.value;
+        var events = document.querySelectorAll('.timeline-event');
+
+        events.forEach(function(event) {
+            if (selectedCategory === 'all' || event.getAttribute('data-category') === selectedCategory) {
+                event.style.display = 'block';
+                setTimeout(() => event.classList.add('visible'), 10); // Add animation
+            } else {
+                event.classList.remove('visible');
+                setTimeout(() => event.style.display = 'none', 300); // Wait for animation to finish
+            }
+        });
+    });
+
+    // Scroll animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const timelineEvents = document.querySelectorAll('.timeline-event');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        timelineEvents.forEach(event => {
+            observer.observe(event);
+        });
+    });
+
+    // Add data-group attribute to each event after TimelineJS renders
+    setTimeout(() => {
+        const timelineEvents = document.querySelectorAll('.tl-event');
+        timelineEvents.forEach(event => {
+            const eventId = event.querySelector('.tl-headline').innerText; // Update to get the headline text correctly
+            const eventData = milestonesData.events.find(e => e.text.headline === eventId);
+            if (eventData) {
+                event.setAttribute('data-group', eventData.group);
+            }
+        });
+    }, 1000); // Wait for TimelineJS to render
+</script>
+{% endblock %}

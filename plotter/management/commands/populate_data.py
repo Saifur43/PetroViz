@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from plotter.models import Core, WellData
+from plotter.models import Core, CoreData
 import csv
 
 class Command(BaseCommand):
@@ -26,7 +26,7 @@ class Command(BaseCommand):
                             core_no=core_no,
                             defaults={'image': None}
                         )
-                        WellData.objects.create(
+                        CoreData.objects.create(
                             well_name = well_name,
                             core=core,
                             core_no=core_no,

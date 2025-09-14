@@ -10,8 +10,9 @@
     <!-- Custom CSS -->
     <style>
         :root {
-            --primary-green: #006241;
-            --secondary-green: #007f54;
+            --primary-blue: #1353A3;
+            --secondary-orange: #CA7007;
+            --tertiary-green: #257358;
             --light-gray: #f5f5f5;
             --dark-gray: #333333;
         }
@@ -21,13 +22,14 @@
         }
 
         .navbar {
-            background-color: var(--primary-green) !important;
+            background-color: var(--primary-blue) !important;
         }
 
         .main-content {
-            min-height: calc(100vh - 160px);
-            padding: 5px 0;
+            min-height: calc(100vh - 120px);
+            padding: 5px;
             background-color: var(--light-gray);
+            width: 100%;
         }
 
         .footer {
@@ -40,22 +42,22 @@
         }
 
         .card-header {
-            background-color: var(--primary-green);
+            background-color: var(--primary-blue);
             color: white;
         }
 
         .stats-card {
-            border-left: 4px solid var(--primary-green);
+            border-left: 4px solid var(--secondary-orange);
         }
 
         .btn-primary {
-            background-color: var(--primary-green);
-            border-color: var(--primary-green);
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
         }
 
         .btn-primary:hover {
-            background-color: var(--secondary-green);
-            border-color: var(--secondary-green);
+            background-color: var(--tertiary-green);
+            border-color: var(--tertiary-green);
         }
     </style>
 </head>
@@ -76,7 +78,10 @@
                         <a class="nav-link" href="{% url 'graph_view' %}">Petro Physical</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Production</a>
+                        <a class="nav-link" href="{% url 'production_graph' %}">Production</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'exploration_timeline' %}">Exp Time Line</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
@@ -93,7 +98,7 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="container">
+        <div class="container-fluid px-5">
             {% block content %}
             {% endblock %}
         </div>
