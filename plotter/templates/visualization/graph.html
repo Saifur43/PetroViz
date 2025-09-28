@@ -3,156 +3,304 @@
 {% block title %}Core Data Visualization{% endblock %}
 
 {% block content %}
-<style>
-    .container-fluid {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        padding: 0;
-    }
-    .content-row {
-        display: flex;
-        flex-grow: 1;
-        height: 100%;
-        margin: 0;
-    }
-    .sidebar {
-        width: 20%;
-        background-color: #f8f9fa;
-        border-right: 1px solid #dee2e6;
-        overflow-y: auto;
-        padding: 15px;
-    }
-    .graph-container {
-        width: 26.67%; /* 80% / 3 sections = 26.67% each */
-        padding: 10px;
-    }
-    .image-container {
-        width: 26.67%; /* 80% / 3 sections = 26.67% each */
-        padding: 10px;
-    }
-    .card {
-        height: 100%;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-    }
-    .image-container img {
-        max-height: 100%;
-        max-width: 100%;
-        object-fit: cover;
-    }
-    .sidebar .card {
-        border: none;
-        background: transparent;
-    }
-    .sidebar .card-body {
-        padding: 15px 0;
-    }
-</style>
-
 <div class="container-fluid">
-    <div class="content-row">
-        <!-- Sidebar (20%) -->
-        <div class="sidebar">
-            <div class="card">
-                <div class="card-header text-white" style="background-color: #F59E0B; border-radius: 8px 8px 0 0;">
-                    <h5 class="mb-0">Selection Controls</h5>
-                </div>
-                <div class="card-body">
-                    <form method="GET">
-                        <div class="mb-3">
-                            <label class="form-label">Select Well</label>
-                            <select name="well_name" class="form-select" onchange="this.form.submit()">
-                                <option value="">Choose Well</option>
-                                {% for well in well_names %}
-                                <option value="{{ well }}" {% if well == selected_well %}selected{% endif %}>{{ well }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        {% if selected_well %}
-                        <div class="mb-3">
-                            <label class="form-label">Select Core</label>
-                            <select name="core_no" class="form-select" onchange="this.form.submit()">
-                                <option value="">Choose Core</option>
-                                {% for core in core_numbers %}
-                                <option value="{{ core }}" {% if core|stringformat:"i" == selected_core %}selected{% endif %}>
-                                    Core {{ core }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        {% endif %}
-
-                        <div class="d-grid">
-                            <a href="{% url 'graph_view' %}" class="btn btn-primary">Clear Selection</a>
-                        </div>
-                    </form>
-                </div>
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3" style="background-color: #257358; color: white; min-height: 100vh;">
+            <div class="card-header text-white" style="background-color: #257358; border-radius: 8px 8px 0 0; padding: 10px;">
+                <h5 class="mb-0" style="color: #E98108;">Selection Controls</h5>
             </div>
-        </div>
+                <form method="GET">
+                    <div class="mb-3">
+                        <label class="form-label" style="color: white;">Select Well</label>
+                        <select name="well_name" class="form-select" onchange="this.form.submit()">
+                            <option value="">Choose Well</option>
+                            {% for well in well_names %}
+                            <option value="{{ well }}" {% if well == selected_well %}selected{% endif %}>{{ well }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if selected_well %}
+                    <div class="mb-3">
+                        <label class="form-label" style="color: white;">Select Core</label>
+                        <select name="core_no" class="form-select" onchange="this.form.submit()">
+                            <option value="">Choose Core</option>
+                            {% for core in core_numbers %}
+                            <option value="{{ core }}" {% if core|stringformat:"i" == selected_core %}selected{% endif %}>
+                                Core {{ core }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-grid">
+                        <a href="{% url 'graph_view' %}" class="btn btn-primary">Clear Selection</a>
+                    </div>
+                </form>
+        </nav>
 
         {% if selected_well and selected_core %}
-        <!-- Graph Container (26.67%) -->
-        <div class="graph-container">
-            <div class="card">
-                <div class="card-header text-white" style="background-color: #F59E0B;">
-                    <h5 class="mb-0">Core Analysis: {{ selected_well }} - Core {{ selected_core }}</h5>
-                </div>
-                <div class="card-body">
-                    <div style="height: calc(100vh - 200px); width: 100%;">
-                        <canvas id="coreDataChart"></canvas>
+        <!-- Main Content -->
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
+            <h6 class="mb-0">Core Analysis: {{ selected_well }} - Core {{ selected_core }}</h6>
+            <div class="row">
+                <!-- Core Analysis Chart -->
+                <div class="col-md-4 col-lg-2">
+                    <div class="card">
+                        <div class="card-header text-white" style="background-color: #257358;">
+                            <h6 class="mb-0">Prtro Analysis</h6>
+                        </div>
+                        <div class="card-body">
+                            <div style="height: calc(100vh - 200px); width: 100%;">
+                                <canvas id="coreDataChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Core Image (26.67%) -->
-        <div class="image-container">
-            <div class="card">
-                <div class="card-header text-white" style="background-color: #F59E0B;">
-                    <h5 class="mb-0">Core Image</h5>
-                </div>
-                <div class="card-body d-flex align-items-stretch justify-content-center" style="height: calc(100vh - 200px);">
-                    {% if core_img_url %}
-                    <img src="{{ core_img_url }}" alt="Core Image" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-                    {% else %}
-                    <div class="d-flex align-items-center justify-content-center w-100">
-                        <p class="text-muted">No core image available</p>
+                <!-- Core Image -->
+                <div class="col-md-4 col-lg-2">
+                    <div class="card">
+                        <div class="card-header text-white" style="background-color: #257358;">
+                            <h6 class="mb-0">Core Image</h6>
+                        </div>
+                        <div class="card-body d-flex align-items-stretch justify-content-center" style="height: calc(100vh - 200px);">
+                            {% if core_img_url %}
+                            <img src="{{ core_img_url }}" alt="Core Image" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                            {% else %}
+                            <div class="d-flex align-items-center justify-content-center w-100">
+                                <p class="text-muted">No core image available</p>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% endif %}
                 </div>
-            </div>
-        </div>
 
-        <!-- Litho Image (26.67%) -->
-        <div class="image-container">
-            <div class="card">
-                <div class="card-header text-white" style="background-color: #F59E0B;">
-                    <h5 class="mb-0">Litho Image</h5>
-                </div>
-                <div class="card-body d-flex align-items-stretch justify-content-center" style="height: calc(100vh - 200px);">
-                    {% if litho_image_url %}
-                    <img src="{{ litho_image_url }}" alt="Litho Image" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-                    {% else %}
-                    <div class="d-flex align-items-center justify-content-center w-100">
-                        <p class="text-muted">No litho image available</p>
+                <!-- Litho Image -->
+                <div class="col-md-4 col-lg-2">
+                    <div class="card">
+                        <div class="card-header text-white" style="background-color: #257358;">
+                            <h6 class="mb-0">Litho Image</h6>
+                        </div>
+                        <div class="card-body d-flex align-items-stretch justify-content-center" style="height: calc(100vh - 200px);">
+                            {% if litho_image_url %}
+                            <img src="{{ litho_image_url }}" alt="Litho Image" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                            {% else %}
+                            <div class="d-flex align-items-center justify-content-center w-100">
+                                <p class="text-muted">No litho image available</p>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% endif %}
+                </div>
+
+                <!-- Grain Size Analysis -->
+                <div class="col-md-4 col-lg-2">
+                    <div class="card">
+                        <div class="card-header text-white" style="background-color: #257358;">
+                            <h6 class="mb-0">Grain Size Analysis</h6>
+                        </div>
+                        <div class="card-body" style="height: calc(100vh - 200px); overflow-y: auto;">
+                            {% if grain_size_data %}
+                                <div style="height: 300px; width: 100%; margin-bottom: 20px;">
+                                    <canvas id="grainSizeChart"></canvas>
+                                </div>
+                               <!--
+                              
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Depth Range (m)</th>
+                                                <th>Lithology</th>
+                                                <th>Gravel %</th>
+                                                <th>C.Sand %</th>
+                                                <th>M.Sand %</th>
+                                                <th>F.Sand %</th>
+                                                <th>VF.Sand %</th>
+                                                <th>Silt %</th>
+                                                <th>Clay %</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in grain_size_data %}
+                                            <tr>
+                                                <td>{{ item.sampling_depth_start }}-{{ item.sampling_depth_end }}</td>
+                                                <td>{{ item.lithology|truncatechars:15 }}</td>
+                                                <td>{{ item.gravel_percent|floatformat:1|default:"-" }}</td>
+                                                <td>{{ item.coarse_sand_percent|floatformat:1|default:"-" }}</td>
+                                                <td>{{ item.medium_sand_percent|floatformat:1|default:"-" }}</td>
+                                                <td>{{ item.fine_sand_percent|floatformat:1|default:"-" }}</td>
+                                                <td>{{ item.very_fine_sand_percent|floatformat:1|default:"-" }}</td>
+                                                <td>{{ item.silt_percent|floatformat:1|default:"-" }}</td>
+                                                <td>{{ item.clay_percent|floatformat:1|default:"-" }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                -->
+
+
+                            {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <p class="text-muted">No grain size data available</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mineralogy Analysis -->
+                <div class="col-md-4 col-lg-2">
+                    <div class="card">
+                        <div class="card-header text-white" style="background-color: #257358;">
+                            <h6 class="mb-0">Mineralogy Analysis</h6>
+                        </div>
+                        <div class="card-body" style="height: calc(100vh - 200px); overflow-y: auto;">
+                            {% if bulk_mineralogy or clay_mineralogy %}
+                                <!-- Bulk Mineralogy -->
+                                {% if bulk_mineralogy %}
+                                <div class="mb-3">
+                                    <h6 class="text-primary">Bulk Mineralogy</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Depth Range (m)</th>
+                                                    <th>Mineral</th>
+                                                    <th>%</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in bulk_mineralogy %}
+                                                <tr>
+                                                    <td>{{ item.sampling_depth_start }}-{{ item.sampling_depth_end }}</td>
+                                                    <td>{{ item.display_mineral_name|truncatechars:15 }}</td>
+                                                    <td>{{ item.percentage|floatformat:1|default:"-" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Clay Mineralogy -->
+                                {% if clay_mineralogy %}
+                                <div>
+                                    <h6 class="text-success">Clay Mineralogy</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Depth Range (m)</th>
+                                                    <th>Mineral</th>
+                                                    <th>%</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in clay_mineralogy %}
+                                                <tr>
+                                                    <td>{{ item.sampling_depth_start }}-{{ item.sampling_depth_end }}</td>
+                                                    <td>{{ item.display_mineral_name|truncatechars:15 }}</td>
+                                                    <td>{{ item.percentage|floatformat:1|default:"-" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <p class="text-muted">No mineralogy data available</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fossils Analysis -->
+                <div class="col-md-4 col-lg-2">
+                    <div class="card">
+                        <div class="card-header text-white" style="background-color: #257358;">
+                            <h6 class="mb-0">Fossils Analysis</h6>
+                        </div>
+                        <div class="card-body" style="height: calc(100vh - 200px); overflow-y: auto;">
+                            {% if fossils_data %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Depth Range (m)</th>
+                                                <th>Type</th>
+                                                <th>Species</th>
+                                                <th>Abundance</th>
+                                                <th>Preservation</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for fossil in fossils_data %}
+                                            <tr>
+                                                <td>{{ fossil.sampling_depth_start }}-{{ fossil.sampling_depth_end }}</td>
+                                                <td>{{ fossil.display_fossil_type|truncatechars:10 }}</td>
+                                                <td>{{ fossil.species_name|truncatechars:15|default:"-" }}</td>
+                                                <td>
+                                                    <span class="badge 
+                                                        {% if fossil.abundance == 'very_abundant' %}bg-success
+                                                        {% elif fossil.abundance == 'abundant' %}bg-primary
+                                                        {% elif fossil.abundance == 'common' %}bg-info
+                                                        {% elif fossil.abundance == 'few' %}bg-warning
+                                                        {% elif fossil.abundance == 'rare' %}bg-secondary
+                                                        {% else %}bg-light text-dark{% endif %}">
+                                                        {{ fossil.get_abundance_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ fossil.get_preservation_display|default:"-" }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Age and Environment Information -->
+                                {% regroup fossils_data by age_indication as age_groups %}
+                                {% if age_groups %}
+                                <div class="mt-3">
+                                    <h6 class="text-info">Age Indications</h6>
+                                    {% for age_group in age_groups %}
+                                        {% if age_group.grouper %}
+                                        <div class="badge bg-info me-1 mb-1">{{ age_group.grouper }}</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <p class="text-muted">No fossils data available</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
 
         {% else %}
-        <div class="col text-center d-flex align-items-center justify-content-center">
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3 text-center d-flex align-items-center justify-content-center">
             <h3 class="text-muted">Please select a well and core to view data</h3>
-        </div>
+        </main>
         {% endif %}
     </div>
 </div>
 
 {% if selected_well and selected_core %}
 <script>
+    // Core Data Chart (Porosity and Permeability)
     const ctx = document.getElementById('coreDataChart').getContext('2d');
     const chartData = {{ chart_data|safe }};
     
@@ -207,7 +355,7 @@
                     title: {
                         display: true,
                         text: 'Depth (m)',
-                        font: { size: 14, weight: 'bold' }
+                        font: { size: 12, weight: 'bold' }
                     },
                     grid: { color: '#ddd' }
                 },
@@ -226,6 +374,103 @@
             }
         }
     });
+
+    // Grain Size Chart
+    {% if grain_size_chart_data.depths %}
+    const grainSizeCtx = document.getElementById('grainSizeChart').getContext('2d');
+    const grainSizeData = {{ grain_size_chart_data|safe }};
+    
+    new Chart(grainSizeCtx, {
+        type: 'bar',
+        data: {
+            labels: grainSizeData.depths,
+            datasets: [
+                {
+                    label: 'Gravel',
+                    data: grainSizeData.gravel,
+                    backgroundColor: '#8B4513',
+                    borderColor: '#654321',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Coarse Sand',
+                    data: grainSizeData.coarse_sand,
+                    backgroundColor: '#DAA520',
+                    borderColor: '#B8860B',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Medium Sand',
+                    data: grainSizeData.medium_sand,
+                    backgroundColor: '#F0E68C',
+                    borderColor: '#BDB76B',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Fine Sand',
+                    data: grainSizeData.fine_sand,
+                    backgroundColor: '#FFFFE0',
+                    borderColor: '#FFFACD',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Very Fine Sand',
+                    data: grainSizeData.very_fine_sand,
+                    backgroundColor: '#F5DEB3',
+                    borderColor: '#DEB887',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Silt',
+                    data: grainSizeData.silt,
+                    backgroundColor: '#A0522D',
+                    borderColor: '#8B4513',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Clay',
+                    data: grainSizeData.clay,
+                    backgroundColor: '#8FBC8F',
+                    borderColor: '#556B2F',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Percentage (%)'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    title: {
+                        display: false,
+                        text: 'Depth Range'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
 </script>
 {% endif %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -3,75 +3,150 @@
 {% block title %}BAPEX Dashboard Home{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12 mb-4">
-        <h2 class="text-dark">Operations Dashboard</h2>
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background-color: #257358; color: white; padding: 20px; min-height: 100vh;">
+            <div class="mb-4">
+                <h4 class="text-white">Content</h4>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white d-flex align-items-center" href="{% url 'graph_view' %}" style="padding: 12px 15px; border-radius: 5px; transition: background-color 0.3s;">
+                        <span class="me-2">→</span> Petro Physical
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white d-flex align-items-center" href="{% url 'production_graph' %}" style="padding: 12px 15px; border-radius: 5px; transition: background-color 0.3s;">
+                        <span class="me-2">→</span> Production
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white d-flex align-items-center" href="{% url 'exploration_timeline' %}" style="padding: 12px 15px; border-radius: 5px; transition: background-color 0.3s;">
+                        <span class="me-2">→</span> Exploration Timeline
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link text-white d-flex align-items-center" href="{% url 'credits' %}" style="padding: 12px 15px; border-radius: 5px; transition: background-color 0.3s;">
+                        <span class="me-2">→</span> Credits
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <h2 class="text-dark">Operations Dashboard</h2>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Key Performance Indicators -->
+                <div class="col-md-3 mb-4">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Daily Production</h5>
+                            <h2 class="card-text">25,000 BBL</h2>
+                            <p class="text-muted">Oil Production</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Fields</h5>
+                            <h2 class="card-text">12</h2>
+                            <p class="text-muted">Operational Status</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Active Wells</h5>
+                            <h2 class="card-text">42</h2>
+                            <p class="text-muted">Operational Status</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Gas Production</h5>
+                            <h2 class="card-text">150 MCF</h2>
+                            <p class="text-muted">Daily Output</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Field Efficiency</h5>
+                            <h2 class="card-text">94%</h2>
+                            <p class="text-muted">Operational Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Operations Activity -->
+                <div class="col-md-12">
+                    <div class="card" >
+                        <div class="card-header text-white" style="background-color: #1353A3;">
+                            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Recent Operations</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_activities %}
+                                <ul class="list-group list-group-flush">
+                                    {% for activity in recent_activities %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto">
+                                            <div class="fw-bold">{{ activity.title }}</div>
+                                            <p class="mb-1">{{ activity.description }}</p>
+                                            {% if activity.location %}
+                                                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ activity.location }}</small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-end">
+                                            {% if activity.priority == 'critical' %}
+                                                <span class="badge bg-danger rounded-pill mb-1">Critical</span>
+                                            {% elif activity.priority == 'high' %}
+                                                <span class="badge bg-warning rounded-pill mb-1">High</span>
+                                            {% elif activity.priority == 'medium' %}
+                                                <span class="badge bg-info rounded-pill mb-1">Medium</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary rounded-pill mb-1">Low</span>
+                                            {% endif %}
+                                            <br>
+                                            <small class="text-muted">{{ activity.get_time_ago }}</small>
+                                        </div>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-info-circle fa-2x text-muted mb-2"></i>
+                                    <p class="text-muted">No recent operation activities found.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 </div>
 
-<div class="row">
-    <!-- Key Performance Indicators -->
-    <div class="col-md-3 mb-4">
-        <div class="card stats-card">
-            <div class="card-body">
-                <h5 class="card-title">Daily Production</h5>
-                <h2 class="card-text">25,000 BBL</h2>
-                <p class="text-muted">Oil Production</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card stats-card">
-            <div class="card-body">
-                <h5 class="card-title">Total Fields</h5>
-                <h2 class="card-text">12</h2>
-                <p class="text-muted">Operational Status</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card stats-card">
-            <div class="card-body">
-                <h5 class="card-title">Active Wells</h5>
-                <h2 class="card-text">42</h2>
-                <p class="text-muted">Operational Status</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card stats-card">
-            <div class="card-body">
-                <h5 class="card-title">Gas Production</h5>
-                <h2 class="card-text">150 MCF</h2>
-                <p class="text-muted">Daily Output</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card stats-card">
-            <div class="card-body">
-                <h5 class="card-title">Field Efficiency</h5>
-                <h2 class="card-text">94%</h2>
-                <p class="text-muted">Operational Rate</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <!-- Operations Activity -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Recent Operations</h5>
-            </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">নোয়াখালীর বেগমগঞ্জ গ্যাসক্ষেত্রে নতুন গ্যাসের স্তর পাওয়া গেছে। এখানে উত্তোলনযোগ্য গ্যাসের মজুত ১৮০ বিলিয়ন ঘনফুট (বিসিএফ) - 2 hours ago</li>
-                    <li class="list-group-item">ভোলায় ইলিশা-১ নামের আরেকটি নতুন গ্যাসকূপে গ্যাসের সন্ধান মিলেছে। এ কূপ থেকে দৈনিক ২০–২২ মিলিয়ন ঘনফুট গ্যাস উত্তোলন করা যাবে।  - 5 hours ago</li>
-                    <li class="list-group-item">New order received - 1 day ago</li>
-                    
-                </ul>
-            </div>
-        </div>
-</div>
+<style>
+    .sidebar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .sidebar {
+        border-right: 1px solid #dee2e6;
+    }
+</style>
 {% endblock %}

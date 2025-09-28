@@ -1,19 +1,25 @@
 from django.shortcuts import render
-from .models import WellData, Core
-from .models import WellData, Core
-from .models import Core, WellData
+from .models import WellData, Core, GrainSize, Mineralogy, Fossils
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Min, Max
 from .models import GasField, Well, ProductionData
 from datetime import datetime
 from collections import defaultdict
-from .models import ExplorationTimeline, ExplorationCategory
+from .models import ExplorationTimeline, ExplorationCategory, OperationActivity
 from django.template.loader import get_template
 
 def dashboard(request):
-     
-     return render(request, 'visualization/dashboard.html')
+    # Get recent operation activities (limit to 10 most recent)
+    recent_activities = OperationActivity.objects.filter(is_active=True)[:10]
+    
+    context = {
+        'recent_activities': recent_activities,
+    }
+    return render(request, 'visualization/dashboard.html', context)
+
+def credits(request):
+    return render(request, 'visualization/credits.html')
 
 def graph_view(request):
     selected_well = request.GET.get('well_name')
@@ -36,8 +42,34 @@ def graph_view(request):
             core_no=selected_core
         ).values('depth', 'porosity', 'perm_kair')
         
+        # Fetch grain size data for the selected core
+        grain_size_data = GrainSize.objects.filter(core=core).order_by('sampling_depth_start')
+        
+        # Fetch mineralogy data for the selected core
+        mineralogy_data = Mineralogy.objects.filter(core=core).order_by('sampling_depth_start', 'analysis_type')
+        
+        # Fetch fossils data for the selected core
+        fossils_data = Fossils.objects.filter(core=core).order_by('sampling_depth_start')
+        
         # Convert to list for JSON serialization
         data_list = list(well_data)
+        
+        # Prepare grain size chart data
+        grain_size_chart_data = {
+            'depths': [f"{gs.sampling_depth_start}-{gs.sampling_depth_end}" for gs in grain_size_data],
+            'depth_midpoints': [gs.depth_midpoint for gs in grain_size_data],
+            'gravel': [gs.gravel_percent or 0 for gs in grain_size_data],
+            'coarse_sand': [gs.coarse_sand_percent or 0 for gs in grain_size_data],
+            'medium_sand': [gs.medium_sand_percent or 0 for gs in grain_size_data],
+            'fine_sand': [gs.fine_sand_percent or 0 for gs in grain_size_data],
+            'very_fine_sand': [gs.very_fine_sand_percent or 0 for gs in grain_size_data],
+            'silt': [gs.silt_percent or 0 for gs in grain_size_data],
+            'clay': [gs.clay_percent or 0 for gs in grain_size_data]
+        }
+        
+        # Group mineralogy data by analysis type
+        bulk_mineralogy = mineralogy_data.filter(analysis_type='bulk')
+        clay_mineralogy = mineralogy_data.filter(analysis_type='clay')
         
         # Prepare data for the template
         context = {
@@ -51,7 +83,12 @@ def graph_view(request):
                 'depths': [d['depth'] for d in data_list],
                 'porosity': [d['porosity'] for d in data_list],
                 'permeability': [d['perm_kair'] for d in data_list]
-            }
+            },
+            'grain_size_data': grain_size_data,
+            'grain_size_chart_data': grain_size_chart_data,
+            'bulk_mineralogy': bulk_mineralogy,
+            'clay_mineralogy': clay_mineralogy,
+            'fossils_data': fossils_data
         }
     else:
         context = {
