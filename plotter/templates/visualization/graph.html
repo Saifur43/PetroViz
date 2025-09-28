@@ -162,59 +162,89 @@
                         </div>
                         <div class="card-body" style="height: calc(100vh - 200px); overflow-y: auto;">
                             {% if bulk_mineralogy or clay_mineralogy %}
-                                <!-- Bulk Mineralogy -->
-                                {% if bulk_mineralogy %}
-                                <div class="mb-3">
-                                    <h6 class="text-primary">Bulk Mineralogy</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>Depth Range (m)</th>
-                                                    <th>Mineral</th>
-                                                    <th>%</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for item in bulk_mineralogy %}
-                                                <tr>
-                                                    <td>{{ item.sampling_depth_start }}-{{ item.sampling_depth_end }}</td>
-                                                    <td>{{ item.display_mineral_name|truncatechars:15 }}</td>
-                                                    <td>{{ item.percentage|floatformat:1|default:"-" }}</td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                {% endif %}
+                                <!-- Group mineralogy data by depth range -->
+                                {% regroup bulk_mineralogy by sampling_depth_start as bulk_depth_groups %}
+                                {% regroup clay_mineralogy by sampling_depth_start as clay_depth_groups %}
                                 
-                                <!-- Clay Mineralogy -->
-                                {% if clay_mineralogy %}
-                                <div>
-                                    <h6 class="text-success">Clay Mineralogy</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>Depth Range (m)</th>
-                                                    <th>Mineral</th>
-                                                    <th>%</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for item in clay_mineralogy %}
-                                                <tr>
-                                                    <td>{{ item.sampling_depth_start }}-{{ item.sampling_depth_end }}</td>
-                                                    <td>{{ item.display_mineral_name|truncatechars:15 }}</td>
-                                                    <td>{{ item.percentage|floatformat:1|default:"-" }}</td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Depth Range (m)</th>
+                                                <th>Bulk Minerals</th>
+                                                <th>Clay Minerals</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Process bulk mineralogy depth groups -->
+                                            {% for bulk_group in bulk_depth_groups %}
+                                            <tr>
+                                                <td class="align-top">
+                                                    <strong>{{ bulk_group.grouper }}-{{ bulk_group.list.0.sampling_depth_end }}</strong>
+                                                </td>
+                                                <td class="align-top">
+                                                    {% for mineral in bulk_group.list %}
+                                                        <div class="mb-1">
+                                                            <span class="badge bg-primary me-1" style="font-size: 0.7rem;">{{ mineral.display_mineral_name|truncatechars:10 }}</span>
+                                                            <small class="text-muted">{{ mineral.percentage|floatformat:1|default:"-" }}%</small>
+                                                        </div>
+                                                    {% endfor %}
+                                                </td>
+                                                <td class="align-top">
+                                                    {% for clay_group in clay_depth_groups %}
+                                                        {% if clay_group.grouper == bulk_group.grouper %}
+                                                            {% for mineral in clay_group.list %}
+                                                                <div class="mb-1">
+                                                                    <span class="badge bg-success me-1" style="font-size: 0.7rem;">{{ mineral.display_mineral_name|truncatechars:10 }}</span>
+                                                                    <small class="text-muted">{{ mineral.percentage|floatformat:1|default:"-" }}%</small>
+                                                                </div>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            
+                                            <!-- Process clay-only depth groups -->
+                                            {% for clay_group in clay_depth_groups %}
+                                                {% with found_in_bulk=False %}
+                                                    {% for bulk_group in bulk_depth_groups %}
+                                                        {% if bulk_group.grouper == clay_group.grouper %}
+                                                            {% with found_in_bulk=True %}
+                                                            {% endwith %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {% if not found_in_bulk %}
+                                                    <tr>
+                                                        <td class="align-top">
+                                                            <strong>{{ clay_group.grouper }}-{{ clay_group.list.0.sampling_depth_end }}</strong>
+                                                        </td>
+                                                        <td class="align-top">
+                                                            <small class="text-muted">No bulk data</small>
+                                                        </td>
+                                                        <td class="align-top">
+                                                            {% for mineral in clay_group.list %}
+                                                                <div class="mb-1">
+                                                                    <span class="badge bg-success me-1" style="font-size: 0.7rem;">{{ mineral.display_mineral_name|truncatechars:10 }}</span>
+                                                                    <small class="text-muted">{{ mineral.percentage|floatformat:1|default:"-" }}%</small>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </td>
+                                                    </tr>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
                                 </div>
-                                {% endif %}
+                                
+                                <!-- Legend -->
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <span class="badge bg-primary me-2" style="font-size: 0.7rem;">Bulk</span>
+                                        <span class="badge bg-success" style="font-size: 0.7rem;">Clay</span>
+                                    </small>
+                                </div>
                             {% else %}
                             <div class="d-flex align-items-center justify-content-center h-100">
                                 <p class="text-muted">No mineralogy data available</p>
