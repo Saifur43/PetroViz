@@ -1,0 +1,162 @@
+{
+  "well_name": "Srikail-5",
+  "total_reports": 5,
+  "extraction_timestamp": "2025-11-03T13:50:10.225428",
+  "reports": [
+    {
+      "filename": "daily morning report-27.docx",
+      "data": {
+        "well_name": "Srikail-5",
+        "report_date": "24-10-2025",
+        "report_number": "27",
+        "drilling_progress": {
+          "from_depth": null,
+          "to_depth": null,
+          "total_drilled": null,
+          "description": ""
+        },
+        "drilling_breakdown": {
+          "actual_drilling": null,
+          "sliding": null,
+          "reaming_connection": null
+        },
+        "mud_properties": {
+          "density_out": null,
+          "density_in": null,
+          "viscosity_out": null,
+          "viscosity_in": null
+        },
+        "drilling_parameters": {
+          "wob": null,
+          "rpm": null
+        },
+        "summary": "Normal drilling day with operations continuing as planned.",
+        "html_output": "<table border=\"1\" cellspacing=\"0\" cellpadding=\"6\" style=\"border-collapse:collapse; width:100%;\">\n  <tr style=\"background-color:#f2f2f2;\">\n    <th style=\"text-align:left;\">Activity Summary</th>\n    <th style=\"text-align:left;\">Details</th>\n  </tr>\n  <tr style=\"background-color:#f9f9f9;\">\n    <td><strong>Daily Operation Summary</strong></td>\n    <td>Normal drilling day with operations continuing as planned.</td>\n  </tr>\n</table>"
+      }
+    },
+    {
+      "filename": "daily morning report-28.docx",
+      "data": {
+        "well_name": "Srikail-5",
+        "report_date": "25-10-2025",
+        "report_number": "28",
+        "drilling_progress": {
+          "from_depth": 193,
+          "to_depth": 292,
+          "total_drilled": 99,
+          "description": "Continued drilling from 193m to 292m (Total 99m). Operations continued smoothly."
+        },
+        "drilling_breakdown": {
+          "actual_drilling": null,
+          "sliding": null,
+          "reaming_connection": null
+        },
+        "mud_properties": {
+          "density_out": null,
+          "density_in": null,
+          "viscosity_out": null,
+          "viscosity_in": null
+        },
+        "drilling_parameters": {
+          "wob": null,
+          "rpm": null
+        },
+        "summary": "Normal drilling day with steady progress of 99m and no major downtime reported.",
+        "html_output": "<table border=\"1\" cellspacing=\"0\" cellpadding=\"6\" style=\"border-collapse:collapse; width:100%;\">\n  <tr style=\"background-color:#f2f2f2;\">\n    <th style=\"text-align:left;\">Activity Summary</th>\n    <th style=\"text-align:left;\">Details</th>\n  </tr>\n  <tr>\n    <td>Drilling Progress</td>\n    <td>Continued drilling from 193m to 292m (Total 99m). Operations continued smoothly.</td>\n  </tr>\n  <tr style=\"background-color:#f9f9f9;\">\n    <td><strong>Daily Operation Summary</strong></td>\n    <td>Normal drilling day with steady progress of 99m and no major downtime reported.</td>\n  </tr>\n</table>"
+      }
+    },
+    {
+      "filename": "daily morning report-30.docx",
+      "data": {
+        "well_name": "Srikail-5",
+        "report_date": "27-10-2025",
+        "report_number": "30",
+        "drilling_progress": {
+          "from_depth": 380,
+          "to_depth": 725,
+          "total_drilled": 345,
+          "description": "Continued drilling from 380m to 725m (Total 345m). Operations continued smoothly."
+        },
+        "drilling_breakdown": {
+          "actual_drilling": "7 hrs",
+          "sliding": "3 hrs",
+          "reaming_connection": "2 hrs"
+        },
+        "mud_properties": {
+          "density_out": "1.07 sg",
+          "density_in": "1.05 sg",
+          "viscosity_out": "1 sec/qt",
+          "viscosity_in": "1 sec/qt"
+        },
+        "drilling_parameters": {
+          "wob": "8-10",
+          "rpm": "45"
+        },
+        "summary": "Normal drilling day with steady progress of 345m and no major downtime reported.",
+        "html_output": "<table border=\"1\" cellspacing=\"0\" cellpadding=\"6\" style=\"border-collapse:collapse; width:100%;\">\n  <tr style=\"background-color:#f2f2f2;\">\n    <th style=\"text-align:left;\">Activity Summary</th>\n    <th style=\"text-align:left;\">Details</th>\n  </tr>\n  <tr>\n    <td>Drilling Progress</td>\n    <td>Continued drilling from 380m to 725m (Total 345m). Operations continued smoothly.</td>\n  </tr>\n  <tr>\n    <td>Drilling Breakdown</td>\n    <td>Actual drilling: 7 hrs<br>Sliding: 3 hrs<br>Reaming / Wiper trip / Connection: 2 hrs</td>\n  </tr>\n  <tr>\n    <td>Mud Properties</td>\n    <td>Density: Out – 1.07 sg, In – 1.05 sg<br>Viscosity: Out – 1 sec/qt, In – 1 sec/qt</td>\n  </tr>\n  <tr>\n    <td>Drilling Parameters</td>\n    <td>WOB: 8-10<br>RPM: 45</td>\n  </tr>\n  <tr style=\"background-color:#f9f9f9;\">\n    <td><strong>Daily Operation Summary</strong></td>\n    <td>Normal drilling day with steady progress of 345m and no major downtime reported.</td>\n  </tr>\n</table>"
+      }
+    },
+    {
+      "filename": "daily morning report-31.docx",
+      "data": {
+        "well_name": "Srikail-5",
+        "report_date": "28-10-2025",
+        "report_number": "31",
+        "drilling_progress": {
+          "from_depth": 725,
+          "to_depth": 804,
+          "total_drilled": 79,
+          "description": "Continued drilling from 725m to 804m (Total 79m). Operations continued smoothly."
+        },
+        "drilling_breakdown": {
+          "actual_drilling": "4 hrs",
+          "sliding": "1 hrs",
+          "reaming_connection": "1 hrs"
+        },
+        "mud_properties": {
+          "density_out": "1.07 sg",
+          "density_in": "1.07 sg",
+          "viscosity_out": "1 sec/qt",
+          "viscosity_in": "1 sec/qt"
+        },
+        "drilling_parameters": {
+          "wob": "8-10",
+          "rpm": "45"
+        },
+        "summary": "Normal drilling day with steady progress of 79m and no major downtime reported.",
+        "html_output": "<table border=\"1\" cellspacing=\"0\" cellpadding=\"6\" style=\"border-collapse:collapse; width:100%;\">\n  <tr style=\"background-color:#f2f2f2;\">\n    <th style=\"text-align:left;\">Activity Summary</th>\n    <th style=\"text-align:left;\">Details</th>\n  </tr>\n  <tr>\n    <td>Drilling Progress</td>\n    <td>Continued drilling from 725m to 804m (Total 79m). Operations continued smoothly.</td>\n  </tr>\n  <tr>\n    <td>Drilling Breakdown</td>\n    <td>Actual drilling: 4 hrs<br>Sliding: 1 hrs<br>Reaming / Wiper trip / Connection: 1 hrs</td>\n  </tr>\n  <tr>\n    <td>Mud Properties</td>\n    <td>Density: Out – 1.07 sg, In – 1.07 sg<br>Viscosity: Out – 1 sec/qt, In – 1 sec/qt</td>\n  </tr>\n  <tr>\n    <td>Drilling Parameters</td>\n    <td>WOB: 8-10<br>RPM: 45</td>\n  </tr>\n  <tr style=\"background-color:#f9f9f9;\">\n    <td><strong>Daily Operation Summary</strong></td>\n    <td>Normal drilling day with steady progress of 79m and no major downtime reported.</td>\n  </tr>\n</table>"
+      }
+    },
+    {
+      "filename": "daily morning report-32.docx",
+      "data": {
+        "well_name": "Srikail-5",
+        "report_date": "29-10-2025",
+        "report_number": "32",
+        "drilling_progress": {
+          "from_depth": null,
+          "to_depth": null,
+          "total_drilled": null,
+          "description": ""
+        },
+        "drilling_breakdown": {
+          "actual_drilling": null,
+          "sliding": null,
+          "reaming_connection": null
+        },
+        "mud_properties": {
+          "density_out": "1.07 sg",
+          "density_in": "1.07 sg",
+          "viscosity_out": "1 sec/qt",
+          "viscosity_in": "1 sec/qt"
+        },
+        "drilling_parameters": {
+          "wob": "8-10",
+          "rpm": "45"
+        },
+        "summary": "Normal drilling day with operations continuing as planned.",
+        "html_output": "<table border=\"1\" cellspacing=\"0\" cellpadding=\"6\" style=\"border-collapse:collapse; width:100%;\">\n  <tr style=\"background-color:#f2f2f2;\">\n    <th style=\"text-align:left;\">Activity Summary</th>\n    <th style=\"text-align:left;\">Details</th>\n  </tr>\n  <tr>\n    <td>Mud Properties</td>\n    <td>Density: Out – 1.07 sg, In – 1.07 sg<br>Viscosity: Out – 1 sec/qt, In – 1 sec/qt</td>\n  </tr>\n  <tr>\n    <td>Drilling Parameters</td>\n    <td>WOB: 8-10<br>RPM: 45</td>\n  </tr>\n  <tr style=\"background-color:#f9f9f9;\">\n    <td><strong>Daily Operation Summary</strong></td>\n    <td>Normal drilling day with operations continuing as planned.</td>\n  </tr>\n</table>"
+      }
+    }
+  ]
+}

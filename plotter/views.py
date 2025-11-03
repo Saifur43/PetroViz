@@ -1,10 +1,13 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db.models import Min, Max
 from django.template.loader import get_template
 from datetime import datetime
 from django.http import JsonResponse
 from collections import defaultdict
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from io import BytesIO
 from .models import (
     WellData, Core, GrainSize, Mineralogy, Fossils,
     GasField, Well, ProductionData,
@@ -242,9 +245,6 @@ def exploration_timeline_js(request):
         ]
         return JsonResponse({"milestones": milestones_data})
     
-    # Make sure to add the template tag to the context
-    template = get_template('visualization/exploration_timejs.html')
-    
     return render(request, 'visualization/exploration_timejs.html', {
         'milestones': milestones, 
         'categories': categories,
@@ -289,7 +289,7 @@ def drilling_reports(request):
             'total_reports': reports.count(),
             'depth_progress': latest_report.depth_end - earliest_report.depth_start,
             'latest_depth': latest_report.depth_end,
-            'avg_progress_per_day': (latest_report.depth_end - earliest_report.depth_start) / reports.count(),
+            'avg_progress_per_day': (latest_report.depth_end - earliest_report.depth_start) / total_days,
             'drilling_efficiency': calculate_drilling_efficiency(reports)
         }
     
@@ -318,6 +318,7 @@ def drilling_reports(request):
             'id': report.id,
             'well_name': report.well.name,
             'date': report.date.strftime('%d %b, %Y'),
+            'date_iso': report.date.strftime('%Y-%m-%d'),  # Add ISO format for URL
             'depth_start': report.depth_start,
             'depth_end': report.depth_end,
             'current_operation': report.current_operation,
@@ -359,3 +360,171 @@ def calculate_drilling_efficiency(reports):
     if total_time > 0:
         return round(total_depth_progress / total_time * 24, 2)
     return 0
+
+def drilling_reports(request):
+    # Get filter parameters from request
+    well_id = request.GET.get('well')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    depth_from = request.GET.get('depth_from')
+    depth_to = request.GET.get('depth_to')
+    
+    # Start with all reports and apply filters
+    reports = DailyDrillingReport.objects.select_related('well').all()
+    
+    if well_id:
+        reports = reports.filter(well_id=well_id)
+    if start_date:
+        reports = reports.filter(date__gte=start_date)
+    if end_date:
+        reports = reports.filter(date__lte=end_date)
+    if depth_from:
+        reports = reports.filter(depth_start__gte=float(depth_from))
+    if depth_to:
+        reports = reports.filter(depth_end__lte=float(depth_to))
+        
+    # Order by date (newest first)
+    reports = reports.order_by('-date', '-depth_start')
+    
+    # Get all wells for the filter dropdown
+    wells = Well.objects.all()
+    
+    # Calculate statistics if a well is selected
+    stats = None
+    if well_id and reports.exists():
+        latest_report = reports.first()
+        earliest_report = reports.last()
+        total_days = (latest_report.date - earliest_report.date).days or 1
+        
+        stats = {
+            'total_reports': reports.count(),
+            'depth_progress': latest_report.depth_end - earliest_report.depth_start,
+            'latest_depth': latest_report.depth_end,
+            'avg_progress_per_day': (latest_report.depth_end - earliest_report.depth_start) / total_days,
+            'drilling_efficiency': calculate_drilling_efficiency(reports)
+        }
+    
+    # Prepare report data with all necessary calculations
+    processed_reports = []
+    for report in reports.prefetch_related('lithologies'):
+        # Process lithologies for this report
+        lithologies = []
+        for litho in report.lithologies.all():
+            lithologies.append({
+                'depth_range': f"{litho.depth_from}-{litho.depth_to}m",
+                'depth_from': litho.depth_from,
+                'depth_to': litho.depth_to,
+                'shale': round(litho.shale_percentage or 0, 1),
+                'sand': round(litho.sand_percentage or 0, 1),
+                'clay': round(litho.clay_percentage or 0, 1),
+                'slit': round(litho.slit_percentage or 0, 1),
+                'total': round((litho.shale_percentage or 0) + 
+                             (litho.sand_percentage or 0) + 
+                             (litho.clay_percentage or 0) + 
+                             (litho.slit_percentage or 0), 1),
+                'description': litho.description
+            })
+        
+        processed_reports.append({
+            'id': report.id,
+            'well_name': report.well.name,
+            'date': report.date.strftime('%d %b, %Y'),
+            'date_iso': report.date.strftime('%Y-%m-%d'),  # Add ISO format for URL
+            'depth_start': report.depth_start,
+            'depth_end': report.depth_end,
+            'current_operation': report.current_operation,
+            'lithologies': lithologies,
+            'gas_show': report.gas_show,
+            'comments': report.comments,
+            'daily_progress': report.depth_end - report.depth_start
+        })
+    
+    context = {
+        'reports': processed_reports,
+        'wells': wells,
+        'selected_well': well_id,
+        'start_date': start_date,
+        'end_date': end_date,
+        'depth_from': depth_from,
+        'depth_to': depth_to,
+        'stats': stats,
+    }
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'reports': processed_reports,
+            'stats': stats
+        })
+    
+    return render(request, 'visualization/drilling_reports.html', context)
+
+def generate_drilling_reports_pdf(request):
+    """Generate PDF report of drilling reports for a well and specific date"""
+    well_id = request.GET.get('well')
+    report_date = request.GET.get('date')
+    
+    if not well_id or not report_date:
+        return HttpResponse('Well ID and date are required', status=400)
+    
+    # Validate date format and parse
+    try:
+        parsed_date = datetime.strptime(report_date, '%Y-%m-%d').date()
+    except ValueError:
+        return HttpResponse('Invalid date format. Use YYYY-MM-DD', status=400)
+
+    # Get well and specific date report
+    report_obj = DailyDrillingReport.objects.select_related('well').filter(
+        well_id=well_id,
+        date=parsed_date
+    ).first()
+    
+    if not report_obj:
+        return HttpResponse('No report found for this well on the specified date', status=404)
+
+    # Process lithology data
+    lithologies = []
+    for litho in report_obj.lithologies.all():
+        lithologies.append({
+            'depth_range': f"{litho.depth_from}-{litho.depth_to}m",
+            'depth_from': litho.depth_from,
+            'depth_to': litho.depth_to,
+            'shale': round(litho.shale_percentage or 0, 1),
+            'sand': round(litho.sand_percentage or 0, 1),
+            'clay': round(litho.clay_percentage or 0, 1),
+            'slit': round(litho.slit_percentage or 0, 1),
+            'description': litho.description or ''
+        })
+    
+    # Prepare report data
+    report_data = {
+        'date': report_obj.date.strftime('%d %b, %Y'),
+        'depth_start': report_obj.depth_start,
+        'depth_end': report_obj.depth_end,
+        'current_operation': report_obj.current_operation or 'Not specified',
+        'lithologies': lithologies,
+        'gas_show': report_obj.gas_show or 'None',
+        'comments': report_obj.comments or '',
+        'daily_progress': report_obj.depth_end - report_obj.depth_start
+    }
+
+    # Prepare context for PDF template
+    context = {
+        'well_name': report_obj.well.name,
+        'generation_date': datetime.now().strftime('%d %b, %Y %H:%M'),
+        'report': report_data
+    }
+
+    # Render HTML
+    html_string = render_to_string('visualization/drilling_reports_pdf.html', context)
+    
+    # Create PDF
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html_string.encode("UTF-8")), result)
+    
+    if not pdf.err:
+        response = HttpResponse(result.getvalue(), content_type='application/pdf')
+        filename = f"{report_obj.well.name.replace(' ', '_')}_drilling_report_{parsed_date.strftime('%Y%m%d')}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    
+    return HttpResponse('Error generating PDF', status=500)
