@@ -27,74 +27,145 @@
     .report-card {
         margin-bottom: 1rem;
         transition: all 0.3s ease;
-        border: 1px solid #dee2e6;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .report-card .card-header {
         cursor: pointer;
-        background-color: #f8f9fa;
-        padding: 1rem;
-        transition: background-color 0.2s;
+        background: linear-gradient(135deg, #257358 0%, #2d8a6a 100%);
+        padding: 1.25rem;
+        transition: all 0.2s;
+        border-radius: 6px 6px 0 0;
     }
     .report-card .card-header:hover {
-        background-color: #e9ecef;
+        background: linear-gradient(135deg, #2d8a6a 0%, #257358 100%);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     .report-card .card-body {
         display: none;
         padding: 1.5rem;
+        background-color: #fafafa;
     }
     .report-card.expanded .card-body {
         display: block;
     }
     .stats-card {
         border-left: 4px solid #F59E0B;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     .report-date {
         color: white !important;
-        background-color:#257358;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        margin-left: 12px;
+        background-color: #1a5943;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        margin-right: 15px;
         display: inline-flex;
         align-items: center;
-        font-weight: 500;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        letter-spacing: 0.3px;
+    }
+    .report-date i {
+        font-size: 1.2rem;
+        margin-right: 8px;
     }
     .report-depth {
-        background-color: #E98108;
+        background: linear-gradient(135deg, #E98108 0%, #d47307 100%);
         color: white !important;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        margin-left: 12px;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 1.1rem;
         display: inline-flex;
         align-items: center;
-        font-weight: 500;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        letter-spacing: 0.3px;
     }
     .report-depth i {
         color: white !important;
-        margin-right: 4px;
+        margin-right: 8px;
+        font-size: 1.2rem;
     }
     .lithology-section {
-        background-color: #f8f9fa;
-        padding: 15px;
+        background-color: white;
+        padding: 20px;
         border-radius: 8px;
         margin-top: 10px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     .chevron-icon {
         transition: transform 0.3s ease;
-        color: #6c757d;
-        font-size: 1.2rem;
+        color: white;
+        font-size: 1.4rem;
+        opacity: 0.9;
     }
     .report-card.expanded .chevron-icon {
         transform: rotate(180deg);
     }
     .info-row {
-        margin-bottom: 12px;
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: white;
+        border-radius: 6px;
+        border-left: 3px solid #257358;
     }
     .info-row strong {
         color: #257358;
         min-width: 150px;
         display: inline-block;
+        font-size: 0.95rem;
+    }
+    .lithology-legend {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+    }
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 20px;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+    .legend-color {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        border-radius: 4px;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+    .depth-label {
+        background-color: #e9ecef;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        color: #495057;
+    }
+    .lithology-entry {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #e0e0e0;
+    }
+    .info-section {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 </style>
 
@@ -102,14 +173,16 @@
     <div class="row">
         <!-- Sidebar Navigation -->
         <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3" style="background-color: #257358; color: white; min-height: 100vh;">
-            <div class="card-header text-white" style="background-color: #257358; border-radius: 8px 8px 0 0; padding: 10px;">
-                <h5 class="mb-0" style="color: #E98108;">Available Wells</h5>
+            <div class="card-header text-white" style="background-color: #1a5943; border-radius: 8px; padding: 15px;">
+                <h5 class="mb-0" style="color: #E98108; font-weight: 600;">
+                    <i class="bi bi-layers me-2"></i>Available Wells
+                </h5>
             </div>
             <ul class="well-list mt-3">
                 {% for well in wells %}
                     <li class="well-list-item {% if well.id|stringformat:'s' == selected_well %}active{% endif %}">
                         <a href="?well={{ well.id }}" class="text-white text-decoration-none">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>{{ well.name }}
+                            <i class="bi bi-pin-angle-fill me-2"></i>{{ well.name }}
                         </a>
                     </li>
                 {% empty %}
@@ -121,38 +194,54 @@
         <!-- Main Content -->
         <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
             {% if selected_well %}
+            <h1 class="display-5">
+                <i class="bi bi-drill me-3" style="color: #257358;"></i>
+                {% for well in wells %}
+                    {% if well.id|stringformat:'s' == selected_well %}
+                        {{ well.name }}
+                    {% endif %}
+                {% endfor %}
+            </h1>
             <!-- Statistics Cards -->
             {% if stats %}
             <div class="row mb-4">
                 <div class="col-md-3">
                     <div class="card stats-card">
                         <div class="card-body">
-                            <h6 class="card-title text-muted">Total Reports</h6>
-                            <h3 class="card-text">{{ stats.total_reports }}</h3>
+                            <h6 class="card-title text-muted mb-2">
+                                <i class="bi bi-file-earmark-text me-2"></i>Total Reports
+                            </h6>
+                            <h3 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.total_reports }}</h3>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card stats-card">
                         <div class="card-body">
-                            <h6 class="card-title text-muted">Total Depth Progress</h6>
-                            <h3 class="card-text">{{ stats.depth_progress|floatformat:1 }} m</h3>
+                            <h6 class="card-title text-muted mb-2">
+                                <i class="bi bi-arrow-down-circle me-2"></i>Total Depth Progress
+                            </h6>
+                            <h3 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.depth_progress|floatformat:1 }} m</h3>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card stats-card">
                         <div class="card-body">
-                            <h6 class="card-title text-muted">Latest Depth</h6>
-                            <h3 class="card-text">{{ stats.latest_depth|floatformat:1 }} m</h3>
+                            <h6 class="card-title text-muted mb-2">
+                                <i class="bi bi-geo-alt me-2"></i>Latest Depth
+                            </h6>
+                            <h3 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.latest_depth|floatformat:1 }} m</h3>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card stats-card">
                         <div class="card-body">
-                            <h6 class="card-title text-muted">Avg. Progress/Day</h6>
-                            <h3 class="card-text">{{ stats.avg_progress_per_day|floatformat:1 }} m</h3>
+                            <h6 class="card-title text-muted mb-2">
+                                <i class="bi bi-speedometer2 me-2"></i>Avg. Progress/Day
+                            </h6>
+                            <h3 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.avg_progress_per_day|floatformat:1 }} m</h3>
                         </div>
                     </div>
                 </div>
@@ -166,11 +255,10 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center flex-wrap">
                             <span class="report-date">
-                                <i class="bi bi-calendar-date me-2"></i> Date: {{ report.date}}
+                                <i class="bi bi-calendar-check"></i>{{ report.date}}
                             </span>
                             <span class="report-depth">
-                                <i class="bi bi-arrows-collapse-vertical"></i> Depth:
-                                {{ report.depth_start|floatformat:1 }}-{{ report.depth_end|floatformat:1 }} m
+                                <i class="bi bi-arrows-expand"></i>{{ report.depth_start|floatformat:1 }} - {{ report.depth_end|floatformat:1 }} m
                             </span>
                         </div>
                         <i class="bi bi-chevron-down chevron-icon"></i>
@@ -178,67 +266,83 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="info-row">
-                                    <strong>Current Operation:</strong> 
-                                    <span>{{ report.current_operation|default:"Not specified"|safe  }}</span>
-                                </div>
-                                <div class="info-row">
-                                    <strong>Gas Show:</strong> 
-                                    <span>{{ report.gas_show|default:"None" }}</span>
-                                </div>
-                                <div class="info-row">
-                                    <strong>Comments:</strong> 
-                                    <span>{{ report.comments|default:"No comments" }}</span>
+                                <div class="info-section">
+                                    <h6 class="mb-3" style="color: #257358; font-weight: 600; font-size: 1.1rem;">
+                                        <i class="bi bi-info-circle me-2"></i>Report Details
+                                    </h6>
+                                    <div class="info-row">
+                                        <strong><i class="bi bi-gear me-2"></i>Current Operation:</strong> 
+                                        <span>{{ report.current_operation|default:"Not specified"|safe }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <strong><i class="bi bi-cloud me-2"></i>Gas Show:</strong> 
+                                        <span>{{ report.gas_show|default:"None" }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <strong><i class="bi bi-chat-left-text me-2"></i>Comments:</strong> 
+                                        <span>{{ report.comments|default:"No comments" }}</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="lithology-section">
-                                    <h6 class="mb-3 text-center">Lithology Compositions</h6>
+                                    <h6 class="mb-3" style="color: #257358; font-weight: 600; font-size: 1.1rem;">
+                                        <i class="bi bi-layers-fill me-2"></i>Lithology Compositions
+                                    </h6>
+                                    
+                                    <!-- Single Legend for All Charts -->
+                                    {% if report.lithologies %}
+                                    <div class="lithology-legend">
+                                        <div class="d-flex flex-wrap justify-content-center">
+                                            <span class="legend-item">
+                                                <span class="legend-color" style="background:#666666;"></span>
+                                                Shale
+                                            </span>
+                                            <span class="legend-item">
+                                                <span class="legend-color" style="background:#FFD700;"></span>
+                                                Sand
+                                            </span>
+                                            <span class="legend-item">
+                                                <span class="legend-color" style="background:#CD853F;"></span>
+                                                Clay
+                                            </span>
+                                            <span class="legend-item">
+                                                <span class="legend-color" style="background:#DEB887;"></span>
+                                                Silt
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
                                     {% for lithology in report.lithologies %}
-                                    <div class="lithology-entry mb-3">
-                                        <div class="d-flex align-items-center">
-                                            <div class="depth-label me-3" style="min-width: 120px;">
-                                                <span class="badge bg-secondary">{{ lithology.depth_range }}</span>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <div class="lithology-chart-container" style="height: 60px;">
-                                                    <canvas class="lithologyChartRow"
-                                                        id="chart-{{ report.id }}-{{ forloop.counter }}"
-                                                        data-shale="{{ lithology.shale }}"
-                                                        data-sand="{{ lithology.sand }}"
-                                                        data-clay="{{ lithology.clay }}"
-                                                        data-slit="{{ lithology.slit }}"
-                                                        data-depth-range="{{ lithology.depth_range }}">
-                                                    </canvas>
-                                                </div>
+                                    <div class="lithology-entry">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="depth-label me-3">
+                                                <i class="bi bi-arrows-collapse-vertical me-1"></i>
+                                                {{ lithology.depth_range }}
                                             </div>
                                         </div>
-                                        <div class="mt-1 text-end small">
-                                            <span class="me-2">
-                                                <span style="display:inline-block;width:8px;height:8px;background:#666;margin-right:2px;"></span>
-                                                Shale:{{ lithology.shale|floatformat:1 }}%
-                                            </span>
-                                            <span class="me-2">
-                                                <span style="display:inline-block;width:8px;height:8px;background:#FFD700;margin-right:2px;"></span>
-                                                Sand:{{ lithology.sand|floatformat:1 }}%
-                                            </span>
-                                            <span class="me-2">
-                                                <span style="display:inline-block;width:8px;height:8px;background:#CD853F;margin-right:2px;"></span>
-                                                Clay:{{ lithology.clay|floatformat:1 }}%
-                                            </span>
-                                            <span>
-                                                <span style="display:inline-block;width:8px;height:8px;background:#DEB887;margin-right:2px;"></span>
-                                                Slit:{{ lithology.slit|floatformat:1 }}%
-                                            </span>
+                                        <div class="lithology-chart-container" style="height: 70px;">
+                                            <canvas class="lithologyChartRow"
+                                                id="chart-{{ report.id }}-{{ forloop.counter }}"
+                                                data-shale="{{ lithology.shale }}"
+                                                data-sand="{{ lithology.sand }}"
+                                                data-clay="{{ lithology.clay }}"
+                                                data-slit="{{ lithology.slit }}"
+                                                data-depth-range="{{ lithology.depth_range }}">
+                                            </canvas>
                                         </div>
+                                    
                                         {% if lithology.description %}
-                                        <div class="mt-2 text-center">
-                                            <small class="text-muted">{{ lithology.description }}</small>
+                                        <div class="mt-2 p-2 text-center" style="background-color: #e9ecef; border-radius: 6px;">
+                                            <small class="text-muted"><i class="bi bi-file-text me-1"></i>{{ lithology.description }}</small>
                                         </div>
                                         {% endif %}
                                     </div>
                                     {% empty %}
-                                    <p class="text-center text-muted">No lithology data available for this interval</p>
+                                    <div class="alert alert-light text-center" role="alert">
+                                        <i class="bi bi-exclamation-circle me-2"></i>No lithology data available for this interval
+                                    </div>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -247,7 +351,7 @@
                 </div>
                 {% empty %}
                 <div class="alert alert-info">
-                    No drilling reports found for this well.
+                    <i class="bi bi-info-circle me-2"></i>No drilling reports found for this well.
                 </div>
                 {% endfor %}
             </div>
@@ -269,12 +373,10 @@ class DrillingReportsVisualizer {
     }
 
     initializeEventListeners() {
-        // Handle card expansion
         document.querySelectorAll('.report-card .card-header').forEach(header => {
             header.addEventListener('click', (e) => this.handleCardClick(e));
         });
 
-        // Auto-expand first card
         this.expandFirstCard();
     }
 
@@ -283,11 +385,9 @@ class DrillingReportsVisualizer {
         const card = header.closest('.report-card');
         const wasExpanded = card.classList.contains('expanded');
 
-        // Close all other cards
         document.querySelectorAll('.report-card').forEach(c => {
             if (c !== card) {
                 c.classList.remove('expanded');
-                // Destroy charts in closed cards
                 c.querySelectorAll('.lithologyChartRow').forEach(canvas => {
                     const chartId = canvas.id;
                     if (this.chartInstances.has(chartId)) {
@@ -298,7 +398,6 @@ class DrillingReportsVisualizer {
             }
         });
 
-        // Toggle current card
         if (!wasExpanded) {
             card.classList.add('expanded');
             this.renderChartsInCard(card);
@@ -340,7 +439,6 @@ class DrillingReportsVisualizer {
             depthRange: canvas.dataset.depthRange || ''
         };
 
-        // Validate and ensure values are numbers
         ['shale', 'sand', 'clay', 'slit'].forEach(key => {
             if (isNaN(data[key])) data[key] = 0;
             data[key] = parseFloat(data[key].toFixed(1));
@@ -377,7 +475,7 @@ class DrillingReportsVisualizer {
                         borderWidth: 0
                     },
                     {
-                        label: 'Slit',
+                        label: 'Silt',
                         data: [data.slit],
                         backgroundColor: '#DEB887',
                         borderColor: '#D2691E',
@@ -393,13 +491,17 @@ class DrillingReportsVisualizer {
                     padding: {
                         left: 0,
                         right: 0,
-                        top: 0,
-                        bottom: 0
+                        top: 5,
+                        bottom: 5
                     }
                 },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
                         callbacks: {
                             label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%`
                         }
@@ -413,13 +515,14 @@ class DrillingReportsVisualizer {
                         ticks: {
                             display: true,
                             font: {
-                                size: 10
+                                size: 11,
+                                weight: '500'
                             },
                             callback: (value) => value + '%'
                         },
                         grid: {
                             display: true,
-                            color: 'rgba(0, 0, 0, 0.1)'
+                            color: 'rgba(0, 0, 0, 0.08)'
                         }
                     },
                     y: {
@@ -428,7 +531,10 @@ class DrillingReportsVisualizer {
                         grid: { display: false }
                     }
                 },
-                animation: { duration: 300 }
+                animation: { 
+                    duration: 400,
+                    easing: 'easeInOutQuart'
+                }
             }
         };
     }
@@ -437,12 +543,9 @@ class DrillingReportsVisualizer {
         const firstCard = document.querySelector('.report-card');
         if (firstCard) {
             firstCard.classList.add('expanded');
-            const reportId = firstCard.dataset.reportId;
-            const firstCanvas = firstCard.querySelector('.lithologyChartRow');
-            
-            if (firstCanvas) {
-                this.renderChartWithDelay(firstCard, reportId);
-            }
+            setTimeout(() => {
+                this.renderChartsInCard(firstCard);
+            }, 100);
         }
     }
 }

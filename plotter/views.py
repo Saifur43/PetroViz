@@ -317,7 +317,7 @@ def drilling_reports(request):
         processed_reports.append({
             'id': report.id,
             'well_name': report.well.name,
-            'date': report.date.strftime('%Y-%m-%d'),
+            'date': report.date.strftime('%d %b, %Y'),
             'depth_start': report.depth_start,
             'depth_end': report.depth_end,
             'current_operation': report.current_operation,
