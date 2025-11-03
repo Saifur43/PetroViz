@@ -98,6 +98,52 @@ class ExplorationTimeline(models.Model):
     def __str__(self):
         return f"{self.year} - {self.title}"
 
+class DailyDrillingReport(models.Model):
+    well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='drilling_reports')
+    date = models.DateField()
+    depth_start = models.FloatField(help_text="start depth in meters")
+    depth_end = models.FloatField(help_text="end depth in meters")
+    current_operation = models.TextField(blank=True, null=True)
+    gas_show = models.TextField(blank=True, null=True, help_text="Description of gas shows if any")
+    comments = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ['date', 'depth_start']
+        verbose_name = 'Daily Drilling Report'
+        verbose_name_plural = 'Daily Drilling Reports'
+        
+    def __str__(self):
+        return f"{self.well.name} - {self.date} ({self.depth_start}-{self.depth_end}m)"
+
+
+class DrillingLithology(models.Model):
+    drilling_report = models.ForeignKey(DailyDrillingReport, on_delete=models.CASCADE, related_name='lithologies')
+    depth_from = models.FloatField(help_text="Start depth in meters")
+    depth_to = models.FloatField(help_text="End depth in meters")
+    shale_percentage = models.FloatField(default=0, help_text="Percentage of shale")
+    sand_percentage = models.FloatField(default=0, help_text="Percentage of sand")
+    clay_percentage = models.FloatField(default=0, help_text="Percentage of clay")
+    slit_percentage = models.FloatField(default=0, help_text="Percentage of slit")
+    description = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ['depth_from']
+        verbose_name = 'Drilling Lithology'
+        verbose_name_plural = 'Drilling Lithologies'
+        
+    def __str__(self):
+        return f"{self.drilling_report.well.name} - {self.drilling_report.date} ({self.depth_from}-{self.depth_to}m)"
+    
+    def clean(self):
+        total_percentage = (
+            self.shale_percentage + 
+            self.sand_percentage + 
+            self.clay_percentage + 
+            self.slit_percentage
+        )
+        if total_percentage > 100:
+            raise ValidationError("Lithology percentages cannot exceed 100%")
+
 class OperationActivity(models.Model):
     PRIORITY_CHOICES = [
         ('low', 'Low'),

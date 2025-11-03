@@ -1,13 +1,16 @@
 from django.shortcuts import render
-from .models import WellData, Core, GrainSize, Mineralogy, Fossils
-from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Min, Max
-from .models import GasField, Well, ProductionData
-from datetime import datetime
-from collections import defaultdict
-from .models import ExplorationTimeline, ExplorationCategory, OperationActivity
 from django.template.loader import get_template
+from datetime import datetime
+from django.http import JsonResponse
+from collections import defaultdict
+from .models import (
+    WellData, Core, GrainSize, Mineralogy, Fossils,
+    GasField, Well, ProductionData,
+    ExplorationTimeline, ExplorationCategory, OperationActivity,
+    DailyDrillingReport
+)
 
 def dashboard(request):
     # Get recent operation activities (limit to 10 most recent)
@@ -215,9 +218,6 @@ def exploration_timeline(request):
     return render(request, 'visualization/exploration_timeline.html', {'milestones': milestones, 'categories': categories})
 
 
-
-from django.http import JsonResponse
-
 def exploration_timeline_js(request):
     category_id = request.GET.get('category')
     if category_id and category_id != 'all':
@@ -249,3 +249,113 @@ def exploration_timeline_js(request):
         'milestones': milestones, 
         'categories': categories,
     })
+
+def drilling_reports(request):
+    # Get filter parameters from request
+    well_id = request.GET.get('well')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    depth_from = request.GET.get('depth_from')
+    depth_to = request.GET.get('depth_to')
+    
+    # Start with all reports and apply filters
+    reports = DailyDrillingReport.objects.select_related('well').all()
+    
+    if well_id:
+        reports = reports.filter(well_id=well_id)
+    if start_date:
+        reports = reports.filter(date__gte=start_date)
+    if end_date:
+        reports = reports.filter(date__lte=end_date)
+    if depth_from:
+        reports = reports.filter(depth_start__gte=float(depth_from))
+    if depth_to:
+        reports = reports.filter(depth_end__lte=float(depth_to))
+        
+    # Order by date (newest first)
+    reports = reports.order_by('-date', '-depth_start')
+    
+    # Get all wells for the filter dropdown
+    wells = Well.objects.all()
+    
+    # Calculate statistics if a well is selected
+    stats = None
+    if well_id and reports.exists():
+        latest_report = reports.first()
+        earliest_report = reports.last()
+        total_days = (latest_report.date - earliest_report.date).days or 1
+        
+        stats = {
+            'total_reports': reports.count(),
+            'depth_progress': latest_report.depth_end - earliest_report.depth_start,
+            'latest_depth': latest_report.depth_end,
+            'avg_progress_per_day': (latest_report.depth_end - earliest_report.depth_start) / reports.count(),
+            'drilling_efficiency': calculate_drilling_efficiency(reports)
+        }
+    
+    # Prepare report data with all necessary calculations
+    processed_reports = []
+    for report in reports.prefetch_related('lithologies'):
+        # Process lithologies for this report
+        lithologies = []
+        for litho in report.lithologies.all():
+            lithologies.append({
+                'depth_range': f"{litho.depth_from}-{litho.depth_to}m",
+                'depth_from': litho.depth_from,
+                'depth_to': litho.depth_to,
+                'shale': round(litho.shale_percentage or 0, 1),
+                'sand': round(litho.sand_percentage or 0, 1),
+                'clay': round(litho.clay_percentage or 0, 1),
+                'slit': round(litho.slit_percentage or 0, 1),
+                'total': round((litho.shale_percentage or 0) + 
+                             (litho.sand_percentage or 0) + 
+                             (litho.clay_percentage or 0) + 
+                             (litho.slit_percentage or 0), 1),
+                'description': litho.description
+            })
+        
+        processed_reports.append({
+            'id': report.id,
+            'well_name': report.well.name,
+            'date': report.date.strftime('%Y-%m-%d'),
+            'depth_start': report.depth_start,
+            'depth_end': report.depth_end,
+            'current_operation': report.current_operation,
+            'lithologies': lithologies,
+            'gas_show': report.gas_show,
+            'comments': report.comments,
+            'daily_progress': report.depth_end - report.depth_start
+        })
+    
+    context = {
+        'reports': processed_reports,
+        'wells': wells,
+        'selected_well': well_id,
+        'start_date': start_date,
+        'end_date': end_date,
+        'depth_from': depth_from,
+        'depth_to': depth_to,
+        'stats': stats,
+    }
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'reports': processed_reports,
+            'stats': stats
+        })
+    
+    return render(request, 'visualization/drilling_reports.html', context)
+
+def calculate_drilling_efficiency(reports):
+    """Calculate drilling efficiency based on daily progress and operational time"""
+    total_depth_progress = 0
+    total_time = 0
+    
+    for report in reports:
+        daily_progress = report.depth_end - report.depth_start
+        total_depth_progress += daily_progress
+        total_time += 24 
+        
+    if total_time > 0:
+        return round(total_depth_progress / total_time * 24, 2)
+    return 0

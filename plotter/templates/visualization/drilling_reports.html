@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .lithology-chart-container {
+        position: relative;
+        width: 100%;
+        height: 100px;
+        margin: 0 auto;
+    }
+    .well-list {
+        list-style: none;
+        padding: 0;
+    }
+    .well-list-item {
+        padding: 10px 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .well-list-item:hover {
+        background-color: rgba(255,255,255,0.1);
+    }
+    .well-list-item.active {
+        background-color: rgba(255,255,255,0.2);
+    }
+    .report-card {
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        border: 1px solid #dee2e6;
+    }
+    .report-card .card-header {
+        cursor: pointer;
+        background-color: #f8f9fa;
+        padding: 1rem;
+        transition: background-color 0.2s;
+    }
+    .report-card .card-header:hover {
+        background-color: #e9ecef;
+    }
+    .report-card .card-body {
+        display: none;
+        padding: 1.5rem;
+    }
+    .report-card.expanded .card-body {
+        display: block;
+    }
+    .stats-card {
+        border-left: 4px solid #F59E0B;
+    }
+    .report-date {
+        color: white !important;
+        background-color:#257358;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        margin-left: 12px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 500;
+    }
+    .report-depth {
+        background-color: #E98108;
+        color: white !important;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        margin-left: 12px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 500;
+    }
+    .report-depth i {
+        color: white !important;
+        margin-right: 4px;
+    }
+    .lithology-section {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .chevron-icon {
+        transition: transform 0.3s ease;
+        color: #6c757d;
+        font-size: 1.2rem;
+    }
+    .report-card.expanded .chevron-icon {
+        transform: rotate(180deg);
+    }
+    .info-row {
+        margin-bottom: 12px;
+    }
+    .info-row strong {
+        color: #257358;
+        min-width: 150px;
+        display: inline-block;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3" style="background-color: #257358; color: white; min-height: 100vh;">
+            <div class="card-header text-white" style="background-color: #257358; border-radius: 8px 8px 0 0; padding: 10px;">
+                <h5 class="mb-0" style="color: #E98108;">Available Wells</h5>
+            </div>
+            <ul class="well-list mt-3">
+                {% for well in wells %}
+                    <li class="well-list-item {% if well.id|stringformat:'s' == selected_well %}active{% endif %}">
+                        <a href="?well={{ well.id }}" class="text-white text-decoration-none">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>{{ well.name }}
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="text-white-50 p-3">No wells available</li>
+                {% endfor %}
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
+            {% if selected_well %}
+            <!-- Statistics Cards -->
+            {% if stats %}
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Total Reports</h6>
+                            <h3 class="card-text">{{ stats.total_reports }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Total Depth Progress</h6>
+                            <h3 class="card-text">{{ stats.depth_progress|floatformat:1 }} m</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Latest Depth</h6>
+                            <h3 class="card-text">{{ stats.latest_depth|floatformat:1 }} m</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Avg. Progress/Day</h6>
+                            <h3 class="card-text">{{ stats.avg_progress_per_day|floatformat:1 }} m</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Reports Cards -->
+            <div class="reports-container">
+                {% for report in reports %}
+                <div class="card report-card mb-3" data-report-id="{{ report.id }}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center flex-wrap">
+                            <span class="report-date">
+                                <i class="bi bi-calendar-date me-2"></i> Date: {{ report.date}}
+                            </span>
+                            <span class="report-depth">
+                                <i class="bi bi-arrows-collapse-vertical"></i> Depth:
+                                {{ report.depth_start|floatformat:1 }}-{{ report.depth_end|floatformat:1 }} m
+                            </span>
+                        </div>
+                        <i class="bi bi-chevron-down chevron-icon"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-row">
+                                    <strong>Current Operation:</strong> 
+                                    <span>{{ report.current_operation|default:"Not specified"|safe  }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>Gas Show:</strong> 
+                                    <span>{{ report.gas_show|default:"None" }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <strong>Comments:</strong> 
+                                    <span>{{ report.comments|default:"No comments" }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="lithology-section">
+                                    <h6 class="mb-3 text-center">Lithology Compositions</h6>
+                                    {% for lithology in report.lithologies %}
+                                    <div class="lithology-entry mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="depth-label me-3" style="min-width: 120px;">
+                                                <span class="badge bg-secondary">{{ lithology.depth_range }}</span>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="lithology-chart-container" style="height: 60px;">
+                                                    <canvas class="lithologyChartRow"
+                                                        id="chart-{{ report.id }}-{{ forloop.counter }}"
+                                                        data-shale="{{ lithology.shale }}"
+                                                        data-sand="{{ lithology.sand }}"
+                                                        data-clay="{{ lithology.clay }}"
+                                                        data-slit="{{ lithology.slit }}"
+                                                        data-depth-range="{{ lithology.depth_range }}">
+                                                    </canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-1 text-end small">
+                                            <span class="me-2">
+                                                <span style="display:inline-block;width:8px;height:8px;background:#666;margin-right:2px;"></span>
+                                                Shale:{{ lithology.shale|floatformat:1 }}%
+                                            </span>
+                                            <span class="me-2">
+                                                <span style="display:inline-block;width:8px;height:8px;background:#FFD700;margin-right:2px;"></span>
+                                                Sand:{{ lithology.sand|floatformat:1 }}%
+                                            </span>
+                                            <span class="me-2">
+                                                <span style="display:inline-block;width:8px;height:8px;background:#CD853F;margin-right:2px;"></span>
+                                                Clay:{{ lithology.clay|floatformat:1 }}%
+                                            </span>
+                                            <span>
+                                                <span style="display:inline-block;width:8px;height:8px;background:#DEB887;margin-right:2px;"></span>
+                                                Slit:{{ lithology.slit|floatformat:1 }}%
+                                            </span>
+                                        </div>
+                                        {% if lithology.description %}
+                                        <div class="mt-2 text-center">
+                                            <small class="text-muted">{{ lithology.description }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% empty %}
+                                    <p class="text-center text-muted">No lithology data available for this interval</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="alert alert-info">
+                    No drilling reports found for this well.
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center mt-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #257358;"></i>
+                <h3 class="mt-3">Select a well from the left sidebar</h3>
+                <p class="text-muted">Drilling reports will be displayed here, sorted by date with the most recent on top.</p>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+<script>
+class DrillingReportsVisualizer {
+    constructor() {
+        this.chartInstances = new Map();
+        this.initializeEventListeners();
+    }
+
+    initializeEventListeners() {
+        // Handle card expansion
+        document.querySelectorAll('.report-card .card-header').forEach(header => {
+            header.addEventListener('click', (e) => this.handleCardClick(e));
+        });
+
+        // Auto-expand first card
+        this.expandFirstCard();
+    }
+
+    handleCardClick(event) {
+        const header = event.currentTarget;
+        const card = header.closest('.report-card');
+        const wasExpanded = card.classList.contains('expanded');
+
+        // Close all other cards
+        document.querySelectorAll('.report-card').forEach(c => {
+            if (c !== card) {
+                c.classList.remove('expanded');
+                // Destroy charts in closed cards
+                c.querySelectorAll('.lithologyChartRow').forEach(canvas => {
+                    const chartId = canvas.id;
+                    if (this.chartInstances.has(chartId)) {
+                        this.chartInstances.get(chartId).destroy();
+                        this.chartInstances.delete(chartId);
+                    }
+                });
+            }
+        });
+
+        // Toggle current card
+        if (!wasExpanded) {
+            card.classList.add('expanded');
+            this.renderChartsInCard(card);
+        } else {
+            card.classList.remove('expanded');
+        }
+    }
+
+    renderChartsInCard(card) {
+        setTimeout(() => {
+            card.querySelectorAll('.lithologyChartRow').forEach(canvas => {
+                if (!this.chartInstances.has(canvas.id)) {
+                    this.renderLithologyChart(canvas);
+                }
+            });
+        }, 50);
+    }
+
+    renderLithologyChart(canvas) {
+        if (!canvas || !canvas.getContext('2d')) return;
+
+        const ctx = canvas.getContext('2d');
+        const data = this.getLithologyData(canvas);
+
+        if (this.chartInstances.has(canvas.id)) {
+            this.chartInstances.get(canvas.id).destroy();
+        }
+
+        const chart = new Chart(ctx, this.getChartConfig(data));
+        this.chartInstances.set(canvas.id, chart);
+    }
+
+    getLithologyData(canvas) {
+        const data = {
+            shale: parseFloat(canvas.dataset.shale) || 0,
+            sand: parseFloat(canvas.dataset.sand) || 0,
+            clay: parseFloat(canvas.dataset.clay) || 0,
+            slit: parseFloat(canvas.dataset.slit) || 0,
+            depthRange: canvas.dataset.depthRange || ''
+        };
+
+        // Validate and ensure values are numbers
+        ['shale', 'sand', 'clay', 'slit'].forEach(key => {
+            if (isNaN(data[key])) data[key] = 0;
+            data[key] = parseFloat(data[key].toFixed(1));
+        });
+
+        return data;
+    }
+
+    getChartConfig(data) {
+        return {
+            type: 'bar',
+            data: {
+                labels: [''],
+                datasets: [
+                    {
+                        label: 'Shale',
+                        data: [data.shale],
+                        backgroundColor: '#666666',
+                        borderColor: '#444444',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Sand',
+                        data: [data.sand],
+                        backgroundColor: '#FFD700',
+                        borderColor: '#B8860B',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Clay',
+                        data: [data.clay],
+                        backgroundColor: '#CD853F',
+                        borderColor: '#8B4513',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Slit',
+                        data: [data.slit],
+                        backgroundColor: '#DEB887',
+                        borderColor: '#D2691E',
+                        borderWidth: 0
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        bottom: 0
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        max: 100,
+                        min: 0,
+                        ticks: {
+                            display: true,
+                            font: {
+                                size: 10
+                            },
+                            callback: (value) => value + '%'
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        display: false,
+                        grid: { display: false }
+                    }
+                },
+                animation: { duration: 300 }
+            }
+        };
+    }
+
+    expandFirstCard() {
+        const firstCard = document.querySelector('.report-card');
+        if (firstCard) {
+            firstCard.classList.add('expanded');
+            const reportId = firstCard.dataset.reportId;
+            const firstCanvas = firstCard.querySelector('.lithologyChartRow');
+            
+            if (firstCanvas) {
+                this.renderChartWithDelay(firstCard, reportId);
+            }
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded! Make sure the CDN is accessible.');
+        return;
+    }
+    
+    new DrillingReportsVisualizer();
+});
+</script>
+{% endblock %}
