@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import timedelta
 
 
 class Core(models.Model):
@@ -57,7 +59,12 @@ class GasField(models.Model):
 class Well(models.Model):
     name = models.CharField(max_length=100, unique=True)
     location = models.CharField(max_length=200, null=True, blank=True)
+    type = models.CharField(max_length=200, null=True, blank=True)
+    rig = models.CharField(max_length=200, null=True, blank=True)
+    spud_date = models.DateField(null=True, blank=True)
+    
     gas_field = models.ForeignKey(
+        
         GasField,
         on_delete=models.CASCADE,
         related_name='wells'
@@ -100,12 +107,23 @@ class ExplorationTimeline(models.Model):
 
 class DailyDrillingReport(models.Model):
     well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='drilling_reports')
-    date = models.DateField()
-    depth_start = models.FloatField(help_text="start depth in meters")
-    depth_end = models.FloatField(help_text="end depth in meters")
+    report_no = models.IntegerField(max_length=255)
+    date = models.DateField(blank=True, null=True)
+    depth_start = models.FloatField(help_text="start depth (MD) in meters")
+    depth_end = models.FloatField(help_text="end depth (MD) in meters")
+    depth_start_tvd = models.FloatField(help_text="start depth (TVD) in meters", blank=True, null=True)
+    depth_end_tvd = models.FloatField(help_text="end depth (TVD) in meters", blank=True, null=True)
     current_operation = models.TextField(blank=True, null=True)
+    present_activity = models.TextField(blank=True, null=True)
+    csg = models.TextField(blank=True, null=True)
+    last_csg = models.TextField(blank=True, null=True)
+    next_program = models.TextField(blank=True, null=True)
     gas_show = models.TextField(blank=True, null=True, help_text="Description of gas shows if any")
     comments = models.TextField(blank=True, null=True)
+    
+    @property
+    def daily_progress(self):
+        return self.depth_end - self.depth_start if self.depth_end and self.depth_start else None
     
     class Meta:
         ordering = ['date', 'depth_start']
@@ -169,8 +187,6 @@ class OperationActivity(models.Model):
     
     def get_time_ago(self):
         """Returns a human-readable time difference"""
-        from django.utils import timezone
-        from datetime import timedelta
         
         now = timezone.now()
         diff = now - self.created_at

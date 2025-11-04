@@ -2,12 +2,22 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Min, Max
 from django.template.loader import get_template
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.http import JsonResponse
 from collections import defaultdict
 from django.template.loader import render_to_string
-from xhtml2pdf import pisa
 from io import BytesIO
+from xhtml2pdf import pisa
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.units import inch, cm
+from reportlab.platypus import Table, TableStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.platypus import Paragraph
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from .models import (
     WellData, Core, GrainSize, Mineralogy, Fossils,
     GasField, Well, ProductionData,
@@ -459,72 +469,129 @@ def drilling_reports(request):
     return render(request, 'visualization/drilling_reports.html', context)
 
 def generate_drilling_reports_pdf(request):
-    """Generate PDF report of drilling reports for a well and specific date"""
+    """Generate HTML report of drilling reports for a well and specific date"""
     well_id = request.GET.get('well')
     report_date = request.GET.get('date')
     
     if not well_id or not report_date:
         return HttpResponse('Well ID and date are required', status=400)
     
-    # Validate date format and parse
     try:
         parsed_date = datetime.strptime(report_date, '%Y-%m-%d').date()
     except ValueError:
         return HttpResponse('Invalid date format. Use YYYY-MM-DD', status=400)
 
-    # Get well and specific date report
     report_obj = DailyDrillingReport.objects.select_related('well').filter(
         well_id=well_id,
         date=parsed_date
-    ).first()
+    ).prefetch_related('lithologies').first()
     
     if not report_obj:
         return HttpResponse('No report found for this well on the specified date', status=404)
 
+    # Calculate days from spud
+    days_from_spud = (parsed_date - report_obj.well.spud_date).days if report_obj.well.spud_date else 0
+    
+    # Calculate progress
+    progress_md = report_obj.depth_end - report_obj.depth_start if report_obj.depth_end and report_obj.depth_start else 0
+    progress_tvd = report_obj.depth_end_tvd - report_obj.depth_start_tvd if report_obj.depth_end_tvd and report_obj.depth_start_tvd else 0
+    
+    # Calculate midnight depth (you can adjust this logic as needed)
+    midnight_depth = report_obj.depth_end - progress_md if report_obj.depth_end else 0
+    
     # Process lithology data
-    lithologies = []
+    lithology_data = []
     for litho in report_obj.lithologies.all():
-        lithologies.append({
-            'depth_range': f"{litho.depth_from}-{litho.depth_to}m",
-            'depth_from': litho.depth_from,
-            'depth_to': litho.depth_to,
-            'shale': round(litho.shale_percentage or 0, 1),
-            'sand': round(litho.sand_percentage or 0, 1),
-            'clay': round(litho.clay_percentage or 0, 1),
-            'slit': round(litho.slit_percentage or 0, 1),
-            'description': litho.description or ''
-        })
+        depth_range = f"{int(litho.depth_from)}-{int(litho.depth_to)}"
+        litho_items = []
+        
+        # Add Sand
+        if litho.sand_percentage and litho.sand_percentage > 0:
+            sand_desc = litho.description if hasattr(litho, 'description') and litho.description else (
+                "Sand: Colorless to white, loose, transparent to translucent, sub-angular to "
+                "sub-rounded, medium to fine grained, poorly sorted, predominantly quartz "
+                "with some mica & dark color minerals, slightly reacts with HCl."
+            )
+            if sand_desc == "A/A":
+                sand_desc = "A/A"
+            
+            litho_items.append({
+                'type': 'Sand',
+                'percentage': int(litho.sand_percentage),
+                'description': sand_desc
+            })
+        
+        # Add Silt
+        if litho.slit_percentage and litho.slit_percentage > 0:
+            silt_desc = "Silt: Milky white to white with dark spotted, highly reacts with HCL."
+            if hasattr(litho, 'description') and litho.description == "A/A":
+                silt_desc = "A/A"
+            
+            percentage_display = "Tr" if litho.slit_percentage < 5 else int(litho.slit_percentage)
+            litho_items.append({
+                'type': 'Silt',
+                'percentage': percentage_display,
+                'description': silt_desc
+            })
+        
+        # Add Clay
+        if litho.clay_percentage and litho.clay_percentage > 0:
+            clay_desc = "Clay: Dark gray to gray in color, very soft, reacts with HCL in dry state."
+            if hasattr(litho, 'description') and litho.description == "A/A":
+                clay_desc = "A/A"
+            
+            litho_items.append({
+                'type': 'Clay',
+                'percentage': int(litho.clay_percentage),
+                'description': clay_desc
+            })
+        
+        # Add Shale
+        if litho.shale_percentage and litho.shale_percentage > 0:
+            shale_desc = "Grey to light grey in color, mostly amorphous with little sub blocky in shape, poorly laminated, very soft in wet condition. Reacts and dissolve in HCL."
+            if hasattr(litho, 'description') and litho.description == "A/A":
+                shale_desc = "A/A"
+            
+            litho_items.append({
+                'type': 'Shale',
+                'percentage': int(litho.shale_percentage),
+                'description': shale_desc
+            })
+        
+        if litho_items:
+            lithology_data.append((depth_range, litho_items))
     
-    # Prepare report data
-    report_data = {
-        'date': report_obj.date.strftime('%d %b, %Y'),
-        'depth_start': report_obj.depth_start,
-        'depth_end': report_obj.depth_end,
-        'current_operation': report_obj.current_operation or 'Not specified',
-        'lithologies': lithologies,
-        'gas_show': report_obj.gas_show or 'None',
-        'comments': report_obj.comments or '',
-        'daily_progress': report_obj.depth_end - report_obj.depth_start
-    }
-
-    # Prepare context for PDF template
+    # Paginate lithology data (e.g., 15 rows per page)
+    rows_per_page = 15
+    lithology_pages = []
+    current_page = []
+    current_row_count = 0
+    
+    for depth_range, litho_items in lithology_data:
+        row_count = len(litho_items)
+        if current_row_count + row_count > rows_per_page and current_page:
+            lithology_pages.append(current_page)
+            current_page = []
+            current_row_count = 0
+        
+        current_page.append((depth_range, litho_items))
+        current_row_count += row_count
+    
+    if current_page:
+        lithology_pages.append(current_page)
+    
+    # If no lithology data, create at least one page
+    if not lithology_pages:
+        lithology_pages = [[]]
+    
     context = {
-        'well_name': report_obj.well.name,
-        'generation_date': datetime.now().strftime('%d %b, %Y %H:%M'),
-        'report': report_data
+        'report': report_obj,
+        'days_from_spud': days_from_spud,
+        'progress_md': progress_md,
+        'progress_tvd': progress_tvd,
+        'midnight_depth': midnight_depth,
+        'lithology_pages': lithology_pages,
+        'logo_path': 'images/bapex_logo.png',  # Update with actual logo path
     }
-
-    # Render HTML
-    html_string = render_to_string('visualization/drilling_reports_pdf.html', context)
     
-    # Create PDF
-    result = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html_string.encode("UTF-8")), result)
-    
-    if not pdf.err:
-        response = HttpResponse(result.getvalue(), content_type='application/pdf')
-        filename = f"{report_obj.well.name.replace(' ', '_')}_drilling_report_{parsed_date.strftime('%Y%m%d')}.pdf"
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        return response
-    
-    return HttpResponse('Error generating PDF', status=500)
+    return render(request, 'visualization/drilling_reports_pdf.html', context)

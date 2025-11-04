@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Daily Drilling Report</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Geologging Report - {{ report.well.name }}</title>
     <style>
         @page {
-            size: a4 portrait;
-            margin: 1.2cm 1.5cm;
+            size: A4;
+            margin: 1.2cm;
         }
         
         * {
@@ -16,448 +17,456 @@
         }
         
         body {
-            font-family: 'Arial', 'Helvetica', sans-serif;
-            font-size: 10pt;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 9pt;
             line-height: 1.3;
             color: #000;
+            background: #f5f5f5;
         }
         
-        .header-container {
-            display: table;
-            width: 100%;
-            margin-bottom: 15px;
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 1.2cm;
+            margin: 0 auto 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            page-break-after: always;
         }
         
-        .header-row {
-            display: table-row;
+        .page:last-child {
+            page-break-after: auto;
         }
         
-        .logo-cell {
-            display: table-cell;
-            width: 20%;
-            vertical-align: middle;
-            padding-right: 15px;
+        /* Header that repeats on every page */
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
         }
         
-        .logo-img {
-            width: 150px;
-            height: 70px;
-            object-fit: contain;
-            object-position: center;
+        .logo {
+            width: 3.5cm;
+            margin-right: 15px;
+            flex-shrink: 0;
         }
         
-        .title-cell {
-            display: table-cell;
-            width: 60%;
+        .logo img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .header-content {
+            flex-grow: 1;
             text-align: center;
-            vertical-align: middle;
         }
         
-        .unit-cell {
-            display: table-cell;
-            width: 20%;
-            vertical-align: top;
-            text-align: center;
-        }
-        
-        .main-title {
-            font-size: 13pt;
+        .header-content h1 {
+            font-size: 14pt;
             font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-        
-        .well-name {
-            font-size: 12pt;
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
-        
-        .company-name {
-            font-size: 10pt;
-            font-weight: bold;
-        }
-        
-        .unit-box {
-            border: 1px solid #000;
-            padding: 3px;
-            font-size: 8pt;
             margin-bottom: 2px;
         }
         
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 12px;
-            font-size: 9pt;
+        .header-content h2 {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-bottom: 2px;
         }
         
-        .info-table td {
+        .header-content p {
+            font-size: 11pt;
+        }
+        
+        .unit-box {
+            width: 4.5cm;
             border: 1px solid #000;
-            padding: 4px 6px;
-        }
-        
-        .info-label {
-            font-weight: bold;
-            background-color: #f0f0f0;
-            width: 20%;
-        }
-        
-        .info-value {
-            width: 30%;
-        }
-        
-        .section-header {
-            background-color: #f0f0f0;
-            border: 2px solid #000;
-            padding: 5px 8px;
-            font-weight: bold;
-            font-size: 10pt;
-            text-transform: uppercase;
-            margin-top: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .status-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 12px;
-            font-size: 9pt;
-        }
-        
-        .status-table td {
-            border: 1px solid #000;
-            padding: 5px 6px;
-        }
-        
-        .status-label-cell {
-            font-weight: bold;
-            background-color: #f5f5f5;
-            width: 22%;
-        }
-        
-        .status-value-cell {
-            width: 28%;
-        }
-        
-        .depth-highlight {
-            background-color: #fff3cd;
-            font-weight: bold;
-        }
-        
-        .lithology-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 12px;
-            font-size: 9pt;
-        }
-        
-        .lithology-table th {
-            background-color: #f0f0f0;
-            border: 1px solid #000;
-            padding: 5px 4px;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .lithology-table td {
-            border: 1px solid #000;
-            padding: 5px 4px;
-            vertical-align: top;
-        }
-        
-        .depth-cell {
-            text-align: center;
-            font-weight: bold;
-            width: 12%;
-        }
-        
-        .lithology-type {
-            font-weight: bold;
-            text-align: center;
-            width: 10%;
-        }
-        
-        .percentage-cell {
-            text-align: center;
-            font-weight: bold;
-            width: 8%;
-        }
-        
-        .description-cell {
-            font-size: 8.5pt;
-            line-height: 1.4;
-        }
-        
-        .composition-row {
-            padding: 3px 0;
-        }
-        
-        .comp-bar-container {
             display: flex;
-            height: 20px;
-            border: 1px solid #000;
-            margin: 3px 0;
+            height: 0.8cm;
+            flex-shrink: 0;
+            align-self: flex-start;
+            margin-top: 5px;
         }
         
-        .comp-segment {
+        .unit-cell {
+            flex: 1;
+            border-right: 1px solid #000;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 8pt;
-            font-weight: bold;
+            font-size: 9pt;
+            font-weight: 500;
         }
         
-        .comp-shale {
-            background-color: #808080;
-            color: white;
+        .unit-cell:last-child {
+            border-right: none;
         }
         
-        .comp-sand {
-            background-color: #FFD700;
-            color: #000;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
         }
         
-        .comp-clay {
-            background-color: #A0522D;
-            color: white;
-        }
-        
-        .comp-silt {
-            background-color: #D2B48C;
-            color: #000;
-        }
-        
-        .remarks-section {
+        table td, table th {
             border: 1px solid #000;
-            padding: 8px;
-            margin-top: 10px;
+            padding: 4px 6px;
+            vertical-align: middle;
+        }
+        
+        /* Report Info Tables */
+        .report-tables {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .report-left {
+            width: 30%;
+        }
+        
+        .report-middle {
+            width: 30%;
+        }
+        
+        .report-right {
+            width: 40%;
+        }
+        
+        .report-tables table {
+            margin-bottom: 0;
+        }
+        
+        .report-tables td {
+            font-size: 9pt;
+            padding: 5px 8px;
+        }
+        
+        .report-tables .label-cell {
+            font-weight: normal;
+            text-align: left;
+        }
+        
+        .report-tables .value-cell {
+            text-align: center;
+            font-weight: normal;
+        }
+        
+        .report-tables .center-text {
+            text-align: center;
+        }
+        
+        /* Status Section */
+        .status-section {
+            margin-bottom: 10px;
+        }
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #000;
+            padding: 5px 8px;
+            font-weight: bold;
+            font-size: 10pt;
+            margin-bottom: 0;
+        }
+        
+        .status-header-left {
+            flex-grow: 1;
+        }
+        
+        .status-header-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .status-table {
+            margin-top: -1px;
+        }
+        
+        .status-table td {
+            padding: 5px 8px;
             font-size: 9pt;
         }
         
-        .remarks-title {
-            font-weight: bold;
-            margin-bottom: 5px;
+        .status-table .label-col {
+            width: 20%;
+            text-align: left;
+            font-weight: normal;
         }
         
-        .remarks-list {
-            margin-left: 15px;
-        }
-        
-        .remarks-list li {
-            margin-bottom: 3px;
-        }
-        
-        .footer {
-            position: fixed;
-            bottom: 1cm;
-            left: 0;
-            right: 0;
+        .status-table .md-col,
+        .status-table .tvd-col {
+            width: 12%;
             text-align: center;
-            font-size: 8pt;
-            color: #666;
         }
         
-        .page-break {
-            page-break-after: always;
+        .status-table .spacer-col {
+            width: 2%;
+            border: none;
+            background: white;
+        }
+        
+        .status-table .info-label {
+            width: 15%;
+            text-align: right;
+            font-weight: normal;
+        }
+        
+        .status-table .info-value {
+            text-align: left;
+        }
+        
+        .status-table .header-row td {
+            background: white;
+            font-weight: normal;
+        }
+        
+        .progress-value {
+            color: green;
+            font-weight: bold;
+        }
+        
+        .section-header {
+            background: #000;
+            color: #fff;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-size: 11pt;
+            margin: 10px 0 5px 0;
+        }
+        
+        .lithology-table th {
+            background: #d3d3d3;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px;
+            font-size: 9pt;
+        }
+        
+        .lithology-table td {
+            padding: 5px;
+            vertical-align: top;
+            font-size: 9pt;
+        }
+        
+        .lithology-table .depth-col {
+            width: 2cm;
+            text-align: center;
+        }
+        
+        .lithology-table .type-col {
+            width: 1.5cm;
+            text-align: center;
+        }
+        
+        .lithology-table .percent-col {
+            width: 1cm;
+            text-align: center;
+        }
+        
+        .lithology-table .desc-col {
+            text-align: left;
+            line-height: 1.4;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            
+            .page {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                page-break-after: always;
+            }
+            
+            .page:last-child {
+                page-break-after: auto;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            /* Ensure header appears on every page */
+            .page-header {
+                display: flex !important;
+            }
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .print-button:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header-container">
-        <div class="header-row">
-            <div class="logo-cell">
-                <img src="https://bapex.com.bd/sites/default/files/files/bapex.portal.gov.bd/page/c81bcc78_edc9_49ca_97e6_a5db526a4075/165905Bapex.jpg" 
-                     alt="BAPEX Logo" 
-                     class="logo-img">
+    <button class="print-button no-print" onclick="window.print()">Print Report</button>
+    
+    {% for page_lithologies in lithology_pages %}
+    <div class="page">
+        <!-- Header (repeats on every page) -->
+        <div class="page-header">
+            <div class="logo">
+                
+                <img src="https://bapex.com.bd/sites/default/files/files/bapex.portal.gov.bd/page/c81bcc78_edc9_49ca_97e6_a5db526a4075/165905Bapex.jpg" alt="BAPEX Logo">
             </div>
-            <div class="title-cell">
-                <div class="main-title">Daily Drilling Report</div>
-                <div class="well-name">{{ well_name }}</div>
-                <div class="company-name">BAPEX Mudlogging Unit</div>
+            
+            <div class="header-content">
+                <h1>DAILY GEOLOGGING REPORT</h1>
+                <h2>{{ report.well.name|upper }}</h2>
+                <p>BAPEX MUDLOGGING UNIT</p>
             </div>
-            <div class="unit-cell">
-                <div class="unit-box">DIC</div>
-                <div class="unit-box">MUD</div>
-                <div class="unit-box">UNIT</div>
+            
+            <div class="unit-box">
+                <div class="unit-cell">DIC</div>
+                <div class="unit-cell">MUD</div>
+                <div class="unit-cell">UNIT</div>
             </div>
         </div>
+        
+        {% if forloop.first %}
+        <!-- Report Info Tables (only on first page) -->
+        <div class="report-tables">
+            <div class="report-left">
+                <table>
+                    <tr>
+                        <td class="label-cell">Report No.</td>
+                        <td class="value-cell">{{ report.report_no|stringformat:"02d" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Well Type:</td>
+                        <td class="center-text">{{ report.well.type|default:"APPRAISAL CUM<br>DEVELOPMENT"|safe }}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="report-middle">
+                <table>
+                    <tr>
+                        <td class="center-text" rowspan="2" style="vertical-align: middle;">Rig: {{ report.well.rig|default:"ZJ70DBS" }}<br>(Bijoy-10)</td>
+                    </tr>
+                    <tr></tr>
+                </table>
+            </div>
+            
+            <div class="report-right">
+                <table>
+                    <tr>
+                        <td class="label-cell" style="text-align: left;">Report Date:</td>
+                        <td class="value-cell">{{ report.date|date:"d F Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell" style="text-align: left;">Spud Date: {{ report.well.spud_date|date:"d.m.Y" }}</td>
+                        <td class="label-cell" style="text-align: left;">Days From Spud: {{ days_from_spud }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Status Section (only on first page) -->
+        <div class="status-section">
+            <div class="status-header">
+                <span class="status-header-left">STATUS at 07.00 hrs&nbsp;&nbsp;&nbsp;&nbsp;{{ report.date|date:"d F Y" }}</span>
+                <span class="status-header-right">
+                    <span>MIDNIGHT DEPTH:</span>
+                    <span style="margin-left: 10px;">{{ midnight_depth|floatformat:2 }}</span>
+                    <span style="margin-left: 5px;">M</span>
+                </span>
+            </div>
+            
+            <table class="status-table">
+                <tr class="header-row">
+                    <td class="label-col"></td>
+                    <td class="md-col"><strong>MD</strong></td>
+                    <td class="tvd-col"><strong>TVD</strong></td>
+                    <td class="spacer-col"></td>
+                    <td class="info-label">CSG:</td>
+                    <td class="info-value" colspan="2">{{ report.csg|default:"30\" FC @30m, 20\" casing @185m" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-col">Present Depth (m):</td>
+                    <td class="md-col">{{ report.depth_end|floatformat:2 }}</td>
+                    <td class="tvd-col">{{ report.depth_end_tvd|floatformat:2 }}</td>
+                    <td class="spacer-col"></td>
+                    <td class="info-label">Last CSG:</td>
+                    <td class="info-value" colspan="2">{{ report.last_csg|default:"20\" casing @185m" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-col">Previous Depth (m):</td>
+                    <td class="md-col">{{ report.depth_start|floatformat:2 }}</td>
+                    <td class="tvd-col">{{ report.depth_start_tvd|floatformat:2 }}</td>
+                    <td class="spacer-col"></td>
+                    <td class="info-label">Present Activity:</td>
+                    <td class="info-value">{{ report.present_activity|default:"Circulation" }}</td>
+                    <td class="info-value" style="text-align: center; width: 15%;"><strong>Next Program:</strong><br>{{ report.next_program|default:"Wiper Trip" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-col">Progress (m):</td>
+                    <td class="md-col progress-value">{{ progress_md|floatformat:2 }}</td>
+                    <td class="tvd-col progress-value">{{ progress_tvd|floatformat:2 }}</td>
+                    <td class="spacer-col"></td>
+                    <td colspan="3"></td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- Lithology Section Header (only on first page) -->
+        <div class="section-header">LITHOLOGY</div>
+        {% endif %}
+        
+        <!-- Lithology Table -->
+        <table class="lithology-table">
+            {% if forloop.first %}
+            <thead>
+                <tr>
+                    <th class="depth-col">Depth (m)</th>
+                    <th colspan="2">Lithology %</th>
+                    <th class="desc-col">Lithological Description</th>
+                </tr>
+            </thead>
+            {% endif %}
+            <tbody>
+                {% for depth_range, litho_list in page_lithologies %}
+                    {% for litho_item in litho_list %}
+                    <tr>
+                        {% if forloop.first %}
+                        <td class="depth-col" rowspan="{{ litho_list|length }}">{{ depth_range }}</td>
+                        {% endif %}
+                        <td class="type-col">{{ litho_item.type }}</td>
+                        <td class="percent-col">{{ litho_item.percentage }}</td>
+                        <td class="desc-col">{{ litho_item.description }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    {% endfor %}
     
-    <!-- Report Information Table -->
-    <table class="info-table">
-        <tr>
-            <td class="info-label">Report No.</td>
-            <td class="info-value">-</td>
-            <td class="info-label">Report Date:</td>
-            <td class="info-value">{{ report.date }}</td>
-        </tr>
-        <tr>
-            <td class="info-label">Well Type:</td>
-            <td class="info-value">APPRAISAL CUM<br>DEVELOPMENT</td>
-            <td class="info-label">Rig:</td>
-            <td class="info-value">-</td>
-        </tr>
-    </table>
-    
-    <!-- Status Section -->
-    <div class="section-header">STATUS at 07.00 hrs {{ report.date }}</div>
-    
-    <table class="status-table">
-        <tr>
-            <td class="status-label-cell">MIDNIGHT DEPTH:</td>
-            <td class="status-value-cell depth-highlight">{{ report.depth_end|floatformat:2 }} M</td>
-            <td class="status-label-cell" style="width: 10%;">MD</td>
-            <td class="status-value-cell" style="width: 10%;">TVD</td>
-            <td class="status-label-cell" style="width: 10%;">CSG:</td>
-            <td class="status-value-cell" style="width: 20%;">-</td>
-        </tr>
-        <tr>
-            <td class="status-label-cell">Present Depth (m):</td>
-            <td class="status-value-cell depth-highlight">{{ report.depth_end|floatformat:2 }}</td>
-            <td class="status-label-cell" colspan="2">Last CSG:</td>
-            <td class="status-value-cell" colspan="2">-</td>
-        </tr>
-        <tr>
-            <td class="status-label-cell">Previous Depth (m):</td>
-            <td class="status-value-cell">{{ report.depth_start|floatformat:2 }}</td>
-            <td class="status-label-cell" colspan="2">Present Activity:</td>
-            <td class="status-value-cell" colspan="2">None</td>
-        </tr>
-    </table>
-
-    <!-- Progress Section -->
-    <div class="section-header">DRILLING PROGRESS</div>
-    <div style="margin: 10px 0; padding: 15px; background-color: #fff3cd; border: 2px solid #ffeeba; text-align: center;">
-        <span style="font-size: 14pt; font-weight: bold; color: #1a5943;">
-            Daily Progress: {{ report.daily_progress|floatformat:2 }} meters
-        </span>
-    </div>
-    <!-- Progress Section -->
-    <div class="section-header">Present Activity</div>
-    <div style="margin: 10px 0; padding: 15px; background-color: #fff3cd; border: 2px solid #ffeeba; text-align: center;">
-        <span style="font-size: 14pt; font-weight: bold; color: #1a5943;">
-            Present Activity: {{ report.current_operation|default:"Not specified"|safe }}
-        </span>
-    </div>
-    
-{% if report.lithologies %}
-<div class="section-header">LITHOLOGY</div>
-
-<table class="lithology-table">
-    <thead>
-        <tr>
-            <th>Depth (m)</th>
-            <th>Sand (%)</th>
-            <th>Silt (%)</th>
-            <th>Clay (%)</th>
-            <th>Shale (%)</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for lithology in report.lithologies %}
-        <tr>
-            <td class="depth-cell">{{ lithology.depth_range }}</td>
-            <td class="percentage-cell">{% if lithology.sand %}{{ lithology.sand|floatformat:0 }}{% else %}-{% endif %}</td>
-            <td class="percentage-cell">{% if lithology.silt %}{{ lithology.silt|floatformat:0 }}{% else %}-{% endif %}</td>
-            <td class="percentage-cell">{% if lithology.clay %}{{ lithology.clay|floatformat:0 }}{% else %}-{% endif %}</td>
-            <td class="percentage-cell">{% if lithology.shale %}{{ lithology.shale|floatformat:0 }}{% else %}-{% endif %}</td>
-            <td class="description-cell">
-                {% if lithology.sand %}
-                <strong>Sand:</strong> {{ lithology.description_sand|default:"Colorless to white, loose, transparent to translucent, sub-angular to sub-rounded, medium to fine grained, poorly sorted, predominantly quartz."|safe }}<br>
-                {% endif %}
-                {% if lithology.silt %}
-                <strong>Silt:</strong> {{ lithology.description_silt|default:"Milky white to white with dark spots, highly reacts with HCL."|safe }}<br>
-                {% endif %}
-                {% if lithology.clay %}
-                <strong>Clay:</strong> {{ lithology.description_clay|default:"Dark gray to gray, very soft, reacts with HCL in dry state."|safe }}<br>
-                {% endif %}
-                {% if lithology.shale %}
-                <strong>Shale:</strong> {{ lithology.description_shale|default:"Gray to dark gray, moderately hard."|safe }}
-                {% endif %}
-            </td>
-        </tr>
-
-        <!-- Composition Bar -->
-        <tr>
-            <td colspan="6" style="padding: 3px;">
-                <div class="comp-bar-container">
-                    {% if lithology.sand %}
-                    <div class="comp-segment comp-sand" style="width: {{ lithology.sand }}%;">
-                        {% if lithology.sand > 10 %}Sand {{ lithology.sand|floatformat:0 }}%{% endif %}
-                    </div>
-                    {% endif %}
-                    {% if lithology.silt %}
-                    <div class="comp-segment comp-silt" style="width: {{ lithology.silt }}%;">
-                        {% if lithology.silt > 10 %}Silt {{ lithology.silt|floatformat:0 }}%{% endif %}
-                    </div>
-                    {% endif %}
-                    {% if lithology.clay %}
-                    <div class="comp-segment comp-clay" style="width: {{ lithology.clay }}%;">
-                        {% if lithology.clay > 10 %}Clay {{ lithology.clay|floatformat:0 }}%{% endif %}
-                    </div>
-                    {% endif %}
-                    {% if lithology.shale %}
-                    <div class="comp-segment comp-shale" style="width: {{ lithology.shale }}%;">
-                        {% if lithology.shale > 10 %}Shale {{ lithology.shale|floatformat:0 }}%{% endif %}
-                    </div>
-                    {% endif %}
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endif %}
-
-    
-    <!-- Formation Gas Peaks (Empty Section) -->
-    <div class="section-header">FORMATION GAS PEAKS</div>
-    <table class="info-table">
-        <tr>
-            <td class="info-label" style="width: 12%;">Depth (m)</td>
-            <td class="info-label" style="width: 11%;">Max (%)</td>
-            <td class="info-label" style="width: 11%;">BG (%)</td>
-            <td class="info-label" style="width: 11%;">Above BG (%)</td>
-            <td class="info-label" style="width: 11%;">C1 (%)</td>
-            <td class="info-label" style="width: 11%;">C2 (%)</td>
-            <td class="info-label" style="width: 11%;">C3 (%)</td>
-            <td class="info-label" style="width: 11%;">iC4 (%)</td>
-            <td class="info-label" style="width: 11%;">NC5 (%)</td>
-        </tr>
-        <tr>
-            <td style="text-align: center;">-</td>
-            <td style="text-align: center;">-</td>
-            <td style="text-align: center;">-</td>
-            <td style="text-align: center;">-</td>
-            <td style="text-align: center;">-</td>
-            <td style="text-align: center;">-</td>
-            <td style="text-align: center;">-</td>
-            <td style="text-align: center;">-</td>
-            <td style="text-align: center;">-</td>
-        </tr>
-    </table>
-    
-    <!-- Remarks Section -->
-    {% if report.comments %}
-    <div class="section-header">Remarks:</div>
-    <div class="remarks-section">
-        {{ report.comments|safe|linebreaks }}
-    </div>
-    {% endif %}
-    
-    <!-- Gas Show Info -->
-    {% if report.gas_show and report.gas_show != "None" %}
-    <div style="margin-top: 10px; padding: 8px; background-color: #fff3cd; border: 2px solid #ffc107;">
-        <strong>Gas Show:</strong> {{ report.gas_show }}
-    </div>
-    {% endif %}
-    
-    <!-- Footer -->
-    <div style="margin-top: 20px; text-align: center; font-size: 8pt; color: #666;">
-        <p>Report Generated: {{ generation_date }}</p>
-    </div>
+    <script>
+        // Optional: Auto-print on load
+        // window.onload = function() { window.print(); }
+    </script>
 </body>
 </html>
