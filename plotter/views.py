@@ -372,10 +372,46 @@ def drilling_reports(request):
     
     # Get prognosis data for the selected well
     prognosis_data = None
+    prognosis_segments = None
+    prognosis_range = None
     if well_id:
         try:
             selected_well_obj = Well.objects.get(id=well_id)
             prognosis_data = selected_well_obj.prognoses.all()
+            # Prepare prognosis segments for visualization (normalized widths)
+            if prognosis_data.exists():
+                # Convert Decimal to float and compute overall range
+                starts = [float(p.planned_depth_start) for p in prognosis_data]
+                ends = [float(p.planned_depth_end) for p in prognosis_data]
+                min_depth = min(starts)
+                max_depth = max(ends)
+                total_range = max(max_depth - min_depth, 1e-6)
+                zero_origin_total = max(max_depth, 1e-6)
+
+                # Sort by start depth and build segments
+                ordered = sorted(prognosis_data, key=lambda p: float(p.planned_depth_start))
+                prognosis_segments = []
+                for p in ordered:
+                    start = float(p.planned_depth_start)
+                    end = float(p.planned_depth_end)
+                    length = max(end - start, 0)
+                    width_pct = (length / total_range) * 100.0
+                    height_pct = (length / zero_origin_total) * 100.0
+                    prognosis_segments.append({
+                        'from': round(start, 1),
+                        'to': round(end, 1),
+                        'lithology': p.lithology,
+                        'is_target': p.target_depth,
+                        'width_pct': width_pct,
+                        'height_pct': height_pct,
+                        'label': f"{round(start,1)}-{round(end,1)} m"
+                    })
+
+                prognosis_range = {
+                    'min': round(min_depth, 1),
+                    'max': round(max_depth, 1),
+                    'top_spacer_pct': (min_depth / zero_origin_total) * 100.0 if max_depth > 0 else 0.0
+                }
         except Well.DoesNotExist:
             prognosis_data = None
 
@@ -389,6 +425,8 @@ def drilling_reports(request):
         'depth_to': depth_to,
         'stats': stats,
         'prognosis_data': prognosis_data,
+        'prognosis_segments': prognosis_segments,
+        'prognosis_range': prognosis_range,
     }
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

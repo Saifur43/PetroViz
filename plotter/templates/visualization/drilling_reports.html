@@ -5,7 +5,7 @@
     .lithology-chart-container {
         position: relative;
         width: 100%;
-        height: 100px;
+        height: 80px;
         margin: 0 auto;
     }
     .well-list {
@@ -34,7 +34,7 @@
     .report-card .card-header {
         cursor: pointer;
         background: linear-gradient(135deg, #257358 0%, #2d8a6a 100%);
-        padding: 1.25rem;
+        padding: 0.8rem 1rem;
         transition: all 0.2s;
         border-radius: 6px 6px 0 0;
     }
@@ -44,7 +44,7 @@
     }
     .report-card .card-body {
         display: none;
-        padding: 1.5rem;
+        padding: 1rem;
         background-color: #fafafa;
     }
     .report-card.expanded .card-body {
@@ -62,9 +62,9 @@
     .report-date {
         color: white !important;
         background-color: #1a5943;
-        padding: 10px 20px;
+        padding: 6px 12px;
         border-radius: 25px;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         margin-right: 15px;
         display: inline-flex;
         align-items: center;
@@ -79,9 +79,9 @@
     .report-depth {
         background: linear-gradient(135deg, #E98108 0%, #d47307 100%);
         color: white !important;
-        padding: 10px 20px;
+        padding: 6px 12px;
         border-radius: 25px;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         display: inline-flex;
         align-items: center;
         font-weight: 600;
@@ -95,7 +95,7 @@
     }
     .lithology-section {
         background-color: white;
-        padding: 20px;
+        padding: 14px;
         border-radius: 8px;
         margin-top: 10px;
         border: 1px solid #e0e0e0;
@@ -112,7 +112,7 @@
     }
     .info-row {
         margin-bottom: 15px;
-        padding: 10px;
+        padding: 8px 10px;
         background-color: white;
         border-radius: 6px;
         border-left: 3px solid #257358;
@@ -157,16 +157,30 @@
         padding: 15px;
         background-color: #f8f9fa;
         border-radius: 8px;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
         border: 1px solid #e0e0e0;
     }
     .info-section {
         background-color: white;
-        padding: 20px;
+        padding: 14px;
         border-radius: 8px;
         border: 1px solid #e0e0e0;
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
+    .lithology-legend { padding: 12px; margin-bottom: 12px; }
+    /* Prognosis lithology vertical bar styles */
+    .prognosis-bar-h { display: flex; width: 100%; height: 24px; border-radius: 6px; overflow: hidden; border: 1px solid #e0e0e0; }
+    .prognosis-bar-v { display: flex; flex-direction: column; width: 199px; height: 100%; border-radius: 6px; overflow: hidden; border: 1px solid #e0e0e0; }
+    .prognosis-segment { height: 100%; position: relative; }
+    .prognosis-segment:hover::after { content: attr(data-tooltip); position: absolute; left: 42px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 4px 8px; border-radius: 4px; white-space: nowrap; font-size: 12px; z-index: 2; }
+    .prognosis-legend .legend-item { display: inline-flex; align-items: center; margin-right: 12px; margin-bottom: 6px; font-size: 0.9rem; }
+    .prognosis-legend .legend-color { width: 14px; height: 14px; border-radius: 3px; display: inline-block; margin-right: 6px; border: 1px solid rgba(0,0,0,0.1); }
+    .prognosis-depth-labels-h { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #6c757d; }
+    .prognosis-depth-labels-v { display: flex; flex-direction: column; justify-content: space-between; margin-left: 8px; font-size: 12px; color: #6c757d; }
+    .prognosis-tick { position: relative; display: flex; align-items: center; gap: 6px; }
+    .prognosis-tick-line { width: 8px; height: 1px; background: #adb5bd; display: inline-block; }
+    .prognosis-target { outline: 2px dashed rgba(0,0,0,0.25); outline-offset: -2px; }
+    .prognosis-wrap { display: flex; align-items: stretch; gap: 10px; }
 </style>
 
 <div class="container-fluid">
@@ -194,6 +208,8 @@
         <!-- Main Content -->
         <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
             {% if selected_well %}
+            <div class="row g-3">
+                <div class="col-lg-9 col-xl-9">
             <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center">
                     <h1 class="display-5 fw-bold">
@@ -209,49 +225,50 @@
             </div>
             <!-- Statistics Cards -->
             {% if stats %}
-            <div class="row mb-4">
+            <div class="row mb-3">
                 <div class="col-md-3">
                     <div class="card stats-card">
                         <div class="card-body">
-                            <h6 class="card-title text-muted mb-2">
+                            <h6 class="card-title text-muted mb-1">
                                 <i class="bi bi-file-earmark-text me-2"></i>Total Reports
                             </h6>
-                            <h3 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.total_reports }}</h3>
+                            <h4 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.total_reports }}</h4>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card stats-card">
                         <div class="card-body">
-                            <h6 class="card-title text-muted mb-2">
+                            <h6 class="card-title text-muted mb-1">
                                 <i class="bi bi-arrow-down-circle me-2"></i>Total Depth Progress
                             </h6>
-                            <h3 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.depth_progress|floatformat:1 }} m</h3>
+                            <h4 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.depth_progress|floatformat:1 }} m</h4>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card stats-card">
                         <div class="card-body">
-                            <h6 class="card-title text-muted mb-2">
+                            <h6 class="card-title text-muted mb-1">
                                 <i class="bi bi-geo-alt me-2"></i>Latest Depth
                             </h6>
-                            <h3 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.latest_depth|floatformat:1 }} m</h3>
+                            <h4 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.latest_depth|floatformat:1 }} m</h4>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card stats-card">
                         <div class="card-body">
-                            <h6 class="card-title text-muted mb-2">
+                            <h6 class="card-title text-muted mb-1">
                                 <i class="bi bi-speedometer2 me-2"></i>Avg. Progress/Day
                             </h6>
-                            <h3 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.avg_progress_per_day|floatformat:1 }} m</h3>
+                            <h4 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.avg_progress_per_day|floatformat:1 }} m</h4>
                         </div>
                     </div>
                 </div>
             </div>
             {% endif %}
+            
 
             <!-- Reports Cards -->
             <div class="reports-container">
@@ -380,6 +397,118 @@
                     <i class="bi bi-info-circle me-2"></i>No drilling reports found for this well.
                 </div>
                 {% endfor %}
+            </div>
+                </div>
+                <aside class="col-lg-3 col-xl-3">
+                    {% if prognosis_segments %}
+                    <div class="position-sticky" style="top: 1rem;">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0" style="color: #257358; font-weight: 600; font-size: 1rem;">
+                                        <i class="bi bi-layers me-2"></i>Prognosis Lithology
+                                    </h6>
+                                    {% if prognosis_range %}
+                                    <span class="text-muted small">{{ prognosis_range.min }} - {{ prognosis_range.max }} m</span>
+                                    {% endif %}
+                                </div>
+                                <div class="prognosis-legend mb-2">
+                                    <span class="legend-item"><span class="legend-color" style="background:#FFD700;"></span> Sand</span>
+                                    <span class="legend-item"><span class="legend-color" style="background:#CD853F;"></span> Clay</span>
+                                    <span class="legend-item"><span class="legend-color" style="background:#666666;"></span> Shale</span>
+                                    <span class="legend-item"><span class="legend-color" style="background:#DEB887;"></span> Silt</span>
+                                </div>
+                                <div class="prognosis-wrap" id="prognosis-wrap">
+                                    <div class="prognosis-bar-v" aria-label="Prognosis lithology by depth (vertical)" id="prognosis-bar">
+                                        {% if prognosis_range and prognosis_range.top_spacer_pct and prognosis_range.top_spacer_pct > 0 %}
+                                            <div class="prognosis-spacer" data-height="{{ prognosis_range.top_spacer_pct }}"></div>
+                                        {% endif %}
+                                        {% for seg in prognosis_segments %}
+                                            <div class="prognosis-segment {% if seg.is_target %}prognosis-target{% endif %}"
+                                                 data-height="{{ seg.height_pct }}"
+                                                 data-color="{% if seg.lithology == 'sand' %}#FFD700{% elif seg.lithology == 'clay' %}#CD853F{% elif seg.lithology == 'shale' %}#666666{% elif seg.lithology == 'slit' %}#DEB887{% else %}#9aa0a6{% endif %}"
+                                                 data-tooltip="{{ seg.label }} • {{ seg.lithology|title }}{% if seg.is_target %} • Target{% endif %}">
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if prognosis_range %}
+                                    <div class="prognosis-depth-labels-v" aria-hidden="true" id="prognosis-ticks"
+                                         data-min="{{ prognosis_range.min }}" data-max="{{ prognosis_range.max }}">
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <script>
+                                    (function(){
+                                        const wrap = document.getElementById('prognosis-wrap');
+                                        const bar = document.getElementById('prognosis-bar');
+                                        const ticks = document.getElementById('prognosis-ticks');
+                                        if (!bar) return;
+                                        bar.querySelectorAll('.prognosis-spacer, .prognosis-segment').forEach(el => {
+                                            const h = parseFloat(el.getAttribute('data-height'));
+                                            if (!isNaN(h)) el.style.height = h + '%';
+                                            const color = el.getAttribute('data-color');
+                                            if (color) el.style.background = color;
+                                        });
+
+                                        function computeBarHeight() {
+                                            try {
+                                                const card = bar.closest('.card');
+                                                const rectTop = card.getBoundingClientRect().top;
+                                                const topOffset = Math.max(rectTop, 0);
+                                                const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                                                const targetHeight = Math.max(viewportHeight - 24 - (rectTop - topOffset), 320);
+                                                bar.style.height = targetHeight + 'px';
+                                                if (ticks) ticks.style.height = targetHeight + 'px';
+                                            } catch(e) { /* noop */ }
+                                        }
+
+                                        function niceStep(max) {
+                                            if (!max || max <= 0) return 50;
+                                            const raw = max / 12; // try ~12 ticks
+                                            const candidates = [10, 20, 25, 50, 100, 200, 250, 500, 1000];
+                                            let best = candidates[0];
+                                            for (const c of candidates) {
+                                                if (raw <= c) { best = c; break; }
+                                                best = c;
+                                            }
+                                            return best;
+                                        }
+
+                                        function buildTicks() {
+                                            if (!ticks) return;
+                                            const min = parseFloat(ticks.getAttribute('data-min')) || 0;
+                                            const max = parseFloat(ticks.getAttribute('data-max')) || 0;
+                                            const step = niceStep(max);
+                                            const labels = [];
+                                            const start = Math.max(0, Math.floor(min / step) * step);
+                                            for (let v = start; v <= max; v += step) labels.push(v);
+                                            if (labels[0] !== 0) labels.unshift(0);
+                                            if (labels[labels.length - 1] !== max) labels.push(max);
+                                            ticks.innerHTML = '';
+                                            // Render from top (0) to bottom (max)
+                                            labels.forEach((value, idx) => {
+                                                const row = document.createElement('div');
+                                                row.className = 'prognosis-tick';
+                                                const line = document.createElement('span');
+                                                line.className = 'prognosis-tick-line';
+                                                const label = document.createElement('span');
+                                                label.textContent = value + ' m';
+                                                row.appendChild(line);
+                                                row.appendChild(label);
+                                                ticks.appendChild(row);
+                                            });
+                                        }
+
+                                        computeBarHeight();
+                                        buildTicks();
+                                        window.addEventListener('resize', computeBarHeight);
+                                    })();
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </aside>
             </div>
             {% else %}
             <div class="text-center mt-5">
