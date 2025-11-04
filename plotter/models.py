@@ -107,7 +107,7 @@ class ExplorationTimeline(models.Model):
 
 class DailyDrillingReport(models.Model):
     well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='drilling_reports')
-    report_no = models.IntegerField(max_length=255)
+    report_no = models.IntegerField()
     date = models.DateField(blank=True, null=True)
     depth_start = models.FloatField(help_text="start depth (MD) in meters")
     depth_end = models.FloatField(help_text="end depth (MD) in meters")
@@ -425,3 +425,33 @@ class Fossils(models.Model):
     def depth_midpoint(self):
         """Calculate midpoint of depth range"""
         return (self.sampling_depth_start + self.sampling_depth_end) / 2
+    
+    
+class WellPrognosis(models.Model):
+    
+    FORMATION_CHOICES = [
+        ('sand', 'sand'),
+        ('lime', 'lime'),
+        ('shale', 'shale'),
+        ('slit', 'slit'),
+        ('dolomite', 'dolomite'),
+        ('coal', 'coal'),
+        ('clay', 'clay'),
+        # Add more formations as needed
+    ]
+    
+    well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='prognoses')
+    planned_depth_start = models.DecimalField(max_digits=10, decimal_places=2, help_text="Planned start depth (m)")
+    planned_depth_end = models.DecimalField(max_digits=10, decimal_places=2, help_text="Planned end depth (m)")
+    lithology = models.CharField(max_length=50, choices=FORMATION_CHOICES, help_text="Expected lithology at this depth")
+    target_depth = models.BooleanField(default=False, help_text="Is this a target depth?")
+    casing_size = models.CharField(max_length=50, blank=True, null=True)
+    drilling_fluid = models.CharField(max_length=100, blank=True, null=True)
+    remarks = models.TextField(blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['planned_depth_start']
+
+    def __str__(self):
+        return f"{self.well.name} - {self.planned_depth_start}m ({self.lithology})"

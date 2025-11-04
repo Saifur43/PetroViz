@@ -348,6 +348,17 @@
                                                 </span>
                                             </div>
                                         </div>
+                                        <div class="mt-1 ms-2">
+                                            <small><strong>Dominant Lithology:</strong> {{ lithology.dominant_lithology|title }} ({{ lithology.dominant_percentage }}%)</small>
+                                        </div>
+                                        {% if lithology.prognosis_comparison %}
+                                        <div class="mt-1 ms-2">
+                                            <div class="alert alert-{{ lithology.comparison_type }} py-1 mb-0" style="font-size: 0.9em;">
+                                                <i class="bi {% if lithology.comparison_type == 'success' %}bi-check-circle{% elif lithology.comparison_type == 'warning' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %} me-1"></i>
+                                                <strong>Prognosis:</strong> {{ lithology.prognosis_comparison }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
                                         {% if lithology.description %}
                                         <div class="mt-1 ms-2">
                                             <small class="text-muted"><i class="bi bi-file-text me-1"></i>{{ lithology.description }}</small>

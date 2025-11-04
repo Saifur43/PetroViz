@@ -4,7 +4,7 @@ from django.urls import path
 from django.shortcuts import render, redirect
 from django.contrib import messages
 import pandas as pd
-from .models import Well, ProductionData, GasField, ExplorationTimeline, OperationActivity, Fossils, GrainSize, Mineralogy, DailyDrillingReport, DrillingLithology
+from .models import Well, ProductionData, GasField, ExplorationTimeline, OperationActivity, Fossils, GrainSize, Mineralogy, DailyDrillingReport, DrillingLithology, WellPrognosis
 
 
 class CoreAdmin(admin.ModelAdmin):
@@ -120,3 +120,4 @@ admin.site.register(GrainSize)
 admin.site.register(Mineralogy)
 admin.site.register(DailyDrillingReport)
 admin.site.register(DrillingLithology)
+admin.site.register(WellPrognosis)
