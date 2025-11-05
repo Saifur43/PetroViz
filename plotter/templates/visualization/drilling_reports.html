@@ -8,6 +8,9 @@
         height: 60px;
         margin: 0 auto;
     }
+    .skeleton { position: relative; overflow: hidden; background: #e9ecef; border-radius: 4px; }
+    .skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
     .well-list {
         list-style: none;
         padding: 0;
@@ -183,7 +186,9 @@
     }
     /* Prognosis styles */
     .prognosis-bar-v { display: flex; flex-direction: column;align-self: start; width: 150px; height: 100%; border-radius: 6px; overflow: hidden; border: 1px solid #e0e0e0; }
-    .prognosis-segment { height: 100%; position: relative; }
+    .prognosis-segment { height: 100%; position: relative; cursor: pointer; }
+    .prognosis-segment:focus { outline: 2px solid #257358; outline-offset: -2px; }
+    .prognosis-segment.active { box-shadow: inset 0 0 0 2px #257358; }
     .prognosis-segment:hover::after { content: attr(data-tooltip); position: absolute; left: 4px; right: 4px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 3px 6px; border-radius: 3px; white-space: normal; word-break: break-word; font-size: 11px; z-index: 2; text-align: center; max-width: calc(100% - 8px); }
     .prognosis-legend .legend-item { display: inline-flex; align-items: center; margin-right: 10px; margin-bottom: 4px; font-size: 0.82rem; }
     .prognosis-legend .legend-color { width: 12px; height: 12px; border-radius: 2px; display: inline-block; margin-right: 5px; border: 1px solid rgba(0,0,0,0.1); }
@@ -208,6 +213,10 @@
     .card.mb-3 { margin-bottom: 0.8rem !important; }
     .position-sticky .card .card-body { padding: 0.8rem; }
     .position-sticky h6 { font-size: 0.9rem; margin-bottom: 6px !important; }
+    .filter-chip { display: none; align-items: center; gap: 6px; background: #e9f5f1; color: #0f5132; border: 1px solid #badbcc; border-radius: 20px; padding: 4px 10px; font-size: 0.8rem; }
+    .filter-chip .btn-clear { background: transparent; border: 0; color: #0f5132; cursor: pointer; padding: 0 4px; }
+    .reports-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .reports-toolbar .btn { padding: 2px 8px; font-size: 0.8rem; }
 </style>
 
 <div class="container-fluid">
@@ -293,10 +302,21 @@
             </div>
             {% endif %}
             
+            <!-- Reports toolbar -->
+            <div class="reports-toolbar">
+                <button class="btn btn-sm btn-outline-secondary" id="btn-expand-all"><i class="bi bi-arrows-expand"></i> Expand all</button>
+                <button class="btn btn-sm btn-outline-secondary" id="btn-collapse-all"><i class="bi bi-arrows-collapse"></i> Collapse all</button>
+                <span class="filter-chip" id="prognosis-filter-chip">
+                    <i class="bi bi-funnel"></i>
+                    <span id="filter-label">Filtered</span>
+                    <button class="btn-clear" id="btn-clear-filter" title="Clear filter"><i class="bi bi-x-circle"></i></button>
+                </span>
+            </div>
+
             <!-- Reports Cards -->
-            <div class="reports-container">
+            <div class="reports-container" id="reports-container">
                 {% for report in reports %}
-                <div class="card report-card" data-report-id="{{ report.id }}">
+                <div class="card report-card" data-report-id="{{ report.id }}" data-depth-start="{{ report.depth_start }}" data-depth-end="{{ report.depth_end }}">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center flex-wrap">
                             <span class="report-date">
@@ -388,6 +408,7 @@
                                                     data-slit="{{ lithology.slit }}"
                                                     data-depth-range="{{ lithology.depth_range }}">
                                                 </canvas>
+                                                <div class="chart-skeleton skeleton" style="position:absolute; inset:0; display:block;"></div>
                                             </div>
                                             <div class="depth-label" style="min-width: 110px; text-align: right; background: none; padding: 3px 6px;">
                                                 <span class="badge bg-secondary" style="font-size: 0.6rem;">
@@ -457,8 +478,9 @@
                                         {% endif %}
                                         {% for seg in prognosis_segments %}
                                             <div class="prognosis-segment {% if seg.is_target %}prognosis-target{% endif %}"
+                                                 data-from="{{ seg.from }}" data-to="{{ seg.to }}"
                                                  data-height="{{ seg.height_pct }}"
-                                                 data-color="{% if seg.is_target %}#a10c07{% elif seg.lithology == 'sand' %}#FFD700{% elif seg.lithology == 'clay' %}#CD853F{% elif seg.lithology == 'shale' %}#666666{% elif seg.lithology == 'slit' %}#DEB887{% else %}#9aa0a6{% endif %}"
+                                                 data-color="{% if seg.is_target %}#a10c07{% elif seg.lithology == 'sand' %}#FFD700{% elif seg.lithology == 'clay' %}#CD853F{% elif seg.lithology == 'shale' %}#666666{% elif seg.lithology == 'slit' or seg.lithology == 'silt' %}#DEB887{% else %}#9aa0a6{% endif %}"
                                                  data-tooltip="{{ seg.label }} • {{ seg.lithology|title }}">
                                             </div>
                                         {% endfor %}
@@ -474,6 +496,12 @@
                                         const wrap = document.getElementById('prognosis-wrap');
                                         const bar = document.getElementById('prognosis-bar');
                                         const ticks = document.getElementById('prognosis-ticks');
+                                        const reportsContainer = document.getElementById('reports-container');
+                                        const chip = document.getElementById('prognosis-filter-chip');
+                                        const chipLabel = document.getElementById('filter-label');
+                                        const btnClear = document.getElementById('btn-clear-filter');
+                                        const btnExpandAll = document.getElementById('btn-expand-all');
+                                        const btnCollapseAll = document.getElementById('btn-collapse-all');
                                         if (!bar) return;
                                         bar.querySelectorAll('.prognosis-spacer, .prognosis-segment').forEach(el => {
                                             const h = parseFloat(el.getAttribute('data-height'));
@@ -556,9 +584,74 @@
                                             label.textContent = 'Latest depth: ' + clamped.toFixed(1) + ' m';
                                         }
 
+                                        function applyFilter(range) {
+                                            if (!reportsContainer) return;
+                                            const { from, to } = range;
+                                            const cards = reportsContainer.querySelectorAll('.report-card');
+                                            let visibleCount = 0;
+                                            cards.forEach(card => {
+                                                const ds = parseFloat(card.getAttribute('data-depth-start'));
+                                                const de = parseFloat(card.getAttribute('data-depth-end'));
+                                                const overlaps = !isNaN(ds) && !isNaN(de) && Math.max(ds, from) <= Math.min(de, to);
+                                                card.style.display = overlaps ? '' : 'none';
+                                                if (overlaps) visibleCount++;
+                                            });
+                                            if (chip) {
+                                                if (visibleCount > 0) {
+                                                    chip.style.display = 'inline-flex';
+                                                    if (chipLabel) chipLabel.textContent = `Depth ${from.toFixed(1)}–${to.toFixed(1)} m`;
+                                                } else {
+                                                    chip.style.display = 'inline-flex';
+                                                    if (chipLabel) chipLabel.textContent = `No reports in ${from.toFixed(1)}–${to.toFixed(1)} m`;
+                                                }
+                                            }
+                                        }
+
+                                        function clearFilter() {
+                                            if (!reportsContainer) return;
+                                            reportsContainer.querySelectorAll('.report-card').forEach(card => { card.style.display = ''; });
+                                            bar.querySelectorAll('.prognosis-segment.active').forEach(s => s.classList.remove('active'));
+                                            if (chip) chip.style.display = 'none';
+                                        }
+
+                                        function wireInteractions() {
+                                            bar.querySelectorAll('.prognosis-segment').forEach(seg => {
+                                                seg.setAttribute('tabindex', '0');
+                                                seg.addEventListener('click', () => {
+                                                    const active = seg.classList.toggle('active');
+                                                    // single-select behaviour: deactivate siblings
+                                                    if (active) {
+                                                        bar.querySelectorAll('.prognosis-segment').forEach(s => { if (s !== seg) s.classList.remove('active'); });
+                                                        const from = parseFloat(seg.getAttribute('data-from'));
+                                                        const to = parseFloat(seg.getAttribute('data-to'));
+                                                        if (!isNaN(from) && !isNaN(to)) applyFilter({ from, to });
+                                                    } else {
+                                                        clearFilter();
+                                                    }
+                                                });
+                                                seg.addEventListener('keydown', (e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seg.click(); }
+                                                });
+                                            });
+                                            if (btnClear) btnClear.addEventListener('click', clearFilter);
+                                            if (btnExpandAll) btnExpandAll.addEventListener('click', () => {
+                                                window.__bulkOp = true;
+                                                document.querySelectorAll('.report-card').forEach(c => {
+                                                    if (!c.classList.contains('expanded')) c.querySelector('.card-header').click();
+                                                });
+                                                setTimeout(() => { window.__bulkOp = false; }, 0);
+                                            });
+                                            if (btnCollapseAll) btnCollapseAll.addEventListener('click', () => {
+                                                window.__bulkOp = true;
+                                                document.querySelectorAll('.report-card.expanded .card-header').forEach(h => h.click());
+                                                setTimeout(() => { window.__bulkOp = false; }, 0);
+                                            });
+                                        }
+
                                         computeBarHeight();
                                         buildTicks();
                                         renderLatestDepthMarker();
+                                        wireInteractions();
                                         window.addEventListener('resize', () => {
                                             computeBarHeight();
                                             renderLatestDepthMarker();
@@ -600,19 +693,21 @@ class DrillingReportsVisualizer {
         const header = event.currentTarget;
         const card = header.closest('.report-card');
         const wasExpanded = card.classList.contains('expanded');
-
-        document.querySelectorAll('.report-card').forEach(c => {
-            if (c !== card) {
-                c.classList.remove('expanded');
-                c.querySelectorAll('.lithologyChartRow').forEach(canvas => {
-                    const chartId = canvas.id;
-                    if (this.chartInstances.has(chartId)) {
-                        this.chartInstances.get(chartId).destroy();
-                        this.chartInstances.delete(chartId);
-                    }
-                });
-            }
-        });
+        const isBulk = !!window.__bulkOp;
+        if (!isBulk) {
+            document.querySelectorAll('.report-card').forEach(c => {
+                if (c !== card) {
+                    c.classList.remove('expanded');
+                    c.querySelectorAll('.lithologyChartRow').forEach(canvas => {
+                        const chartId = canvas.id;
+                        if (this.chartInstances.has(chartId)) {
+                            this.chartInstances.get(chartId).destroy();
+                            this.chartInstances.delete(chartId);
+                        }
+                    });
+                }
+            });
+        }
 
         if (!wasExpanded) {
             card.classList.add('expanded');
@@ -644,6 +739,8 @@ class DrillingReportsVisualizer {
 
         const chart = new Chart(ctx, this.getChartConfig(data));
         this.chartInstances.set(canvas.id, chart);
+        const skeleton = canvas.parentElement.querySelector('.chart-skeleton');
+        if (skeleton) skeleton.style.display = 'none';
     }
 
     getLithologyData(canvas) {

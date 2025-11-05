@@ -18,6 +18,14 @@
             --light-gray: #f5f5f5;
             --dark-gray: #333333;
             --footer-amber: #F59E0B;
+            /* Typography scale */
+            --fs-12: 12px;
+            --fs-14: 14px;
+            --fs-16: 16px;
+            --fs-20: 20px;
+            --fs-24: 24px;
+            --text-color: #212529;
+            --muted-color: #6c757d;
         }
 
         body {
@@ -27,6 +35,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            color: var(--text-color);
         }
 
         .navbar {
@@ -35,14 +44,10 @@
             min-height: 50px;
         }
 
-        .navbar-brand {
-            font-size: 1.1rem;
-        }
+        .navbar-brand { font-size: 1.1rem; }
 
-        .nav-link {
-            font-size: 0.9rem;
-            padding: 0.3rem 0.8rem !important;
-        }
+        .nav-link { font-size: 0.9rem; padding: 0.3rem 0.8rem !important; }
+        .nav-link.active { background: rgba(255,255,255,0.15); border-radius: 4px; }
 
         .main-content {
             flex: 1;
@@ -80,6 +85,7 @@
             background-color: var(--primary-blue);
             color: white;
         }
+        .card-header h6, .card-header h5 { font-weight: 700; }
 
         .stats-card {
             border-left: 4px solid var(--secondary-amber);
@@ -93,6 +99,16 @@
         .btn-primary:hover {
             background-color: var(--tertiary-green);
             border-color: var(--tertiary-green);
+        }
+
+        /* Focus states for accessibility */
+        .btn:focus-visible, .nav-link:focus-visible, a:focus-visible { outline: 3px solid #94d3ac; outline-offset: 2px; }
+
+        /* Mobile navbar compact */
+        @media (max-width: 992px) {
+            .navbar { padding: 0.3rem 0.6rem; }
+            .nav-link { font-size: 0.85rem; padding: 0.25rem 0.6rem !important; }
+            .navbar-brand { font-size: 1rem; }
         }
     </style>
 </head>
@@ -110,16 +126,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'graph_view' %}">Petro Physical</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'graph_view' %}active{% endif %}" href="{% url 'graph_view' %}">Petro Physical</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'production_graph' %}">Production</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'production_graph' %}active{% endif %}" href="{% url 'production_graph' %}">Production</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'exploration_timeline' %}">Exp Time Line</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'exploration_timeline' %}active{% endif %}" href="{% url 'exploration_timeline' %}">Exp Time Line</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'drilling_reports' %}">Drilling Reports</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'drilling_reports' %}active{% endif %}" href="{% url 'drilling_reports' %}">Drilling Reports</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">

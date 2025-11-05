@@ -6,29 +6,38 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar Navigation -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background-color: #257358; color: white; padding: 20px; min-height: 100vh;">
-            <div class="mb-4">
-                <h4 class="text-white">Content</h4>
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background: linear-gradient(180deg, #257358 0%, #1a5943 100%); color: white; padding: 16px; min-height: 100vh;">
+            <div class="mb-3 d-flex align-items-center" style="gap:8px;">
+                <i class="bi bi-grid-3x3-gap" style="font-size: 1.1rem; color:#E98108;"></i>
+                <h5 class="mb-0" style="color:#E98108; font-weight:700;">Navigation</h5>
             </div>
-            <ul class="nav flex-column">
-                <li class="nav-item mb-2">
-                    <a class="nav-link text-white d-flex align-items-center" href="{% url 'graph_view' %}" style="padding: 12px 15px; border-radius: 5px; transition: background-color 0.3s;">
-                        <span class="me-2">→</span> Petro Physical
+            <ul class="nav flex-column sidebar-menu">
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'graph_view' %}active{% endif %}"
+                       href="{% url 'graph_view' %}">
+                        <i class="bi bi-activity me-2"></i>
+                        <span>Petro Physical</span>
                     </a>
                 </li>
-                <li class="nav-item mb-2">
-                    <a class="nav-link text-white d-flex align-items-center" href="{% url 'production_graph' %}" style="padding: 12px 15px; border-radius: 5px; transition: background-color 0.3s;">
-                        <span class="me-2">→</span> Production
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'production_graph' %}active{% endif %}"
+                       href="{% url 'production_graph' %}">
+                        <i class="bi bi-bar-chart-line me-2"></i>
+                        <span>Production</span>
                     </a>
                 </li>
-                <li class="nav-item mb-2">
-                    <a class="nav-link text-white d-flex align-items-center" href="{% url 'exploration_timeline' %}" style="padding: 12px 15px; border-radius: 5px; transition: background-color 0.3s;">
-                        <span class="me-2">→</span> Exploration Timeline
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'exploration_timeline' %}active{% endif %}"
+                       href="{% url 'exploration_timeline' %}">
+                        <i class="bi bi-clock-history me-2"></i>
+                        <span>Exploration Timeline</span>
                     </a>
                 </li>
-                <li class="nav-item mb-2">
-                    <a class="nav-link text-white d-flex align-items-center" href="{% url 'credits' %}" style="padding: 12px 15px; border-radius: 5px; transition: background-color 0.3s; background-color: rgba(255,255,255,0.1);">
-                        <span class="me-2">→</span> Credits
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center active"
+                       href="{% url 'credits' %}">
+                        <i class="bi bi-people me-2"></i>
+                        <span>Credits</span>
                     </a>
                 </li>
             </ul>
@@ -37,7 +46,7 @@
         <!-- Main Content -->
         <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h3 font-weight-bold text-primary">BOGDP TEAM - BAPEX</h2>
+                <h2 class="h3" style="font-weight:700; color:#1353A3;">BOGDP TEAM - BAPEX</h2>
             </div>
 
             <div class="row">

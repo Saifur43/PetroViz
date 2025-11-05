@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar Navigation -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3" style="background-color: #257358; color: white; min-height: 100vh;">
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3" style="background: linear-gradient(180deg, #257358 0%, #1a5943 100%); color: white; min-height: 100vh;">
             <div class="card-header text-white" style="background-color: #257358; border-radius: 8px 8px 0 0; padding: 10px;">
                 <h5 class="mb-0" style="color: #E98108;">Selection Controls</h5>
             </div>
@@ -50,11 +50,12 @@
                 <div class="col-md-4 col-lg-2">
                     <div class="card">
                         <div class="card-header text-white" style="background-color: #257358;">
-                            <h6 class="mb-0">Prtro Analysis</h6>
+                            <h6 class="mb-0">Petro Analysis</h6>
                         </div>
                         <div class="card-body">
-                            <div style="height: calc(100vh - 200px); width: 100%;">
+                            <div style="height: calc(100vh - 200px); width: 100%; position: relative;">
                                 <canvas id="coreDataChart"></canvas>
+                                <div id="coreChartSkeleton" class="skeleton" style="position:absolute; inset:0; border-radius: 6px;"></div>
                             </div>
                         </div>
                     </div>
@@ -104,8 +105,9 @@
                         </div>
                         <div class="card-body" style="height: calc(100vh - 200px); overflow-y: auto;">
                             {% if grain_size_data %}
-                                <div style="height: 300px; width: 100%; margin-bottom: 20px;">
+                                <div style="height: 300px; width: 100%; margin-bottom: 20px; position: relative;">
                                     <canvas id="grainSizeChart"></canvas>
+                                    <div id="grainChartSkeleton" class="skeleton" style="position:absolute; inset:0; border-radius: 6px;"></div>
                                 </div>
                                <!--
                               
@@ -329,86 +331,75 @@
 </div>
 
 {% if selected_well and selected_core %}
+{{ chart_data|json_script:"chart-data" }}
+{{ grain_size_chart_data|json_script:"grain-size-data" }}
 <script>
+    // simple skeleton styles
+    (function(){
+        const s = document.createElement('style');
+        s.textContent = `.skeleton{position:relative;overflow:hidden;background:#e9ecef}.skeleton::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);animation:shimmer 1.2s infinite}@keyframes shimmer{100%{transform:translateX(100%)}}`;
+        document.head.appendChild(s);
+    })();
     // Core Data Chart (Porosity and Permeability)
     const ctx = document.getElementById('coreDataChart').getContext('2d');
-    const chartData = {{ chart_data|safe }};
-    
-    // Calculate depth range for scaling
-    const depthMin = Math.min(...chartData.depths);
-    const depthMax = Math.max(...chartData.depths);
-    const depthPadding = (depthMax - depthMin) * 0.01;
-    
-    new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Porosity (%)',
-                data: chartData.depths.map((depth, i) => ({
-                    x: chartData.porosity[i],
-                    y: depth
-                })),
-                yAxisID: 'y',
-                xAxisID: 'x1',
-                backgroundColor: '#1353A3',
-                borderColor: '#1353A3',
-                pointRadius: 4,
-                showLine: true,
-                borderWidth: 1
-            }, {
-                label: 'Permeability (mD)',
-                data: chartData.depths.map((depth, i) => ({
-                    x: chartData.permeability[i],
-                    y: depth
-                })),
-                yAxisID: 'y',
-                xAxisID: 'x2',
-                backgroundColor: '#CA7007',
-                borderColor: '#CA7007',
-                pointRadius: 4,
-                showLine: true,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'nearest',
-                intersect: false,
+    const chartData = JSON.parse(document.getElementById('chart-data')?.textContent || 'null');
+    if (!chartData || !Array.isArray(chartData.depths) || chartData.depths.length === 0) {
+        const coreSk0 = document.getElementById('coreChartSkeleton');
+        if (coreSk0) coreSk0.style.display = 'none';
+    } else {
+        const depthMin = Math.min(...chartData.depths);
+        const depthMax = Math.max(...chartData.depths);
+        const depthPadding = (depthMax - depthMin) * 0.01;
+        new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Porosity (%)',
+                    data: chartData.depths.map((depth, i) => ({ x: chartData.porosity[i], y: depth })),
+                    yAxisID: 'y',
+                    xAxisID: 'x1',
+                    backgroundColor: '#1353A3',
+                    borderColor: '#1353A3',
+                    pointRadius: 4,
+                    showLine: true,
+                    borderWidth: 1
+                }, {
+                    label: 'Permeability (mD)',
+                    data: chartData.depths.map((depth, i) => ({ x: chartData.permeability[i], y: depth })),
+                    yAxisID: 'y',
+                    xAxisID: 'x2',
+                    backgroundColor: '#CA7007',
+                    borderColor: '#CA7007',
+                    pointRadius: 4,
+                    showLine: true,
+                    borderWidth: 1
+                }]
             },
-            scales: {
-                y: {
-                    reverse: true,
-                    min: depthMin - depthPadding,
-                    max: depthMax + depthPadding,
-                    title: {
-                        display: true,
-                        text: 'Depth (m)',
-                        font: { size: 12, weight: 'bold' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', intersect: false },
+                scales: {
+                    y: {
+                        reverse: true,
+                        min: depthMin - depthPadding,
+                        max: depthMax + depthPadding,
+                        title: { display: true, text: 'Depth (m)', font: { size: 12, weight: 'bold' } },
+                        grid: { color: '#ddd' }
                     },
-                    grid: { color: '#ddd' }
-                },
-                x1: {
-                    type: 'linear',
-                    position: 'top',
-                    title: { display: true, text: 'Porosity (%)' },
-                    ticks: { color: '#1353A3' }
-                },
-                x2: {
-                    type: 'logarithmic',
-                    position: 'bottom',
-                    title: { display: true, text: 'Permeability (mD)' },
-                    ticks: { color: '#CA7007' }
+                    x1: { type: 'linear', position: 'top', title: { display: true, text: 'Porosity (%)' }, ticks: { color: '#1353A3' } },
+                    x2: { type: 'logarithmic', position: 'bottom', title: { display: true, text: 'Permeability (mD)' }, ticks: { color: '#CA7007' } }
                 }
             }
-        }
-    });
+        });
+        const coreSk = document.getElementById('coreChartSkeleton');
+        if (coreSk) coreSk.style.display = 'none';
+    }
 
     // Grain Size Chart
-    {% if grain_size_chart_data.depths %}
+    const grainSizeData = JSON.parse(document.getElementById('grain-size-data')?.textContent || 'null');
+    if (grainSizeData && Array.isArray(grainSizeData.depths) && grainSizeData.depths.length) {
     const grainSizeCtx = document.getElementById('grainSizeChart').getContext('2d');
-    const grainSizeData = {{ grain_size_chart_data|safe }};
     
     new Chart(grainSizeCtx, {
         type: 'bar',
@@ -500,8 +491,9 @@
             }
         }
     });
-    {% endif %}
+    const grainSk = document.getElementById('grainChartSkeleton');
+    if (grainSk) grainSk.style.display = 'none';
+    }
 </script>
 {% endif %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
