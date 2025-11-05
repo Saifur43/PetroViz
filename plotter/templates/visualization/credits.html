@@ -9,7 +9,7 @@
         <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background: linear-gradient(180deg, #257358 0%, #1a5943 100%); color: white; padding: 16px; min-height: 100vh;">
             <div class="mb-3 d-flex align-items-center" style="gap:8px;">
                 <i class="bi bi-grid-3x3-gap" style="font-size: 1.1rem; color:#E98108;"></i>
-                <h5 class="mb-0" style="color:#E98108; font-weight:700;">Navigation</h5>
+                <h5 class="mb-0" style="color:#E98108; font-weight:700;">Dashboard Menu</h5>
             </div>
             <ul class="nav flex-column sidebar-menu">
                 <li class="nav-item">
@@ -34,7 +34,14 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center active"
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'drilling_reports' %}active{% endif %}"
+                       href="{% url 'drilling_reports' %}">
+                        <i class="bi bi-journal-text me-2"></i>
+                        <span>Drilling Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'credits' %}active{% endif %}"
                        href="{% url 'credits' %}">
                         <i class="bi bi-people me-2"></i>
                         <span>Credits</span>
@@ -211,18 +218,11 @@
 </div>
 
 <style>
-    .sidebar .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-    
-    .sidebar {
-        border-right: 1px solid #dee2e6;
-    }
-    
-    .developer-card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        height: 100%;
-    }
+    .sidebar { border-right: 1px solid rgba(255,255,255,0.12); }
+    .sidebar-menu { gap: 4px; }
+    .sidebar .nav-link { color: #f8fafc; padding: 10px 12px; border-radius: 6px; transition: background-color 0.2s, transform 0.1s; font-size: 0.95rem; }
+    .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.12); transform: translateX(2px); }
+    .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.18); }
     
     .developer-card:hover {
         transform: translateY(-2px);
