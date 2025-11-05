@@ -297,6 +297,13 @@ def exploration_timeline_js(request):
         'categories': categories,
     })
 
+
+@login_required
+def drilling_reports_index(request):
+    """Show a list of wells. User clicks a well to navigate to its drilling reports page."""
+    wells = Well.objects.all().order_by('name')
+    return render(request, 'visualization/drilling_reports_index.html', {'wells': wells})
+
 def calculate_drilling_efficiency(reports):
     """Calculate drilling efficiency based on daily progress and operational time"""
     total_depth_progress = 0
@@ -312,9 +319,11 @@ def calculate_drilling_efficiency(reports):
     return 0
 
 @login_required
-def drilling_reports(request):
-    # Get filter parameters from request
-    well_id = request.GET.get('well')
+def drilling_reports(request, well_id=None):
+    # Get filter parameters from request. Prefer the URL parameter `well_id` when provided.
+    # Fallback to querystring 'well' for backward compatibility.
+    if well_id is None:
+        well_id = request.GET.get('well')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     depth_from = request.GET.get('depth_from')
@@ -457,7 +466,7 @@ def drilling_reports(request):
     context = {
         'reports': processed_reports,
         'wells': wells,
-        'selected_well': well_id,
+        'selected_well': str(well_id) if well_id else None,
         'start_date': start_date,
         'end_date': end_date,
         'depth_from': depth_from,
