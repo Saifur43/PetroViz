@@ -107,7 +107,7 @@ class ExplorationTimeline(models.Model):
 
 class DailyDrillingReport(models.Model):
     well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='drilling_reports')
-    report_no = models.IntegerField()
+    report_no = models.IntegerField(blank=True, null=True)
     date = models.DateField(blank=True, null=True)
     depth_start = models.FloatField(help_text="start depth (MD) in meters")
     depth_end = models.FloatField(help_text="end depth (MD) in meters")

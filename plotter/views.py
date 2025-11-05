@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Min, Max
 from django.template.loader import get_template
@@ -19,6 +19,9 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import (
     WellData, Core, GrainSize, Mineralogy, Fossils,
     GasField, Well, ProductionData,
@@ -26,6 +29,32 @@ from .models import (
     DailyDrillingReport, WellPrognosis, DrillingLithology
 )
 
+def login_view(request):
+    """Handle user login"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            next_url = request.GET.get('next', 'dashboard')
+            return redirect(next_url)
+        else:
+            messages.error(request, 'Invalid username or password.')
+    
+    return render(request, 'registration/login.html')
+
+def logout_view(request):
+    """Handle user logout"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('login')
+
+@login_required
 def dashboard(request):
     # Get recent operation activities (limit to 10 most recent)
     recent_activities = OperationActivity.objects.filter(is_active=True)[:10]
@@ -35,9 +64,11 @@ def dashboard(request):
     }
     return render(request, 'visualization/dashboard.html', context)
 
+@login_required
 def credits(request):
     return render(request, 'visualization/credits.html')
 
+@login_required
 def graph_view(request):
     selected_well = request.GET.get('well_name')
     selected_core = request.GET.get('core_no')
@@ -120,6 +151,7 @@ def graph_view(request):
 
 
 
+@login_required
 def production_graph(request):
     # Get all gas fields with their related wells
     gas_fields = GasField.objects.prefetch_related('wells').all()
@@ -158,6 +190,7 @@ def production_graph(request):
     }
     return render(request, 'visualization/production_graph.html', context)
 
+@login_required
 def get_well_data(request):
     well_id = request.GET.get('well_id')
     start_date = request.GET.get('start_date')
@@ -211,6 +244,7 @@ def get_well_data(request):
     return JsonResponse(data, safe=False)
 
 # Optional: Add an endpoint to get wells for a specific gas field
+@login_required
 def get_field_wells(request):
     field_id = request.GET.get('field_id')
     
@@ -221,6 +255,7 @@ def get_field_wells(request):
     except GasField.DoesNotExist:
         return JsonResponse({'error': 'Gas field not found'}, status=404)
 
+@login_required
 def exploration_timeline(request):
     category_id = request.GET.get('category')
     if category_id and category_id != 'all':
@@ -232,6 +267,7 @@ def exploration_timeline(request):
     return render(request, 'visualization/exploration_timeline.html', {'milestones': milestones, 'categories': categories})
 
 
+@login_required
 def exploration_timeline_js(request):
     category_id = request.GET.get('category')
     if category_id and category_id != 'all':
@@ -275,6 +311,7 @@ def calculate_drilling_efficiency(reports):
         return round(total_depth_progress / total_time * 24, 2)
     return 0
 
+@login_required
 def drilling_reports(request):
     # Get filter parameters from request
     well_id = request.GET.get('well')
@@ -367,6 +404,8 @@ def drilling_reports(request):
             'lithologies': lithologies,
             'gas_show': report.gas_show,
             'comments': report.comments,
+            'present_activity': report.present_activity,
+            'next_program': report.next_program,
             'daily_progress': report.depth_end - report.depth_start
         })
     
@@ -437,6 +476,7 @@ def drilling_reports(request):
     
     return render(request, 'visualization/drilling_reports.html', context)
 
+@login_required
 def generate_drilling_reports_pdf(request):
     """Generate HTML report of drilling reports for a well and specific date"""
     well_id = request.GET.get('well')
