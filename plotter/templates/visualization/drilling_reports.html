@@ -120,6 +120,8 @@
         border-left: 2px solid #257358;
         font-size: 0.9rem;
     }
+    .info-row-lg { font-size: 1rem; padding: 7px 10px; }
+    .info-row-lg strong { font-size: 1rem; }
     .info-row strong {
         color: #257358;
         min-width: 130px;
@@ -180,16 +182,19 @@
         margin-bottom: 8px !important;
     }
     /* Prognosis styles */
-    .prognosis-bar-v { display: flex; flex-direction: column; width: 150px; height: 100%; border-radius: 6px; overflow: hidden; border: 1px solid #e0e0e0; }
+    .prognosis-bar-v { display: flex; flex-direction: column;align-self: start; width: 150px; height: 100%; border-radius: 6px; overflow: hidden; border: 1px solid #e0e0e0; }
     .prognosis-segment { height: 100%; position: relative; }
-    .prognosis-segment:hover::after { content: attr(data-tooltip); position: absolute; left: 42px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 3px 6px; border-radius: 3px; white-space: nowrap; font-size: 11px; z-index: 2; }
+    .prognosis-segment:hover::after { content: attr(data-tooltip); position: absolute; left: 4px; right: 4px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 3px 6px; border-radius: 3px; white-space: normal; word-break: break-word; font-size: 11px; z-index: 2; text-align: center; max-width: calc(100% - 8px); }
     .prognosis-legend .legend-item { display: inline-flex; align-items: center; margin-right: 10px; margin-bottom: 4px; font-size: 0.82rem; }
     .prognosis-legend .legend-color { width: 12px; height: 12px; border-radius: 2px; display: inline-block; margin-right: 5px; border: 1px solid rgba(0,0,0,0.1); }
     .prognosis-depth-labels-v { display: flex; flex-direction: column; justify-content: space-between; margin-left: 6px; font-size: 11px; color: #6c757d; }
     .prognosis-tick { position: relative; display: flex; align-items: center; gap: 4px; }
     .prognosis-tick-line { width: 6px; height: 1px; background: #adb5bd; display: inline-block; }
     .prognosis-target { outline: 2px dashed rgba(0,0,0,0.25); outline-offset: -2px; }
-    .prognosis-wrap { display: flex; align-items: stretch; gap: 8px; }
+    .prognosis-wrap { display: flex; align-items: stretch; justify-content: center; gap: 8px; }
+    .prognosis-bar-v { position: relative; }
+    .prognosis-marker { position: absolute; left: 0; right: 0; height: 2px; background: #E98108; z-index: 3; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); }
+    .prognosis-marker-label { position: absolute; right: 4px; transform: translateY(-50%); padding: 2px 6px; background: #E98108; color: #fff; border-radius: 3px; font-size: 11px; z-index: 4; white-space: nowrap; }
     .sidebar { padding: 0.8rem !important; }
     .sidebar .card-header { padding: 10px !important; }
     .sidebar h5 { font-size: 1rem !important; margin-bottom: 0 !important; }
@@ -316,21 +321,26 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="info-section">
-                                    <h6 style="color: #257358; font-weight: 600;">
+                                    <h6 style="color: #257358; font-weight: 800;">
                                         <i class="bi bi-info-circle me-2"></i>Report Details
                                     </h6>
-                                    <div class="info-row">
-                                        <strong><i class="bi bi-cloud me-1"></i>Present Activity</strong> 
+                                    <div class="info-row info-row-lg">
+                                        <strong><i class="bi bi-activity me-1"></i>Present Activity</strong> 
                                         <span>{{ report.present_activity|default:"Not specified"|safe }}</span>
+                                    </div>
+                                    <div class="info-row info-row-lg">
+                                        <strong><i class="bi bi-calendar4-event me-1"></i>Next Program</strong> 
+                                        <span>{{ report.next_program|default:"Not specified"|safe }}</span>
+                                    </div>
+                                    <div class="info-row info-row-lg">
+                                        <strong><i class="bi bi-cloud me-1"></i>Gas Show:</strong> 
+                                        <span>{{ report.gas_show|default:"None" }}</span>
                                     </div>
                                     <div class="info-row">
                                         <strong><i class="bi bi-gear me-1"></i>Drilling Operation:</strong> 
                                         <span>{{ report.current_operation|default:"Not specified"|safe }}</span>
                                     </div>
-                                    <div class="info-row">
-                                        <strong><i class="bi bi-cloud me-1"></i>Gas Show:</strong> 
-                                        <span>{{ report.gas_show|default:"None" }}</span>
-                                    </div>
+                                    
                                     <div class="info-row">
                                         <strong><i class="bi bi-chat-left-text me-1"></i>Comments:</strong> 
                                         <span>{{ report.comments|default:"No comments"|safe }}</span>
@@ -441,7 +451,7 @@
                                     <span class="legend-item"><span class="legend-color" style="background:#a10c07;"></span> Target</span>
                                 </div>
                                 <div class="prognosis-wrap" id="prognosis-wrap">
-                                    <div class="prognosis-bar-v" aria-label="Prognosis lithology by depth (vertical)" id="prognosis-bar">
+                                    <div class="prognosis-bar-v" aria-label="Prognosis lithology by depth (vertical)" id="prognosis-bar"{% if stats and stats.latest_depth %} data-latest-depth="{{ stats.latest_depth }}"{% endif %}>
                                         {% if prognosis_range and prognosis_range.top_spacer_pct and prognosis_range.top_spacer_pct > 0 %}
                                             <div class="prognosis-spacer" data-height="{{ prognosis_range.top_spacer_pct }}"></div>
                                         {% endif %}
@@ -520,9 +530,39 @@
                                             });
                                         }
 
+                                        function renderLatestDepthMarker() {
+                                            const latestAttr = bar.getAttribute('data-latest-depth');
+                                            if (!latestAttr || !ticks) return;
+                                            const latest = parseFloat(latestAttr);
+                                            const max = parseFloat(ticks.getAttribute('data-max')) || 0;
+                                            if (!max || isNaN(latest)) return;
+                                            const clamped = Math.max(0, Math.min(latest, max));
+                                            const pct = (clamped / max) * 100;
+
+                                            let marker = bar.querySelector('.prognosis-marker');
+                                            let label = bar.querySelector('.prognosis-marker-label');
+                                            if (!marker) {
+                                                marker = document.createElement('div');
+                                                marker.className = 'prognosis-marker';
+                                                bar.appendChild(marker);
+                                            }
+                                            if (!label) {
+                                                label = document.createElement('div');
+                                                label.className = 'prognosis-marker-label';
+                                                bar.appendChild(label);
+                                            }
+                                            marker.style.top = pct + '%';
+                                            label.style.top = pct + '%';
+                                            label.textContent = 'Latest depth: ' + clamped.toFixed(1) + ' m';
+                                        }
+
                                         computeBarHeight();
                                         buildTicks();
-                                        window.addEventListener('resize', computeBarHeight);
+                                        renderLatestDepthMarker();
+                                        window.addEventListener('resize', () => {
+                                            computeBarHeight();
+                                            renderLatestDepthMarker();
+                                        });
                                     })();
                                 </script>
                             </div>
