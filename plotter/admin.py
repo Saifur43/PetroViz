@@ -4,7 +4,11 @@ from django.urls import path
 from django.shortcuts import render, redirect
 from django.contrib import messages
 import pandas as pd
-from .models import Well, ProductionData, GasField, ExplorationTimeline, OperationActivity, Fossils, GrainSize, Mineralogy, DailyDrillingReport, DrillingLithology, WellPrognosis
+from .models import (
+    Well, ProductionData, GasField, ExplorationTimeline, OperationActivity, 
+    Fossils, GrainSize, Mineralogy, DailyDrillingReport, DrillingLithology, 
+    WellPrognosis, BHAComponent, BHA, BHAComponentPosition
+)
 
 
 class CoreAdmin(admin.ModelAdmin):
@@ -17,6 +21,39 @@ class CoreAdmin(admin.ModelAdmin):
 class WellDataAdmin(admin.ModelAdmin):
     list_display = ('well_name', 'depth', 'core_no', 'porosity', 'perm_kair', 'resistivity')  # Example fields to display
 
+class BHAComponentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'type', 'connection_type')
+    list_filter = ('type', 'connection_type')
+    search_fields = ('name', 'description')
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'type', 'description')
+        }),
+        ('Connection', {
+            'fields': ('connection_type',)
+        }),
+        ('Visualization', {
+            'fields': ('svg_template',),
+            'classes': ('collapse',)
+        }),
+    )
+
+class BHAComponentInline(admin.TabularInline):
+    model = BHAComponentPosition
+    extra = 1
+    ordering = ('position',)
+
+class BHAAdmin(admin.ModelAdmin):
+    list_display = ('name', 'drilling_report', 'total_length', 'total_weight', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name', 'notes', 'drilling_report__well__name')
+    inlines = [BHAComponentInline]
+    readonly_fields = ('total_length', 'total_weight')
+    
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        # Recalculate totals after components are saved
+        form.instance.calculate_totals()
 
 
 class GasFieldAdmin(admin.ModelAdmin):
@@ -121,3 +158,5 @@ admin.site.register(Mineralogy)
 admin.site.register(DailyDrillingReport)
 admin.site.register(DrillingLithology)
 admin.site.register(WellPrognosis)
+admin.site.register(BHAComponent, BHAComponentAdmin)
+admin.site.register(BHA, BHAAdmin)

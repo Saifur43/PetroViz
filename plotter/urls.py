@@ -1,7 +1,17 @@
 from django.urls import path
-from . import views
+from . import views, bha_views
 
 urlpatterns = [
+    # BHA Management URLs
+    path('bha/', bha_views.bha_list, name='bha_list'),
+    path('bha/<int:bha_id>/', bha_views.bha_detail, name='bha_detail'),
+    path('bha/create/', bha_views.bha_create, name='bha_create'),
+    path('bha/designer/', bha_views.bha_designer, name='bha_designer'),
+    path('bha/<int:bha_id>/edit/', bha_views.bha_edit, name='bha_edit'),
+    path('bha/<int:bha_id>/add-component/', bha_views.add_component, name='bha_add_component'),
+    path('bha/validate-compatibility/', bha_views.validate_component_compatibility, name='bha_validate_compatibility'),
+    path('bha/<int:bha_id>/export-pdf/', bha_views.bha_export_pdf, name='bha_export_pdf'),
+    path('bha/<int:bha_id>/designer/', bha_views.bha_edit_designer, name='bha_edit_designer'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('', views.dashboard, name='dashboard'),

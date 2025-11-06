@@ -1,0 +1,153 @@
+{% extends 'plotter/bha/base_bha.html' %}
+
+{% block bha_content %}
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <h2 class="text-dark" style="font-weight:700;">Design BHA</h2>
+        <p class="text-muted mb-0">Create a BHA by adding components, counts, diameters, and lengths. Totals are automatically calculated.</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" id="designer-form">
+            {% csrf_token %}
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">BHA Name</label>
+                    <input type="text" name="bha_name" class="form-control" placeholder="e.g., 8-1/2" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Drilling Report</label>
+                    <select name="report_id" class="form-select" required>
+                        <option value="">Select report</option>
+                        {% for r in reports %}
+                        <option value="{{ r.id }}">{{ r.well.name }} — {{ r.date|date:'Y-m-d' }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">BHA Text</label>
+                    <input type="text" name="bha_text" class="form-control" placeholder="Optional notes">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle" id="designer-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:28%">Components</th>
+                            <th style="width:7%">Singles</th>
+                            <th style="width:12%">Dia (in)</th>
+                            <th style="width:12%">Length (m)</th>
+                            <th style="width:12%">Weight (kg)</th>
+                            <th style="width:12%">Row Total (m)</th>
+                            <th style="width:17%">BHA Text</th>
+                            <th style="width:6%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in "1234567890" %}
+                        <tr>
+                            <td>
+                                <select class="form-select form-select-sm" name="row_component">
+                                    <option value="">Select component</option>
+                                    {% for c in components %}
+                                    <option value="{{ c.id }}">{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm js-singles" name="row_singles" value="1" min="1">
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" class="form-control form-control-sm js-od" name="row_od" placeholder="e.g., 5.0">
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" class="form-control form-control-sm js-length" name="row_length" placeholder="e.g., 9">
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" class="form-control form-control-sm js-weight" name="row_weight" placeholder="e.g., 150">
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm js-row-total" value="0" readonly>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm" name="row_text" placeholder="Optional">
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-outline-danger js-remove" title="Remove row">✕</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Totals:</th>
+                            <th><input type="text" class="form-control form-control-sm" id="total-length" value="0" readonly></th>
+                            <th><input type="text" class="form-control form-control-sm" id="total-weight" value="0" readonly></th>
+                            <th colspan="3"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" id="add-row">Add Row</button>
+                <button type="submit" class="btn btn-primary">Create BHA</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function(){
+    const table = document.getElementById('designer-table');
+    const addBtn = document.getElementById('add-row');
+
+    function recalc(){
+        let totalLen = 0;
+        let totalW = 0;
+        table.querySelectorAll('tbody tr').forEach(row => {
+            const singles = parseFloat(row.querySelector('.js-singles').value || '1');
+            const length = parseFloat(row.querySelector('.js-length').value || '0');
+            const weight = parseFloat(row.querySelector('.js-weight').value || '0');
+            const rowTotal = singles * length;
+            row.querySelector('.js-row-total').value = rowTotal.toFixed(2);
+            totalLen += rowTotal;
+            totalW += singles * weight;
+        });
+        document.getElementById('total-length').value = totalLen.toFixed(2);
+        document.getElementById('total-weight').value = totalW.toFixed(2);
+    }
+
+    table.addEventListener('input', function(e){
+        if (e.target.matches('.js-singles, .js-length, .js-weight')) recalc();
+    });
+
+    table.addEventListener('click', function(e){
+        if (e.target.classList.contains('js-remove')){
+            const row = e.target.closest('tr');
+            row.parentNode.removeChild(row);
+            recalc();
+        }
+    });
+
+    addBtn.addEventListener('click', function(){
+        const tbody = table.querySelector('tbody');
+        const template = tbody.querySelector('tr').cloneNode(true);
+        template.querySelectorAll('input').forEach(i => { i.value = ''; });
+        template.querySelector('.js-singles').value = '1';
+        template.querySelector('.js-row-total').value = '0';
+        tbody.appendChild(template);
+    });
+
+    recalc();
+})();
+</script>
+{% endblock %}
+
+{% endblock %}

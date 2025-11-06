@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>BHA Export</title>
+    <style>
+        body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; font-size: 12px; color: #111; }
+        h1, h2, h3 { margin: 0 0 6px 0; }
+        .header { border-bottom: 2px solid #1353A3; padding-bottom: 6px; margin-bottom: 10px; }
+        .meta { margin-bottom: 12px; }
+        .meta div { margin: 2px 0; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 6px 8px; border: 1px solid #ddd; }
+        th { background: #1353A3; color: #fff; text-align: left; }
+        .right { text-align: right; }
+        .muted { color: #555; }
+        .summary { margin: 10px 0 14px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>BHA Summary</h2>
+        <div class="meta">
+            <div><strong>Name:</strong> {{ bha.name }}</div>
+            <div><strong>Well:</strong> {{ bha.drilling_report.well.name }}</div>
+            <div><strong>Date:</strong> {{ bha.drilling_report.date|date:"Y-m-d" }}</div>
+        </div>
+        <div class="summary">
+            <div><strong>Total Length:</strong> {{ total_length|floatformat:2 }} m</div>
+            <div><strong>Total Weight:</strong> {{ total_weight|floatformat:2 }} kg</div>
+            <div class="muted">Generated from PetroVis</div>
+        </div>
+    </div>
+
+    <h3>Components</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Pos</th>
+                <th>Component</th>
+                <th>Type</th>
+                <th class="right">Length (m)</th>
+                <th class="right">OD (in)</th>
+                <th class="right">Weight (kg)</th>
+                <th class="right">From Bit (m)</th>
+                <th class="right">Cumulative (m)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in rows %}
+            <tr>
+                <td>{{ r.position }}</td>
+                <td>{{ r.name }}</td>
+                <td>{{ r.type }}</td>
+                <td class="right">{{ r.length|floatformat:2 }}</td>
+                <td class="right">{{ r.outer_diameter|floatformat:2 }}</td>
+                <td class="right">{% if r.weight %}{{ r.weight|floatformat:2 }}{% else %}-{% endif %}</td>
+                <td class="right">{{ r.distance_from_bit|floatformat:2 }}</td>
+                <td class="right">{{ r.cumulative_length|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

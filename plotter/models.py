@@ -427,6 +427,129 @@ class Fossils(models.Model):
         return (self.sampling_depth_start + self.sampling_depth_end) / 2
     
     
+class BHAComponent(models.Model):
+    """Model for individual BHA components like bits, stabilizers, drill collars etc."""
+    name = models.CharField(max_length=100)
+    type = models.CharField(max_length=50, choices=[
+        ('bit', 'Drill Bit'),
+        ('stabilizer', 'Stabilizer'),
+        ('drill_collar', 'Drill Collar'),
+        ('heavy_weight', 'Heavy Weight Drill Pipe'),
+        ('drill_pipe', 'Drill Pipe'),
+        ('jar', 'Jar'),
+        ('mwd', 'MWD Tool'),
+        ('motor', 'Downhole Motor'),
+        ('reamer', 'Reamer'),
+        ('cross_over', 'Cross-over Sub'),
+        ('other', 'Other')
+    ])
+    connection_type = models.CharField(max_length=50, help_text="Type of thread connection", null=True, blank=True)
+    svg_template = models.TextField(help_text="SVG template for component visualization")
+    description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.type})"
+        
+    def get_scaled_svg(self, scale_factor=1.0):
+        """
+        Returns the SVG template with proper scaling applied.
+        The SVG template should contain placeholders:
+        - {length} - component length in meters
+        - {outer_diameter} - outer diameter in inches
+        - {inner_diameter} - inner diameter in inches
+        - {scale_factor} - scaling factor for visualization
+        """
+        try:
+            # Prefer per-position render via BHAComponentPosition.render_svg; fall back safely
+            length = (getattr(self, 'length', 0) or 0) * scale_factor
+            od_value = getattr(self, 'outer_diameter', 0)
+            id_value = getattr(self, 'inner_diameter', 0)
+            outer_diameter = (od_value or 0) * scale_factor
+            inner_diameter = (id_value or 0) * scale_factor
+            return self.svg_template.format(
+                length=length,
+                outer_diameter=outer_diameter,
+                inner_diameter=inner_diameter,
+                scale_factor=scale_factor
+            )
+        except (KeyError, ValueError) as e:
+            return f'<text x="10" y="20" class="error">Error rendering SVG: {str(e)}</text>'
+            
+    def validate_connection_compatibility(self, other_component):
+        """
+        Validates if this component can be connected to another component.
+        Returns (bool, str) tuple: (is_compatible, error_message)
+        """
+        if not other_component:
+            return True, ""
+            
+        # Check connection types
+        if self.connection_type != other_component.connection_type:
+            return False, f"Connection type mismatch: {self.connection_type} ≠ {other_component.connection_type}"
+            
+        # Diameter checks are done at position level; if defaults exist, verify softly
+        self_od = getattr(self, 'outer_diameter', None)
+        other_od = getattr(other_component, 'outer_diameter', None)
+        if self_od is not None and other_od is not None:
+            if abs(self_od - other_od) > 0.5:  # 0.5 inch tolerance
+                return False, f"Diameter mismatch: {self_od}\" ≠ {other_od}\""
+            
+        return True, ""
+
+class BHA(models.Model):
+    """Model for complete Bottom Hole Assembly configurations"""
+    name = models.CharField(max_length=200)
+    drilling_report = models.ForeignKey(DailyDrillingReport, on_delete=models.CASCADE, related_name='bha_configurations')
+    components = models.ManyToManyField(BHAComponent, through='BHAComponentPosition')
+    total_length = models.FloatField(help_text="Total length in meters", null=True, blank=True)
+    total_weight = models.FloatField(help_text="Total weight in kg", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    notes = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def calculate_totals(self):
+        """Calculate total length and weight of the assembly using per-position values"""
+        positions = self.component_positions.all().select_related('component')
+        self.total_length = sum((pos.length or 0) for pos in positions)
+        self.total_weight = sum((pos.weight or 0) for pos in positions)
+        self.save()
+
+    def __str__(self):
+        return f"{self.name} - {self.drilling_report.well.name} ({self.drilling_report.date})"
+
+class BHAComponentPosition(models.Model):
+    """Through model to track position of components in a BHA"""
+    bha = models.ForeignKey(BHA, on_delete=models.CASCADE, related_name='component_positions')
+    component = models.ForeignKey(BHAComponent, on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(help_text="Position from bottom up (1 being the lowest)")
+    distance_from_bit = models.FloatField(help_text="Distance from bit in meters")
+    length = models.FloatField(help_text="Length in meters")
+    outer_diameter = models.FloatField(help_text="Outer diameter in inches")
+    inner_diameter = models.FloatField(help_text="Inner diameter in inches", null=True, blank=True)
+    weight = models.FloatField(help_text="Weight in kg", null=True, blank=True)
+    
+    class Meta:
+        ordering = ['position']
+        unique_together = ['bha', 'position']
+
+    def __str__(self):
+        return f"{self.component.name} at position {self.position} in {self.bha.name}"
+
+    def render_svg(self, scale_factor=1.0):
+        """Render the component's SVG using this position's dimensions"""
+        try:
+            return self.component.svg_template.format(
+                length=self.length * scale_factor,
+                outer_diameter=self.outer_diameter * scale_factor,
+                inner_diameter=(self.inner_diameter or 0) * scale_factor,
+                scale_factor=scale_factor
+            )
+        except (KeyError, ValueError) as e:
+            return f'<text x="10" y="20" class="error">Error rendering SVG: {str(e)}</text>'
+
 class WellPrognosis(models.Model):
     
     FORMATION_CHOICES = [
