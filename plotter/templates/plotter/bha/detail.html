@@ -136,7 +136,7 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="bha-scale" id="bha-scale" aria-hidden="true"></div>
+                   <!-- <div class="bha-scale" id="bha-scale" aria-hidden="true"></div> --->
                 </div>
             </div>
         </div>
@@ -405,96 +405,110 @@
     }
     
     function renderBhaVisualization() {
-        const container = document.getElementById('bha-visualization');
-        const a4Container = document.getElementById('bha-a4-container');
-        const scaleBox = document.getElementById('bha-scale');
-        
-        if (!container || !a4Container) return;
+    const container = document.getElementById('bha-visualization');
+    const a4Container = document.getElementById('bha-a4-container');
+    const scaleBox = document.getElementById('bha-scale');
+    
+    if (!container || !a4Container) return;
 
-        const components = Array.from(container.querySelectorAll('.bha-component'));
-        
-        if (!components.length) return;
+    const components = Array.from(container.querySelectorAll('.bha-component'));
+    
+    if (!components.length) return;
 
-        const lengths = components.map(c => parseFloat(c.dataset.length) || 0);
-        const ods = components.map(c => parseFloat(c.dataset.od) || 0);
+    const lengths = components.map(c => parseFloat(c.dataset.length) || 0);
+    const ods = components.map(c => parseFloat(c.dataset.od) || 0);
 
-        const totalLengthAttr = parseFloat(container.dataset.totalLength);
-        const totalLength = (isFinite(totalLengthAttr) && totalLengthAttr > 0)
-            ? totalLengthAttr
-            : lengths.reduce((s, v) => s + v, 0);
+    const totalLengthAttr = parseFloat(container.dataset.totalLength);
+    const totalLength = (isFinite(totalLengthAttr) && totalLengthAttr > 0)
+        ? totalLengthAttr
+        : lengths.reduce((s, v) => s + v, 0);
 
-        // Use actual container height so it always fits on screen and prints to A4
-        const availableHeight = Math.max(200, a4Container.clientHeight - 40);
-        const pxPerMeter = totalLength > 0 ? (availableHeight / totalLength) : 40;
+    // Use actual container height so it always fits on screen and prints to A4
+    const availableHeight = Math.max(200, a4Container.clientHeight - 40);
+    const pxPerMeter = totalLength > 0 ? (availableHeight / totalLength) : 40;
 
-        const maxOd = Math.max(...ods, 1);
-        const maxSvgWidth = Math.min(300, Math.max(180, Math.floor(a4Container.clientWidth * 0.30)));
-        const odScale = maxSvgWidth / maxOd;
+    const maxOd = Math.max(...ods, 1);
+    const maxSvgWidth = Math.min(300, Math.max(180, Math.floor(a4Container.clientWidth * 0.30)));
+    const odScale = maxSvgWidth / maxOd;
 
-        // Set a common track width so varying OD components are centered consistently
-        container.style.width = maxSvgWidth + 'px';
+    // Set a common track width so varying OD components are centered consistently
+    container.style.width = maxSvgWidth + 'px';
 
-        components.forEach((c, index) => {
-            const len = parseFloat(c.dataset.length) || 0.1;
-            const od = parseFloat(c.dataset.od) || maxOd;
-            const type = (c.dataset.type || '').toLowerCase();
+    components.forEach((c, index) => {
+        const len = parseFloat(c.dataset.length) || 0.1;
+        const od = parseFloat(c.dataset.od) || maxOd;
+        const type = (c.dataset.type || '').toLowerCase();
 
-            const heightPx = Math.max(10, Math.round(len * pxPerMeter));
-            // For drill bits, don't scale by OD — use the full SVG width so the bit renders clearly
-            let widthPx;
-            if (type === 'bit') {
-                widthPx = Math.max(40, Math.round(maxSvgWidth));
-            } else {
-                // Thicker: ensure >= 50% of max width while preserving OD differences
-                const blended = (0.5 * (od / maxOd) + 0.5) * maxSvgWidth;
-                widthPx = Math.max(40, Math.round(blended));
-            }
-
-            c.style.height = heightPx + 'px';
-            c.style.margin = '0';
-            c.style.padding = '0';
-            c.style.flexShrink = '0';
-            c.style.lineHeight = '0';
-            c.style.fontSize = '0';
-            c.style.display = 'flex';
-
-            const svgBox = c.querySelector('.component-svg');
-            if (svgBox) {
-                svgBox.style.width = widthPx + 'px';
-                svgBox.style.height = '100%';
-                svgBox.style.lineHeight = '0';
-                svgBox.style.fontSize = '0';
-                svgBox.style.display = 'block';
-                svgBox.style.margin = '0 auto';
-
-                const svgEl = svgBox.querySelector('svg');
-                if (svgEl) {
-                    svgEl.setAttribute('preserveAspectRatio', 'none');
-                    svgEl.style.width = '100%';
-                    svgEl.style.height = '100%';
-                    svgEl.style.display = 'block';
-                    svgEl.style.verticalAlign = 'top';
-                    svgEl.style.margin = '0';
-                    svgEl.style.padding = '0';
-                }
-            }
-        });
-
-        if (scaleBox) {
-            const sampleMeters = totalLength > 0 ? Math.max(1, Math.floor(totalLength / 10)) : 1;
-            const px = Math.round(sampleMeters * pxPerMeter);
-            scaleBox.textContent = `Scale: 1 m = ${pxPerMeter.toFixed(1)} px  |  ${sampleMeters} m ≈ ${px}px`;
+        // For drill bits: use a fixed, reasonable height to preserve aspect ratio
+        let heightPx;
+        if (type === 'bit') {
+            // Fixed height for drill bits (adjust this value as needed, e.g., 80-120px)
+            heightPx = 100;
+        } else {
+            heightPx = Math.max(10, Math.round(len * pxPerMeter));
         }
+        
+        // For drill bits, use the full SVG width so the bit renders clearly
+        let widthPx;
+        if (type === 'bit') {
+            widthPx = Math.max(40, Math.round(maxSvgWidth));
+        } else {
+            // Thicker: ensure >= 50% of max width while preserving OD differences
+            const blended = (0.5 * (od / maxOd) + 0.5) * maxSvgWidth;
+            widthPx = Math.max(40, Math.round(blended));
+        }
+
+        c.style.height = heightPx + 'px';
+        c.style.margin = '0';
+        c.style.padding = '0';
+        c.style.flexShrink = '0';
+        c.style.lineHeight = '0';
+        c.style.fontSize = '0';
+        c.style.display = 'flex';
+
+        const svgBox = c.querySelector('.component-svg');
+        if (svgBox) {
+            svgBox.style.width = widthPx + 'px';
+            svgBox.style.height = '100%';
+            svgBox.style.lineHeight = '0';
+            svgBox.style.fontSize = '0';
+            svgBox.style.display = 'block';
+            svgBox.style.margin = '0 auto';
+
+            const svgEl = svgBox.querySelector('svg');
+            if (svgEl) {
+                // For drill bits: preserve aspect ratio; for others: stretch to fill
+                if (type === 'bit') {
+                    svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                } else {
+                    svgEl.setAttribute('preserveAspectRatio', 'none');
+                }
+                
+                svgEl.style.width = '100%';
+                svgEl.style.height = '100%';
+                svgEl.style.display = 'block';
+                svgEl.style.verticalAlign = 'top';
+                svgEl.style.margin = '0';
+                svgEl.style.padding = '0';
+            }
+        }
+    });
+
+    if (scaleBox) {
+        const sampleMeters = totalLength > 0 ? Math.max(1, Math.floor(totalLength / 10)) : 1;
+        const px = Math.round(sampleMeters * pxPerMeter);
+        scaleBox.textContent = `Scale: 1 m = ${pxPerMeter.toFixed(1)} px  |  ${sampleMeters} m ≈ ${px}px`;
     }
+}
 
-    document.addEventListener('DOMContentLoaded', function() {
-        renderBhaVisualization();
-        setTimeout(renderBhaVisualization, 200);
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    renderBhaVisualization();
+    setTimeout(renderBhaVisualization, 200);
+});
 
-    window.addEventListener('resize', function() {
-        renderBhaVisualization();
-    });
+window.addEventListener('resize', function() {
+    renderBhaVisualization();
+});
 </script>
 {% endblock %}
 {% endblock %}

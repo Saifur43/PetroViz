@@ -23,30 +23,41 @@ def bha_list(request):
 def bha_detail(request, bha_id):
     """Display detailed view of a BHA with visualization"""
     bha = get_object_or_404(BHA.objects.select_related('drilling_report'), id=bha_id)
-    components = bha.component_positions.select_related('component').order_by('position')
-    
-    # Calculate cumulative distances for visualization
-    cumulative_length = 0
+    components = list(bha.component_positions.select_related('component').order_by('position'))
+
+    total_len = sum((pos.length or 0) for pos in components)
+
     component_data = []
-    
+    cumulative_length = 0
     for position in components:
-        cumulative_length += (position.length or 0)
+        # stored value in DB is the distance from the top to the start of this component
+        stored_from_top = (position.distance_from_bit or 0)
+        length_val = (position.length or 0)
+
+        # distance from bit to the start of this component
+        distance_from_bit_display = None
+        if total_len is not None:
+            distance_from_bit_display = round(max(0.0, total_len - stored_from_top - length_val), 6)
+
+        cumulative_length += length_val
+
         component_data.append({
             'component': position.component,
             'position': position.position,
-            'distance_from_bit': position.distance_from_bit,
+            # expose corrected distance for template display
+            'distance_from_bit': distance_from_bit_display,
             'cumulative_length': cumulative_length,
             'svg': position.render_svg(),
-            'length': position.length,
+            'length': length_val,
             'outer_diameter': position.outer_diameter,
             'inner_diameter': position.inner_diameter,
             'weight': position.weight
         })
-    
+
     context = {
         'bha': bha,
         'components': component_data,
-        'total_length': cumulative_length
+        'total_length': total_len
     }
     return render(request, 'plotter/bha/detail.html', context)
 
