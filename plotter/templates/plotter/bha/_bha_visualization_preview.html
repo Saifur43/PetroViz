@@ -1,0 +1,299 @@
+{# Preview mode visualization for designer pages #}
+<div class="col-lg-4">
+    <div class="card position-sticky" style="top: 20px;">
+        <div class="card-header text-white" style="background-color: #1353A3;">
+            <h6 class="mb-0" style="font-weight:700;">
+                <i class="bi bi-eye me-2"></i>Preview
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="bha-preview-container">
+                <div class="bha-preview-wrapper" id="bha-preview-wrapper">
+                    <div class="bha-preview" id="bha-preview" data-total-length="{{ total_length|default:0 }}"></div>
+                    <div class="bha-preview-empty" id="bha-preview-empty" style="display:none;">
+                        <div class="bha-preview-empty-inner text-center p-4 text-muted">
+                            <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem; display: block;"></i>
+                            No components to preview
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* BHA Preview Styles - Separate from detail page */
+    .bha-preview-container {
+        width: 100%;
+        height: 800px;
+        background: #ffffff;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .bha-preview-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #6c757d;
+    }
+
+    .bha-preview-empty i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .bha-preview-wrapper {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .bha-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    line-height: 0;
+    font-size: 0;
+    width: auto;
+    gap: 0; /* Remove any gap */
+    row-gap: 0; /* Remove row gap */
+}
+
+.bha-preview-component {
+    background: transparent;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.2s;
+    width: 100%;
+    line-height: 0 !important;
+    font-size: 0;
+    height: auto;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.bha-preview-svg {
+    display: block;
+    height: 100%;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+    font-size: 0;
+    overflow: visible;
+    flex-shrink: 0;
+    min-width: 40px;
+}
+
+.bha-preview-svg svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin: 0;
+    padding: 0;
+    vertical-align: top;
+}
+
+    .bha-preview-component:hover {
+        filter: brightness(1.1);
+        z-index: 10;
+    }
+
+
+    .bha-preview-label {
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+    }
+
+    .bha-preview-label-text {
+        font-weight: 600;
+        font-size: 10px;
+    }
+
+    .bha-preview-label-length {
+        font-size: 9px;
+        opacity: 0.9;
+    }
+
+    @media (max-width: 991px) {
+        .bha-preview-container {
+            height: 400px;
+        }
+    }
+</style>
+
+<script>
+    // Shared function to update BHA preview (used by designer pages)
+    function updateBHAViewerPreview(componentData, components) {
+    const bhaPreview = document.getElementById('bha-preview');
+    const bhaPreviewWrapper = document.getElementById('bha-preview-wrapper');
+    const bhaPreviewEmpty = document.getElementById('bha-preview-empty');
+    
+    if (!bhaPreview || !bhaPreviewWrapper || !bhaPreviewEmpty) return;
+
+    const hasComponents = componentData && componentData.length > 0;
+
+    if (!hasComponents) {
+        bhaPreviewWrapper.style.display = 'none';
+        bhaPreviewEmpty.style.display = 'flex';
+        return;
+    }
+
+    bhaPreviewWrapper.style.display = 'block';
+    bhaPreviewEmpty.style.display = 'none';
+    bhaPreview.innerHTML = '';
+
+    let totalLength = 0;
+    componentData.forEach(comp => {
+        totalLength += comp.length || 0;
+    });
+
+    // Calculate scaling
+    const availableHeight = 560; // Fixed height for preview
+    const pxPerMeter = totalLength > 0 ? (availableHeight / totalLength) : 40;
+    const maxOd = Math.max(...componentData.map(c => c.od || 0), 1);
+    const maxWidth = 200;
+
+    bhaPreview.style.width = maxWidth + 'px';
+    bhaPreview.style.display = 'flex';
+    bhaPreview.style.flexDirection = 'column';
+    bhaPreview.style.alignItems = 'center';
+    bhaPreview.style.gap = '0';
+    bhaPreview.style.rowGap = '0';
+    bhaPreview.style.height = Math.max(availableHeight, totalLength * pxPerMeter) + 'px'; // Ensure height matches content
+
+    // Render components
+    componentData.forEach(comp => {
+        const component = components.find(c => c.id == comp.id);
+        if (!component) return;
+
+        const isDrillBit = comp.type === 'bit';
+        const lengthPx = Math.max(20, (comp.length || 0) * pxPerMeter); // Minimum height to avoid collapse
+        const widthPx = isDrillBit ? maxWidth : Math.max(40, Math.round(((comp.od || 0) / maxOd) * maxWidth * 0.8));
+
+        const componentDiv = document.createElement('div');
+        componentDiv.className = 'bha-preview-component';
+        componentDiv.style.height = lengthPx + 'px'; // Use lengthPx for consistent height
+        componentDiv.style.width = '100%';
+        componentDiv.style.margin = '0';
+        componentDiv.style.padding = '0';
+        componentDiv.style.lineHeight = '0';
+        componentDiv.style.fontSize = '0';
+        componentDiv.style.border = 'none';
+        componentDiv.style.boxShadow = 'none';
+        componentDiv.style.flexShrink = '0';
+        componentDiv.style.flexGrow = '0';
+        componentDiv.style.display = 'flex';
+        componentDiv.style.flexDirection = 'row';
+        componentDiv.style.alignItems = 'center';
+        componentDiv.style.justifyContent = 'center';
+
+        const svgDiv = document.createElement('div');
+        svgDiv.className = 'bha-preview-svg';
+        svgDiv.style.width = widthPx + 'px';
+        svgDiv.style.height = '100%'; // Ensure SVG fills the height
+        svgDiv.style.margin = '0';
+        svgDiv.style.padding = '0';
+        svgDiv.style.lineHeight = '0';
+        svgDiv.style.fontSize = '0';
+        svgDiv.style.display = 'block';
+        svgDiv.style.verticalAlign = 'top';
+        
+        const svgHtml = getComponentSVGForPreview(comp.id, comp.length || 0, comp.od || 0, 0, components);
+        svgDiv.innerHTML = svgHtml;
+        
+        const svgElement = svgDiv.querySelector('svg');
+        if (svgElement) {
+            svgElement.style.display = 'block';
+            svgElement.style.margin = '0';
+            svgElement.style.padding = '0';
+            svgElement.style.verticalAlign = 'top';
+            svgElement.style.width = '100%';
+            svgElement.style.height = '100%';
+            svgElement.setAttribute('preserveAspectRatio', 'none'); // Force SVG to stretch
+        }
+
+        const label = document.createElement('div');
+        label.className = 'bha-preview-label';
+        label.innerHTML = `
+            <span class="bha-preview-label-text">${comp.name || component.name}</span>
+            <span class="bha-preview-label-length">${(comp.length || 0).toFixed(1)}m</span>
+        `;
+
+        componentDiv.appendChild(svgDiv);
+        componentDiv.appendChild(label);
+        bhaPreview.appendChild(componentDiv);
+    });
+}
+
+    // Helper function to generate SVG for preview using actual SVG templates
+    function getComponentSVGForPreview(componentId, length, od, id, components) {
+        const component = components.find(c => c.id == componentId);
+        if (!component || !component.svg_template) return '';
+        
+        try {
+            // Calculate scale factor for preview (similar to how render_svg works)
+            const scaleFactor = 1.0;
+            
+            // Format the SVG template with actual dimensions
+            let svg = component.svg_template;
+            
+            // Convert values to numbers and apply scale factor
+            const lengthVal = parseFloat(length || 0) * scaleFactor;
+            const odVal = parseFloat(od || 0) * scaleFactor;
+            const idVal = parseFloat(id || 0) * scaleFactor;
+            
+            // Replace placeholders - handle Python string format syntax
+            svg = svg.replace(/\{length\}/g, lengthVal);
+            svg = svg.replace(/\{outer_diameter\}/g, odVal);
+            svg = svg.replace(/\{inner_diameter\}/g, idVal);
+            svg = svg.replace(/\{scale_factor\}/g, scaleFactor);
+            
+            return svg;
+        } catch (e) {
+            console.error('Error rendering SVG for component:', e);
+            // Fallback to simple rectangle if template fails
+            const isDrillBit = component.type === 'bit';
+            const height = isDrillBit ? 100 : Math.max(20, (length || 0) * 10);
+            const width = Math.max(40, (od || 0) * 8);
+            
+            return `
+                <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0" y="0" width="${width}" height="${height}" fill="#6c757d" stroke="#000" stroke-width="1"/>
+                </svg>
+            `;
+        }
+    }
+</script>
+

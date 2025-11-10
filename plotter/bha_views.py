@@ -227,7 +227,7 @@ def bha_edit_designer(request, bha_id):
         'bha': bha,
         'components': components,
         'reports': reports,
-        'rows': rows,
+        'rows': json.dumps(rows),
     })
 
 @login_required
