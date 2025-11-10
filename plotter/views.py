@@ -28,6 +28,7 @@ from .models import (
     ExplorationTimeline, ExplorationCategory, OperationActivity,
     DailyDrillingReport, WellPrognosis, DrillingLithology
 )
+from .forms import DailyDrillingReportForm, DrillingLithologyForm
 
 def login_view(request):
     """Handle user login"""
@@ -303,6 +304,63 @@ def drilling_reports_index(request):
     """Show a list of wells. User clicks a well to navigate to its drilling reports page."""
     wells = Well.objects.all().order_by('name')
     return render(request, 'visualization/drilling_reports_index.html', {'wells': wells})
+
+
+@login_required
+def create_drilling_report(request):
+    """Create a new DailyDrillingReport. Only superusers allowed."""
+    if not request.user.is_superuser:
+        messages.error(request, 'You do not have permission to create drilling reports.')
+        return redirect('drilling_reports_index')
+
+    if request.method == 'POST':
+        form = DailyDrillingReportForm(request.POST)
+        if form.is_valid():
+            report = form.save()
+            messages.success(request, 'Drilling report created successfully.')
+            # Redirect to the drilling reports listing for the selected well
+            return redirect('drilling_reports', well_id=report.well.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = DailyDrillingReportForm()
+
+    return render(request, 'visualization/drilling_reports_create.html', {
+        'form': form,
+    })
+
+
+@login_required
+def create_drilling_lithology(request):
+    """Create a new DrillingLithology entry. Only superusers allowed."""
+    if not request.user.is_superuser:
+        messages.error(request, 'You do not have permission to create drilling lithology entries.')
+        return redirect('drilling_reports_index')
+
+    initial = {}
+    report_id = request.GET.get('report_id')
+    if report_id:
+        initial['drilling_report'] = report_id
+
+    if request.method == 'POST':
+        form = DrillingLithologyForm(request.POST)
+        if form.is_valid():
+            litho = form.save()
+            messages.success(request, 'Drilling lithology saved successfully.')
+            # Redirect to the drilling reports list for that well
+            try:
+                well_id = litho.drilling_report.well.id
+                return redirect('drilling_reports', well_id=well_id)
+            except Exception:
+                return redirect('drilling_reports_index')
+        else:
+            messages.error(request, 'Please fix the errors below.')
+    else:
+        form = DrillingLithologyForm(initial=initial)
+
+    return render(request, 'visualization/drilling_lithology_create.html', {
+        'form': form,
+    })
 
 def calculate_drilling_efficiency(reports):
     """Calculate drilling efficiency based on daily progress and operational time"""

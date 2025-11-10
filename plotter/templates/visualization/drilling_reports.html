@@ -227,13 +227,12 @@
             <div class="row g-2">
                 <div class="col-lg-9 col-xl-9">
             <div class="mb-3">
-                <h6 style="color: #257358; font-size: 1.5em;font-weight: 800;">
-                                        <i class="bi bi-display-fill me-2"></i>Drilling Monitoring System
-                </h6>
                 <h1 class="display-5 fw-bold">
                     {% for well in wells %}
                         {% if well.id|stringformat:'s' == selected_well %}
-                            <span class="text-muted" style="font-size: 0.65em;"> {{ well.name }} Drilling Reports</span>
+                        <h6 style="color: #257358; font-size: 1.5em;font-weight: 800;">
+                                        <i class="bi bi-display me-2"></i>{{ well.name }} Drilling Reports
+                </h6>
                         {% endif %} 
                     {% endfor %}
                 </h1>
@@ -345,8 +344,8 @@
                                     </div>
                                     
                                     <div class="info-row">
-                                        <strong><i class="bi bi-chat-left-text me-1"></i>Comments:</strong> 
-                                        <span>{{ report.comments|default:"No comments"|safe }}</span>
+                                        <strong><i class="bi bi-chat-left-text me-1"></i>Comments:</strong> <br>
+                                        <span>{{ report.comments|default:"No comments"|safe|linebreaksbr }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -409,11 +408,6 @@
                                                 <i class="bi {% if lithology.comparison_type == 'success' %}bi-check-circle{% elif lithology.comparison_type == 'warning' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %} me-1"></i>
                                                 <strong>Prognosis:</strong> {{ lithology.prognosis_comparison }}
                                             </div>
-                                        </div>
-                                        {% endif %}
-                                        {% if lithology.description %}
-                                        <div class="mt-1 ms-1">
-                                            <small class="text-muted" style="font-size: 0.82rem;"><i class="bi bi-file-text me-1"></i>{{ lithology.description }}</small>
                                         </div>
                                         {% endif %}
                                     </div>

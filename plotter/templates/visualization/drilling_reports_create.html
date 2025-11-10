@@ -1,0 +1,44 @@
+{% extends 'daily_reports/base_dailyr.html' %}
+
+{% block bha_content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title">Create Drilling Report</h4>
+          <p class="text-muted">Only superusers can create drilling reports.</p>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            {{ form.non_field_errors }}
+
+            {% for field in form.visible_fields %}
+              <div class="mb-3">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field.errors }}
+                {{ field }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'drilling_reports_index' %}" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">Create Report</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -118,12 +118,13 @@
                     <div class="bha-visualization-wrapper">
                         <div class="bha-visualization" id="bha-visualization" data-total-length="{{ bha.total_length|default:total_length }}">
                             {% for component in components %}
-                            <div class="bha-component" 
-                                 data-length="{{ component.length }}"
-                                 data-od="{{ component.outer_diameter }}"
-                                 data-position="{{ component.position }}"
-                                 data-name="{{ component.component.name }}"
-                                 title="{{ component.component.name }}">
+                       <div class="bha-component" 
+                           data-length="{{ component.length }}"
+                           data-od="{{ component.outer_diameter }}"
+                           data-position="{{ component.position }}"
+                           data-name="{{ component.component.name }}"
+                           data-type="{{ component.component.type }}"
+                           title="{{ component.component.name }}">
                                 <div class="component-svg">
                                     {{ component.svg|safe }}
                                 </div>
@@ -436,11 +437,18 @@
         components.forEach((c, index) => {
             const len = parseFloat(c.dataset.length) || 0.1;
             const od = parseFloat(c.dataset.od) || maxOd;
+            const type = (c.dataset.type || '').toLowerCase();
 
             const heightPx = Math.max(10, Math.round(len * pxPerMeter));
-            // Thicker: ensure >= 50% of max width while preserving OD differences
-            const blended = (0.5 * (od / maxOd) + 0.5) * maxSvgWidth;
-            const widthPx = Math.max(40, Math.round(blended));
+            // For drill bits, don't scale by OD — use the full SVG width so the bit renders clearly
+            let widthPx;
+            if (type === 'bit') {
+                widthPx = Math.max(40, Math.round(maxSvgWidth));
+            } else {
+                // Thicker: ensure >= 50% of max width while preserving OD differences
+                const blended = (0.5 * (od / maxOd) + 0.5) * maxSvgWidth;
+                widthPx = Math.max(40, Math.round(blended));
+            }
 
             c.style.height = heightPx + 'px';
             c.style.margin = '0';
@@ -452,12 +460,12 @@
 
             const svgBox = c.querySelector('.component-svg');
             if (svgBox) {
-                svgBox.style.width = widthPx + 'px'; // width reflects outer diameter
+                svgBox.style.width = widthPx + 'px';
                 svgBox.style.height = '100%';
                 svgBox.style.lineHeight = '0';
                 svgBox.style.fontSize = '0';
                 svgBox.style.display = 'block';
-                svgBox.style.margin = '0 auto'; // center within bha-component row
+                svgBox.style.margin = '0 auto';
 
                 const svgEl = svgBox.querySelector('svg');
                 if (svgEl) {

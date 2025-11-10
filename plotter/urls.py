@@ -23,6 +23,8 @@ urlpatterns = [
     path('api/field-wells/', views.get_field_wells, name='field-wells'),
     # List of wells (index) and per-well drilling reports
     path('drilling-reports/', views.drilling_reports_index, name='drilling_reports_index'),
+    path('drilling-lithology/create/', views.create_drilling_lithology, name='create_drilling_lithology'),
+    path('drilling-reports/create/', views.create_drilling_report, name='create_drilling_report'),
     path('drilling-reports/<int:well_id>/', views.drilling_reports, name='drilling_reports'),
     path('drilling-reports/pdf/', views.generate_drilling_reports_pdf, name='generate_drilling_reports_pdf'),
 ]

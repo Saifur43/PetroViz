@@ -1,0 +1,1229 @@
+{
+  "total_reports": 10,
+  "extraction_timestamp": "2025-11-09T14:41:50.600241",
+  "reports": [
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_11_04_11_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Previous Depth MD": "1400.50",
+        "Previous Depth TVD": "1341.30",
+        "Next Program": "13⅜\" Casing run",
+        "CSG": "30 FC @ 30m, 20 casing  @185m",
+        "Last CSG": "20 casing @185m",
+        "Report Date": "4-11-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:46.239684"
+    },
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_12_05_11_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Previous Depth MD": "1400.50",
+        "Previous Depth TVD": "1341.30",
+        "Next Program": "13⅜\" Casing run",
+        "CSG": "30 FC @ 30m, 20 casing  @185m",
+        "Last CSG": "20 casing @185m",
+        "Report Date": "5-11-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:46.710871"
+    },
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_1_25_10_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Present Depth MD": "292.67",
+        "Present Depth TVD": "292.67",
+        "Previous Depth MD": "185.00",
+        "Previous Depth TVD": "185.00",
+        "Next Program": "RIH",
+        "CSG": "30 FC @ 30m, 20 casing @1 85m",
+        "Last CSG": "20 casing @18 5m",
+        "Report Date": "25-10-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [
+        {
+          "depth_start_m": 185,
+          "depth_end_m": 210,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand:  Colorless  to white, f ew brow nish grain , loose, transparent to translucent, angular  to sub -angular, medi um to fine grain ed, coarse in place,  poorly  sorted, predominantly quartz with some mica & dark color minerals & traces  of coal grain ."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft . No react with HCL."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 210,
+          "depth_end_m": 230,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand:  Colorless  to white, f ew brow nish grain , loose, transparent to translucent, angular  to sub -angular, medium to fine grain ed, coarse in place,  moderately  sorted, predominantly quartz with some mica & dark color minerals & presence  of coal fragments."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft . No react with HCL."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 230,
+          "depth_end_m": 250,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "A/A + Medium to Coarse grained  + Poorly So rted"
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft . No react with HCL."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 250,
+          "depth_end_m": 290,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand:  Colorless  to white, f ew brow nish grain , loose, transparent to translucent, angular  to sub -angular, medium to fine grain ed, coarse in place,  moderately  sorted, predominantly quartz with some mica & dark color minerals ."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft . No react with HCL."
+            }
+          ]
+        }
+      ],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:47.052072"
+    },
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_2_26_10_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Present Depth MD": "380.00",
+        "Present Depth TVD": "380.0",
+        "Previous Depth MD": "292.67",
+        "Previous Depth TVD": "292.67",
+        "Next Program": "Drilling",
+        "CSG": "30 FC @ 30m, 20 casing @1 85m",
+        "Last CSG": "20 casing @18 5m",
+        "Report Date": "26-10-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [
+        {
+          "depth_start_m": 290,
+          "depth_end_m": 310,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand:  Colorless  to white, f ew brow nish and grey  grain s, loose, transparent to translucent, sub-angular  to sub -rounded , medi um to fine grain ed, coarse in place, poorly  sorted, predominantly quartz with some mica & dark color minerals ."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft . No react with HCL."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 310,
+          "depth_end_m": 340,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand:  Colorless  to white, f ew brow nish and grey  grain s, loose, transparent to translucent, sub-angular  to sub -rounded , medi um to fine grain ed, coarse in place, poorly  sorted, predominantly quartz with some mica & dark color minerals ."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft . No react with HCL."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 340,
+          "depth_end_m": 350,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "A /A + Some cobbles to pebble sized grains are  traced ."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft . No react with HCL."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 350,
+          "depth_end_m": 370,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "A/A + Trace of coal fragments."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft . No react with HCL."
+            }
+          ]
+        }
+      ],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:47.408752"
+    },
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_4_28_10_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Present Depth MD": "803.95",
+        "Present Depth TVD": "790.44",
+        "Previous Depth MD": "727.12",
+        "Previous Depth TVD": "718.89",
+        "Next Program": "Drilling",
+        "CSG": "30 FC @ 30m, 20 casing @1 85m",
+        "Last CSG": "20 casing @185m",
+        "Report Date": "28-10-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [
+        {
+          "depth_start_m": 720,
+          "depth_end_m": 730,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular  to sub - rounded , very fine  to fine grained, poorly so rted, predominantly quartz with  mica & some dark color minerals , slightly reacts with  HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light G rey to Gray in color. Very soft,  react s with HCL  in dry state ."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 730,
+          "depth_end_m": 750,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 40.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular  to sub - rounded , very fine  to fine grained, poorly so rted, predominantly quartz with  mica & some dark color minerals , slightly reacts with  HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 60.0,
+              "description": "Clay:  Light G rey to Gray in color. Very soft,  react s with HCL  in dry state ."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 750,
+          "depth_end_m": 760,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 20.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular  to sub - rounded , very fine  to fine grained, poorly so rted, predominantly quartz with  mica & some dark color minerals , slightly reacts with  HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 80.0,
+              "description": "Clay:  Light G rey to Gray in color. Very soft,  react s with HCL  in dry state ."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 760,
+          "depth_end_m": 800,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand: Colorless to white, few brownish and grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, coarse in place, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with  HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay: Light G rey to Gray in color. Very soft,  react s with HCL  in dry state ."
+            }
+          ]
+        }
+      ],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:47.877079"
+    },
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_5_29_10_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Previous Depth MD": "803.95",
+        "Previous Depth TVD": "790.44",
+        "Next Program": "Drilling",
+        "CSG": "30 FC @ 30m, 20 casing @1 85m",
+        "Last CSG": "20 casing @185m",
+        "Report Date": "29-10-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:48.295300"
+    },
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_6_30_10_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Present Depth MD": "1006.33",
+        "Present Depth TVD": "977.14",
+        "Previous Depth MD": "803.95",
+        "Previous Depth TVD": "790.44",
+        "Next Program": "Drilling",
+        "CSG": "30 FC @ 30m, 20 casing @1 85m",
+        "Last CSG": "20 casing @185m",
+        "Report Date": "30-10-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [
+        {
+          "depth_start_m": 800,
+          "depth_end_m": 820,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 820,
+          "depth_end_m": 850,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 850,
+          "depth_end_m": 860,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 860,
+          "depth_end_m": 870,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 870,
+          "depth_end_m": 880,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 880,
+          "depth_end_m": 890,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 890,
+          "depth_end_m": 900,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 900,
+          "depth_end_m": 920,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 920,
+          "depth_end_m": 930,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 930,
+          "depth_end_m": 980,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 980,
+          "depth_end_m": 990,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, few brownish a nd grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse  grain in place s, poorly sorted, predominantly quartz with some mica & dark color minerals , slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        }
+      ],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:48.785769"
+    },
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_7_31_10_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Present Depth MD": "1235.06",
+        "Present Depth TVD": "1188.67",
+        "Previous Depth MD": "1006.33",
+        "Previous Depth TVD": "977.14",
+        "Next Program": "Drilling",
+        "CSG": "30 FC @ 30m, 20 casing  @185m",
+        "Last CSG": "20 casing @185m",
+        "Report Date": "31-10-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [
+        {
+          "depth_start_m": 990,
+          "depth_end_m": 1000,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white, few brownish and grey grains, loose, transparent"
+            },
+            {
+              "type": "To",
+              "percentage": "Trace",
+              "description": "anslucent, sub -angular to sub -rounded, medium to fine grained, some coarse g 0rain in places, poorly sorted, predominantly quartz with some mica & dark color mineral s, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1000,
+          "depth_end_m": 1010,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 60.0,
+              "description": "Sand: Colorless to white, few brownish and grey grains, loose, transparent"
+            },
+            {
+              "type": "Clay",
+              "percentage": 40.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1010,
+          "depth_end_m": 1020,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, few brownish and grey grains, loose, transparent"
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1020,
+          "depth_end_m": 1030,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand: Colorless to white, few brownish and grey  grains, loose, transparent"
+            },
+            {
+              "type": "To",
+              "percentage": "Trace",
+              "description": "anslucent, sub -angular to sub -rounded, medium to fine grained, some coarse g 0rain in places, poorly sorted, predominantly quartz with some mica & dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to  white with dark spotted , highly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1030,
+          "depth_end_m": 1050,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, very fine to  fine grained, poorly sorted, predominantly quartz and also dominance of mica & some dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Gray in color. Very  soft, reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1050,
+          "depth_end_m": 1060,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, fine to medium grained, poorly sorted, predominantly quartz and  some of mica & dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to  white with dark spotted , highly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Gray in color. Very  soft, reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1060,
+          "depth_end_m": 1070,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, fine to medium grained, poorly sorted, predominantly quartz and  some of mica & dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to  white with dark spotted , highly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Gray in color. Very  soft, reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1070,
+          "depth_end_m": 1100,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white with some brownish and grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse grain in places, poorly sorted, predominantly quartz with some mica & d ark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to  white with dark spotted , highly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1100,
+          "depth_end_m": 1110,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 30.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -rounded to rounded, very f ine to fine grained, poorly sorted, predominantly quartz with some mica & dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 70.0,
+              "description": "Clay: Gray to dark ray in color, very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1110,
+          "depth_end_m": 1120,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 40.0,
+              "description": "Sand: Colorless to white  with so me grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of  mica &  some  dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 60.0,
+              "description": "Clay:  Light Grey to Gray in col or. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1120,
+          "depth_end_m": 1130,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white  with so me grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of  mica &  some  dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in col or. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1130,
+          "depth_end_m": 1140,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 40.0,
+              "description": "Sand: Colorless to white  with so me grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of  mica &  some  dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 60.0,
+              "description": "Clay:  Light Grey to Gray in col or. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1140,
+          "depth_end_m": 1160,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white  with so me grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of  mica &  some  dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Light Grey to Gray in col or. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1160,
+          "depth_end_m": 1180,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, very fine to fine grained, poorly sorted, predominantly quartz and also dominance of mica & some dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1180,
+          "depth_end_m": 1190,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 60.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, very fine to fine grained, poorly sorted, predominantly quartz and also dominance of mica & some dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to white with dark spotted , blocky to sub blocky, highly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 40.0,
+              "description": "Clay:  Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1190,
+          "depth_end_m": 1200,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, very fine to fine grained, poorly sorted, predominantly quartz and also dominance of mica & some dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to white with dark spotted , blocky to sub blocky, highly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1200,
+          "depth_end_m": 1210,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 20.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, very fine to fine grained, poorly sorted, predominantly quartz and also dominance of mica & some dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 80.0,
+              "description": "Clay:  Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1210,
+          "depth_end_m": 1220,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 60.0,
+              "description": "Sand: Colorless to white with some grey gr ains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of mica & some dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to white with dark spo tted, highly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 40.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        }
+      ],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:49.399653"
+    },
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_8_01_11_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Present Depth MD": "1400.50",
+        "Present Depth TVD": "1341.30",
+        "Previous Depth MD": "1235.06",
+        "Previous Depth TVD": "1188.67",
+        "Next Program": "Wiper Trip",
+        "CSG": "30 FC @ 30m, 20 casing @185m",
+        "Last CSG": "20 casing @185m",
+        "Report Date": "1-11-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [
+        {
+          "depth_start_m": 1220,
+          "depth_end_m": 1230,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white , loose, transparent to translucent, sub -angular to sub-rounded, medium to fine grained , poorly sorted, predominantly quartz with some mica & dark color minerals , slightly  reacts with HCl."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to white with dark spotted , highly reacts with  HCL."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Dark gray to gray in color, v ery soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1230,
+          "depth_end_m": 1250,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white  with some l ight yellowish  and gr ay grain , loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained , poorly sorted, predominantly quartz with some mica & dark color minerals , slightly  reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 40.0,
+              "description": "Clay:  Dark gray to gray in color, v ery soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1250,
+          "depth_end_m": 1260,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white  with some l ight yellowish  and gr ay grain , loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained , poorly sorted, predominantly quartz with some mica & dark color minerals , slightly  reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Dark gray to gray in color, v ery soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1260,
+          "depth_end_m": 1270,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 20.0,
+              "description": "Sand: Colorless to white, few gra y grains, loose, transparent to translucent, sub-angular to sub -rounded, medium to f ine grained , poorly sorted, predominantly quartz with some mica & dark color minerals, slightly reacts with HCl.  Presence of calcareous band which is highly reactive with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 80.0,
+              "description": "Clay:  Light g ray to g ray in color, v ery soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1270,
+          "depth_end_m": 1300,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 10.0,
+              "description": "Sand: Colorless to white, few grey grains, loose, transparent to translucent, sub-angular to sub -rounded, medium to f ine grained , poorly sorted, predominantly quartz with some mica & dark color minerals, slightly reacts with HCl ."
+            },
+            {
+              "type": "Clay",
+              "percentage": 90.0,
+              "description": "Clay:  Light g ray to g ray in color, v ery soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1300,
+          "depth_end_m": 1310,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 20.0,
+              "description": "Sand: Colorless to white, few brownish and few grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to f ine grained , poorly sorted, predominantly quartz with some mica & dark color minerals, slightly reacts with HCl. Presence of calcareous band which is highly reactive with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 80.0,
+              "description": "Clay:  Gray to dark g ray in color, v ery soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1310,
+          "depth_end_m": 1315,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 60.0,
+              "description": "Sand: Colorless to white, few brownish and few grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to f ine grained , poorly sorted, predominantly quartz with some mica & dark color minerals, slightly reacts with HCl. Presence of calcareous band which is highly reactive with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 40.0,
+              "description": "Clay:  Gray to dark g ray in color, v ery soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1315,
+          "depth_end_m": 1320,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white with some brownish and grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse grain in places, poorly sorted, predominantly quartz with some mica & da rk color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Silt",
+              "percentage": 30.0,
+              "description": "Silt: Milky white to white with dark spotted , highly reacts with  HCL."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1320,
+          "depth_end_m": 1325,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white with some brownish and grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, some coarse grain in places, poorly sorted, predominantly quartz with some mica & da rk color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in color. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1325,
+          "depth_end_m": 1335,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white  with som e grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of  mica &  some  dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Light Grey to Gray in colo r. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1335,
+          "depth_end_m": 1350,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white  with som e grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of  mica &  some  dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Light Grey to Gray in colo r. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1355,
+          "depth_end_m": 1355,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 90.0,
+              "description": "Sand: Colorless to white  with som e grey grains, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of  mica &  some  dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Clay",
+              "percentage": 10.0,
+              "description": "Clay:  Light Grey to Gray in colo r. Very soft,  reacts with HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1355,
+          "depth_end_m": 1360,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 80.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, very fine to fine grained, poorly sorted, predominantly quartz & some dark color minerals, slightly reacts with HCl  abundance of mica is presence ."
+            },
+            {
+              "type": "Clay",
+              "percentage": 20.0,
+              "description": "Clay:  Gray in color. Very soft,  reacts and dissolve with  HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1360,
+          "depth_end_m": 1365,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, very fine to fine grained, poorly sorted, predominantly quartz & some dark color minerals, slightly reacts with HCl  abundance of mica is presence ."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to white with dark spotted , highly reacts with  HCL."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Gray in color. Very soft,  reacts and dissolve with  HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1365,
+          "depth_end_m": 1375,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 70.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, very fine to fine grained, poorly sorted, predominantly quartz & some dark color minerals, slightly reacts with HCl  abundance of mica is presence ."
+            },
+            {
+              "type": "Silt",
+              "percentage": "Trace",
+              "description": "Silt: Milky white to white with dark spotted , highly reacts with  HCL."
+            },
+            {
+              "type": "Clay",
+              "percentage": 30.0,
+              "description": "Clay:  Gray in color. Very soft,  reacts and dissolve with  HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1375,
+          "depth_end_m": 1380,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 60.0,
+              "description": "Sand: Colorless to white, loose, transparent to translucent, sub -angular to sub-rounded, very fine to fine grained, poorly sorted, predominantly quartz & some dark color minerals, slightly reacts with HCl  abundance of mica is presence ."
+            },
+            {
+              "type": "Clay",
+              "percentage": 40.0,
+              "description": "Clay:  Gray in color. Very soft,  reacts and dissolve with  HCL in dry state."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1380,
+          "depth_end_m": 1385,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 20.0,
+              "description": "Sand: Colorless to white with some grey gra ins, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of mica & some dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Shale",
+              "percentage": 80.0,
+              "description": "Grey to light grey in color, mostly amorphous with little sub blocky in shape, poorly laminated , very soft  in wet condition. React s and dissolve in HCL."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1385,
+          "depth_end_m": 1390,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 30.0,
+              "description": "Sand: Colorless to white with some grey gra ins, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of mica & some dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Shale",
+              "percentage": 70.0,
+              "description": "Grey to light grey in color, mostly amorphous with little sub blocky in shape, poorly laminated , very soft  in wet condition. React s and dissolve in HCL."
+            }
+          ]
+        },
+        {
+          "depth_start_m": 1390,
+          "depth_end_m": 1400,
+          "lithology": [
+            {
+              "type": "Sand",
+              "percentage": 20.0,
+              "description": "Sand: Colorless to white with some grey gra ins, loose, transparent to translucent, sub -angular to sub -rounded, medium to fine grained, poorly sorted, predominantly quartz and dominance of mica & some dark color minerals, slightly reacts with HCl."
+            },
+            {
+              "type": "Shale",
+              "percentage": 80.0,
+              "description": "Grey to light grey in color, mostly amorphous with little sub blocky in shape, poorly laminated , very soft  in wet condition. React s and dissolve in HCL."
+            }
+          ]
+        }
+      ],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:50.067859"
+    },
+    {
+      "well_name": "Srikail-5",
+      "source_file": "SKL_DGR_9_02_11_2025.pdf",
+      "report_metadata": {
+        "Rig": "ZJ70DBS",
+        "Spud Date": "28.09.2025",
+        "Previous Depth MD": "1400.50",
+        "Previous Depth TVD": "1341.30",
+        "Next Program": "Wireline logging",
+        "CSG": "30 FC @ 30m, 20 casing @1 85m",
+        "Last CSG": "20 casing @185m",
+        "Report Date": "2-11-2025",
+        "Report Date Source": "filename"
+      },
+      "lithology_data": [],
+      "formation_gas_data": [],
+      "extraction_timestamp": "2025-11-09T14:41:50.598130"
+    }
+  ]
+}

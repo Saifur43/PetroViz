@@ -155,8 +155,29 @@ admin.site.register(OperationActivity)
 admin.site.register(Fossils)
 admin.site.register(GrainSize)  
 admin.site.register(Mineralogy)
-admin.site.register(DailyDrillingReport)
-admin.site.register(DrillingLithology)
+
+@admin.register(DailyDrillingReport)
+class DailyDrillingReportAdmin(admin.ModelAdmin):
+    list_display = ('report_no', 'well', 'date', 'depth_start', 'depth_end', 'present_activity')
+    list_filter = ('well', 'date')
+    ordering = ('-date',)  # Sort descending by date (newest first)
+    search_fields = ('report_no', 'well__name', 'present_activity')
+    
+@admin.register(DrillingLithology)
+class DrillingLithologyAdmin(admin.ModelAdmin):
+    list_display = ('drilling_report', 'get_well_name', 'get_report_date', 'depth_from', 'depth_to', 'description')
+    list_filter = ('drilling_report__well', 'drilling_report__date')
+    ordering = ('-drilling_report__date', 'depth_from')
+    search_fields = ('drilling_report__well__name', 'description')
+
+    def get_well_name(self, obj):
+        return obj.drilling_report.well.name
+    get_well_name.short_description = 'Well'
+
+    def get_report_date(self, obj):
+        return obj.drilling_report.date
+    get_report_date.short_description = 'Report Date'
+    
 admin.site.register(WellPrognosis)
 admin.site.register(BHAComponent, BHAComponentAdmin)
 admin.site.register(BHA, BHAAdmin)

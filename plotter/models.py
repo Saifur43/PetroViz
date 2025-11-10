@@ -139,9 +139,17 @@ class DrillingLithology(models.Model):
     depth_from = models.FloatField(help_text="Start depth in meters")
     depth_to = models.FloatField(help_text="End depth in meters")
     shale_percentage = models.FloatField(default=0, help_text="Percentage of shale")
+    shale_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of shale type")
     sand_percentage = models.FloatField(default=0, help_text="Percentage of sand")
+    sand_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of sand type")   
     clay_percentage = models.FloatField(default=0, help_text="Percentage of clay")
+    clay_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of clay type")
     slit_percentage = models.FloatField(default=0, help_text="Percentage of slit")
+    slit_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of slit type")
+    coal_percentage = models.FloatField(default=0, help_text="Percentage of coal")
+    coal_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of coal type")
+    limestone_percentage = models.FloatField(default=0, help_text="Percentage of limestone")
+    limestone_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of limestone type")
     description = models.TextField(blank=True, null=True)
     
     class Meta:

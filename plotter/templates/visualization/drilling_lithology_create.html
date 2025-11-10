@@ -1,0 +1,150 @@
+{% extends 'daily_reports/base_dailyr.html' %}
+
+{% block bha_content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title">Add Drilling Lithology</h4>
+          <p class="text-muted">Add an interval and lithology percentages. Total must be ≤ 100%.</p>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            {{ form.non_field_errors }}
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Drilling Report</label>
+                {{ form.drilling_report }}
+                {{ form.drilling_report.errors }}
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Depth From (m)</label>
+                {{ form.depth_from }}
+                {{ form.depth_from.errors }}
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Depth To (m)</label>
+                {{ form.depth_to }}
+                {{ form.depth_to.errors }}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Percentages (total ≤ 100%)</label>
+                <div class="row g-2">
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <span class="input-group-text">Shale %</span>
+                      {{ form.shale_percentage }}
+                    </div>
+                    {{ form.shale_percentage.errors }}
+                  </div>
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <span class="input-group-text">Sand %</span>
+                      {{ form.sand_percentage }}
+                    </div>
+                    {{ form.sand_percentage.errors }}
+                  </div>
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <span class="input-group-text">Clay %</span>
+                      {{ form.clay_percentage }}
+                    </div>
+                    {{ form.clay_percentage.errors }}
+                  </div>
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <span class="input-group-text">Silt %</span>
+                      {{ form.slit_percentage }}
+                    </div>
+                    {{ form.slit_percentage.errors }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Descriptions for each major lithology -->
+              <div class="col-12 mt-2">
+                <label class="form-label">Lithology Descriptions (optional)</label>
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <label class="form-label small">Shale description</label>
+                    {{ form.shale_description }}
+                    {{ form.shale_description.errors }}
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small">Sand description</label>
+                    {{ form.sand_description }}
+                    {{ form.sand_description.errors }}
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small">Clay description</label>
+                    {{ form.clay_description }}
+                    {{ form.clay_description.errors }}
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small">Silt description</label>
+                    {{ form.slit_description }}
+                    {{ form.slit_description.errors }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Coal and Limestone percentages + descriptions -->
+              <div class="col-12 mt-2">
+                <label class="form-label">Other components</label>
+                <div class="row g-2">
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <span class="input-group-text">Coal %</span>
+                      {{ form.coal_percentage }}
+                    </div>
+                    {{ form.coal_percentage.errors }}
+                  </div>
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <span class="input-group-text">Limestone %</span>
+                      {{ form.limestone_percentage }}
+                    </div>
+                    {{ form.limestone_percentage.errors }}
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small">Coal description</label>
+                    {{ form.coal_description }}
+                    {{ form.coal_description.errors }}
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small">Limestone description</label>
+                    {{ form.limestone_description }}
+                    {{ form.limestone_description.errors }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 mt-2">
+                <label class="form-label">Description</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+              </div>
+
+            </div>
+
+            <div class="mt-3 d-flex justify-content-between">
+              <a href="{% url 'drilling_reports_index' %}" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">Save Lithology</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

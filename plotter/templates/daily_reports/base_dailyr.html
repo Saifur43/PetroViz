@@ -1,0 +1,92 @@
+{# templates/plotter/bha/base_bha.html #}
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background: linear-gradient(180deg, #257358 0%, #1a5943 100%); color: white; padding: 16px; min-height: 100vh;">
+            <div class="mb-3 d-flex align-items-center" style="gap:8px;">
+                <i class="bi bi-display" style="font-size: 1.1rem; color:#E98108;"></i>
+                <h5 class="mb-0" style="color:#E98108; font-weight:700;">Drilling Monitoring System</h5>
+            </div>
+            <ul class="nav flex-column sidebar-menu">
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'drilling_reports_index' %}active{% endif %}"
+                       href="{% url 'drilling_reports_index' %}">
+                        <i class="bi bi-list-ul me-2"></i>
+                        <span>Reports List</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    {% if request.user.is_superuser %}
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'create_drilling_report' %}active{% endif %}"
+                       href="{% url 'create_drilling_report' %}">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        <span>Create New Reports</span>
+                    </a>
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'create_drilling_lithology' %}active{% endif %}"
+                       href="{% url 'create_drilling_lithology' %}">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        <span>Add Lithology to Reports</span>
+                    </a>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center"
+                       href="{% url 'dashboard' %}">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        <span>Back to Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
+            {% block bha_content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+<style>
+    .sidebar { border-right: 1px solid rgba(255,255,255,0.12); }
+    .sidebar-menu { gap: 4px; }
+    .sidebar .nav-link { color: #f8fafc; padding: 10px 12px; border-radius: 6px; transition: background-color 0.2s, transform 0.1s; font-size: 0.95rem; }
+    .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.12); transform: translateX(2px); }
+    .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.18); }
+    
+    /* Additional BHA-specific styles */
+    .stats-card {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .stats-card:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+{% block extra_js %}
+<script>
+    function validateComponentCompatibility(prevComponentId, nextComponentId) {
+        return fetch(`/bha/validate-compatibility/?prev_component=${prevComponentId}&next_component=${nextComponentId}`)
+            .then(response => response.json());
+    }
+
+    function updateBHAVisualization(bhaId) {
+        const container = document.getElementById('bha-visualization');
+        const components = container.querySelectorAll('.bha-component');
+        let totalLength = 0;
+        
+        components.forEach(component => {
+            const length = parseFloat(component.dataset.length);
+            totalLength += length;
+            component.style.height = `${length * 20}px`; // Scale factor for visualization
+        });
+        
+        document.getElementById('total-length').textContent = totalLength.toFixed(2);
+    }
+</script>
+{% endblock %}
+{% endblock %}
