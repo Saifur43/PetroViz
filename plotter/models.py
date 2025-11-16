@@ -180,9 +180,10 @@ class OperationActivity(models.Model):
     
     title = models.CharField(max_length=255)
     description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField()
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     location = models.CharField(max_length=200, null=True, blank=True)
+    image = models.ImageField(upload_to='operation_images/', null=True, blank=True, help_text="Image related to the operation activity")
     is_active = models.BooleanField(default=True)
     
     class Meta:

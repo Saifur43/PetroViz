@@ -101,42 +101,55 @@
             <div class="row">
                 <!-- Operations Activity -->
                 <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header text-white" style="background-color: #1353A3;">
+                    <div class="card modern-card">
+                        <div class="card-header text-white" style="background: linear-gradient(135deg, #1353A3 0%, #1a6bc4 100%); border: none;">
                             <h5 class="mb-0" style="font-weight:700;"><i class="bi bi-graph-up-arrow me-2"></i>Recent Operations</h5>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body p-0">
                             {% if recent_activities %}
-                                <ul class="list-group list-group-flush">
+                                <div class="activity-list">
                                     {% for activity in recent_activities %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                                        <div class="ms-2 me-auto">
-                                            <div class="fw-bold">{{ activity.title }}</div>
-                                            <p class="mb-1">{{ activity.description }}</p>
-                                            {% if activity.location %}
-                                                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ activity.location }}</small>
+                                    <div class="activity-item">
+                                        <div class="activity-content">
+                                            {% if activity.image %}
+                                            <div class="activity-image-wrapper" data-bs-toggle="modal" data-bs-target="#imageModal{{ activity.id }}" style="cursor: pointer;">
+                                                <img src="{{ activity.image.url }}" alt="{{ activity.title }}" class="activity-image">
+                                                <div class="image-overlay">
+                                                    <i class="bi bi-zoom-in"></i>
+                                                </div>
+                                            </div>
                                             {% endif %}
+                                            <div class="activity-details">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="activity-title mb-0">{{ activity.title }}</h6>
+                                                    <div class="activity-meta">
+                                                        {% if activity.priority == 'critical' %}
+                                                            <span class="badge priority-badge priority-critical">Critical</span>
+                                                        {% elif activity.priority == 'high' %}
+                                                            <span class="badge priority-badge priority-high">High</span>
+                                                        {% elif activity.priority == 'medium' %}
+                                                            <span class="badge priority-badge priority-medium">Medium</span>
+                                                        {% else %}
+                                                            <span class="badge priority-badge priority-low">Low</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <p class="activity-description">{{ activity.description }}</p>
+                                                <div class="activity-footer">
+                                                    {% if activity.location %}
+                                                        <span class="activity-location"><i class="bi bi-geo-alt-fill me-1"></i>{{ activity.location }}</span>
+                                                    {% endif %}
+                                                    <span class="activity-time"><i class="bi bi-clock me-1"></i>{{ activity.get_time_ago }}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="text-end">
-                                            {% if activity.priority == 'critical' %}
-                                                <span class="badge bg-danger rounded-pill mb-1">Critical</span>
-                                            {% elif activity.priority == 'high' %}
-                                                <span class="badge bg-warning rounded-pill mb-1">High</span>
-                                            {% elif activity.priority == 'medium' %}
-                                                <span class="badge bg-info rounded-pill mb-1">Medium</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary rounded-pill mb-1">Low</span>
-                                            {% endif %}
-                                            <br>
-                                            <small class="text-muted">{{ activity.get_time_ago }}</small>
-                                        </div>
-                                    </li>
+                                    </div>
                                     {% endfor %}
-                                </ul>
+                                </div>
                             {% else %}
-                                <div class="text-center py-4">
-                                    <i class="fas fa-info-circle fa-2x text-muted mb-2"></i>
-                                    <p class="text-muted">No recent operation activities found.</p>
+                                <div class="text-center py-5">
+                                    <i class="bi bi-info-circle" style="font-size: 3rem; color: #6c757d; opacity: 0.5;"></i>
+                                    <p class="text-muted mt-3 mb-0">No recent operation activities found.</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -147,11 +160,267 @@
     </div>
 </div>
 
+<!-- Image Modal -->
+{% if recent_activities %}
+    {% for activity in recent_activities %}
+        {% if activity.image %}
+        <div class="modal fade" id="imageModal{{ activity.id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ activity.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content" style="background: transparent; border: none;">
+                    <div class="modal-header" style="border: none; padding-bottom: 10px;">
+                        <h5 class="modal-title text-white" id="imageModalLabel{{ activity.id }}">{{ activity.title }}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0" style="text-align: center;">
+                        <img src="{{ activity.image.url }}" alt="{{ activity.title }}" class="img-fluid modal-expanded-image" style="border-radius: 8px; max-height: 80vh; width: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
 <style>
     .sidebar { border-right: 1px solid rgba(255,255,255,0.12); }
     .sidebar-menu { gap: 4px; }
     .sidebar .nav-link { color: #f8fafc; padding: 10px 12px; border-radius: 6px; transition: background-color 0.2s, transform 0.1s; font-size: 0.95rem; }
     .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.12); transform: translateX(2px); }
     .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.18); }
+    
+    /* Modern Card Styling */
+    .modern-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .modern-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Activity List Styling */
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .activity-item {
+        padding: 20px;
+        border-bottom: 1px solid #e9ecef;
+        transition: background-color 0.2s;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .activity-content {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+    
+    /* Activity Image Styling */
+    .activity-image-wrapper {
+        flex-shrink: 0;
+        width: 180px;
+        height: 180px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background: #f0f0f0;
+        position: relative;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .activity-image-wrapper:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .activity-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    
+    .activity-image-wrapper:hover .activity-image {
+        transform: scale(1.08);
+    }
+    
+    /* Image Overlay for Zoom Icon */
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+        border-radius: 12px;
+    }
+    
+    .activity-image-wrapper:hover .image-overlay {
+        opacity: 1;
+    }
+    
+    .image-overlay i {
+        font-size: 2.5rem;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Modal Styling */
+    .modal-content {
+        background: rgba(0, 0, 0, 0.85) !important;
+        backdrop-filter: blur(10px);
+    }
+    
+    .modal-expanded-image {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+    
+    /* Activity Details */
+    .activity-details {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .activity-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 8px;
+    }
+    
+    .activity-description {
+        color: #6c757d;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 12px;
+    }
+    
+    .activity-footer {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .activity-location,
+    .activity-time {
+        font-size: 0.85rem;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+    }
+    
+    .activity-location i,
+    .activity-time i {
+        color: #1353A3;
+    }
+    
+    /* Priority Badge Styling */
+    .priority-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .priority-critical {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+    
+    .priority-high {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #212529;
+    }
+    
+    .priority-medium {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+    }
+    
+    .priority-low {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        color: white;
+    }
+    
+    /* Stats Card Enhancement */
+    .stats-card {
+        border-left: 4px solid #E98108;
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    .stats-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .stats-card .card-title {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-card .card-text {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .activity-content {
+            flex-direction: column;
+        }
+        
+        .activity-image-wrapper {
+            width: 100%;
+            height: 250px;
+        }
+        
+        .activity-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .modal-dialog {
+            margin: 10px;
+        }
+        
+        .modal-expanded-image {
+            max-height: 70vh !important;
+        }
+    }
 </style>
 {% endblock %}
