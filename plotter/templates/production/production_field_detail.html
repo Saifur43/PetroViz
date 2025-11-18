@@ -1,0 +1,76 @@
+{% extends 'production/base_production.html' %}
+
+{% block bha_content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12 d-flex align-items-center justify-content-between">
+            <div>
+                <h6 style="color: #257358; font-size: 1.6em; font-weight: 700;">
+                    <i class="bi bi-list-ul me-2"></i>Field: {{ gas_field.name }}
+                </h6>
+                {% if gas_field.description %}
+                    <p class="text-muted small mb-0">{{ gas_field.description }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'production_fields' %}" class="btn btn-outline-secondary">Back to fields</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title" style="color:#1a5943;">Wells</h6>
+                    <div class="list-group list-group-flush">
+                        {% for well in wells %}
+                            <a href="{% url 'production_well_detail' well.id %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-0" style="font-size:1em;">{{ well.name }}</h6>
+                                    <small class="text-muted">{{ well.type }}</small>
+                                </div>
+                                {% if well.location %}<small class="text-muted">{{ well.location }}</small>{% endif %}
+                            </a>
+                        {% empty %}
+                            <div class="alert alert-info">No wells found for this field.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Field Overview</h5>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Discovery date:</strong> {% if discovery_date %}{{ discovery_date|date:"d M, Y" }}{% else %}N/A{% endif %}</p>
+                            <p class="mb-1"><strong>Total area:</strong> {% if total_area %}{{ total_area }} km<sup>2</sup>{% else %}N/A{% endif %}</p>
+                            <p class="mb-1"><strong>Number of wells:</strong> {{ number_of_wells }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mt-0">Production Summary</h6>
+                            <p class="mb-1"><strong>Total cumulative gas:</strong> {% if total_cumulative_flow %}{{ total_cumulative_flow|floatformat:2 }} MMscf{% else %}0{% endif %}</p>
+                            <p class="mb-1"><strong>Total cumulative water:</strong> {% if total_cumulative_water %}{{ total_cumulative_water|floatformat:2 }} bbl{% else %}0{% endif %}</p>
+                            <p class="mb-1"><strong>Total cumulative condensate:</strong> {% if total_cumulative_condensate %}{{ total_cumulative_condensate|floatformat:2 }} bbl{% else %}0{% endif %}</p>
+                            <p class="mb-1"><strong>Latest combined flow-rate:</strong> {% if total_latest_flow_rate %}{{ total_latest_flow_rate|floatformat:2 }} MMscf/d{% else %}0{% endif %}</p>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <p class="small text-muted mb-0">
+                        {% if min_date and max_date %}
+                            Data available from <strong>{{ min_date }}</strong> to <strong>{{ max_date }}</strong>
+                        {% else %}
+                            No production data for this field yet.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

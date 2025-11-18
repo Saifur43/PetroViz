@@ -5,14 +5,16 @@
     <div class="row">
         <!-- Sidebar Navigation -->
         <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3" style="background-color: #257358; color: white; min-height: 100vh;">
-             <div class="card-header text-white" style="background-color: #257358; border-radius: 8px 8px 0 0; padding: 10px;">
-                    <h5 class="mb-0" style="color: #E98108;">Production Data Filters</h5>
-                </div>
+            <div class="card-header text-white" style="background-color: #257358; border-radius: 8px 8px 0 0; padding: 10px;">
+                <h5 class="mb-0" style="color: #E98108;">Production Data Filters</h5>
+            </div>
         
             <!-- Gas Field Selection -->
-            <div class="mb-3">
-                <label class="form-label" style="color: white;">Gas Fields</label>
-                <select id="gasFieldSelector" class="form-select form-select-sm mb-2">
+            <div class="mb-3 mt-3">
+                <label class="form-label fw-bold" style="color: white; font-size: 0.95rem;">
+                    <i class="bi bi-geo-alt-fill me-1"></i>Gas Fields
+                </label>
+                <select id="gasFieldSelector" class="form-select form-select-sm mb-2 custom-select">
                     <option value="">Select Gas Field</option>
                     {% for field in gas_fields %}
                     <option value="{{ field.id }}">{{ field.name }}</option>
@@ -22,12 +24,14 @@
 
             <!-- Wells Selection -->
             <div class="mb-3">
-                <label class="form-label" style="color: white;">Wells</label>
-                <div class="well-checkbox-container" style="max-height: 200px; overflow-y: auto;">
+                <label class="form-label fw-bold" style="color: white; font-size: 0.95rem;">
+                    <i class="bi bi-droplet-fill me-1"></i>Wells
+                </label>
+                <div class="well-checkbox-container custom-scroll" style="max-height: 200px; overflow-y: auto;">
                     {% for field in gas_fields %}
                     <div class="field-wells" id="field_{{ field.id }}_wells" style="display: none;">
                         {% for well in field.wells.all %}
-                        <div class="form-check">
+                        <div class="form-check custom-checkbox">
                             <input class="form-check-input" type="checkbox" value="{{ well.id }}" 
                                    id="well_{{ well.id }}" name="wellSelector" data-field="{{ field.id }}">
                             <label class="form-check-label" for="well_{{ well.id }}" style="color: white;">
@@ -40,34 +44,40 @@
                 </div>
             </div>
 
-            <div class="mb-2">
-                <label class="form-label" style="color: white;">Date Range</label>
-                <div class="input-group input-group-sm">
-                    <input type="date" id="startDate" class="form-control"
+            <hr style="border-color: rgba(255,255,255,0.2);" />
+
+            <div class="mb-3">
+                <label class="form-label fw-bold" style="color: white; font-size: 0.95rem;">
+                    <i class="bi bi-calendar-range me-1"></i>Date Range
+                </label>
+                <div class="input-group input-group-sm mb-2">
+                    <span class="input-group-text" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;">
+                        <i class="bi bi-calendar-check"></i>
+                    </span>
+                    <input type="date" id="startDate" class="form-control custom-date-input"
                            value="{{ min_date|date:'Y-m-d' }}">
-                    <span class="input-group-text">to</span>
-                    <input type="date" id="endDate" class="form-control"
+                </div>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;">
+                        <i class="bi bi-calendar-x"></i>
+                    </span>
+                    <input type="date" id="endDate" class="form-control custom-date-input"
                            value="{{ max_date|date:'Y-m-d' }}">
                 </div>
             </div>
 
-            <div class="mb-2">
-                <label class="form-label" style="color: white;">X-Axis</label>
-                <select id="xAxisSelector" class="form-select form-select-sm">
-                    {% for value, label in x_axis_attributes %}
-                        <option value="{{ value }}">{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
             <div class="mb-3">
-                <label class="form-label" style="color: white;">Y-Axis Parameters</label>
+                <label class="form-label fw-bold" style="color: white; font-size: 0.95rem;">
+                    <i class="bi bi-bar-chart-line me-1"></i>Y-Axis Parameters
+                </label>
                 
                 <!-- Rate Parameters Group -->
-                <div class="parameter-group mb-2 border-bottom pb-2">
-                    <div class="fw-bold mb-1" style="color: white;">Rate Parameters</div>
+                <div class="parameter-group mb-2 pb-2" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+                    <div class="fw-bold mb-2 d-flex align-items-center" style="color: #E98108; font-size: 0.9rem;">
+                        <i class="bi bi-speedometer2 me-1"></i>Rate Parameters
+                    </div>
                     {% for value, label in rate_attributes %}
-                    <div class="form-check">
+                    <div class="form-check custom-checkbox">
                         <input class="form-check-input y-axis-input" type="checkbox" 
                                value="{{ value }}" id="y_{{ value }}" 
                                name="yAxisSelector" data-group="rate">
@@ -80,9 +90,11 @@
 
                 <!-- Cumulative Parameters Group -->
                 <div class="parameter-group mb-2">
-                    <div class="fw-bold mb-1" style="color: white;">Cumulative Parameters</div>
+                    <div class="fw-bold mb-2 d-flex align-items-center" style="color: #E98108; font-size: 0.9rem;">
+                        <i class="bi bi-graph-up-arrow me-1"></i>Cumulative Parameters
+                    </div>
                     {% for value, label in cumulative_attributes %}
-                    <div class="form-check">
+                    <div class="form-check custom-checkbox">
                         <input class="form-check-input y-axis-input" type="checkbox" 
                                value="{{ value }}" id="y_{{ value }}" 
                                name="yAxisSelector" data-group="cumulative">
@@ -95,31 +107,52 @@
             </div>
 
             <!-- Y-Axis Scale Option -->
-            <div class="fw-bold mb-1" style="color: white;">Logarithmic Scale</div>
             <div class="mb-3">
-                <div class="form-check">
+                <div class="fw-bold mb-2" style="color: white; font-size: 0.95rem;">
+                    <i class="bi bi-sliders me-1"></i>Scale Options
+                </div>
+                <div class="form-check custom-checkbox">
                     <input class="form-check-input" type="checkbox" id="logScale">
                     <label class="form-check-label" for="logScale" style="color: white;">
                         Logarithmic Scale
                     </label>
                 </div>
             </div>
-            <button id="clearSelection" class="btn btn-primary btn-sm">Clear Selection</button>
+            
+            <button id="clearSelection" class="btn btn-light btn-sm w-100 mb-2" style="font-weight: 600;">
+                <i class="bi bi-arrow-clockwise me-1"></i>Reset Filters
+            </button>
         </nav>
 
         <!-- Main Content -->
         <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2 class="h5 font-semibold mb-2">Production Analysis Chart</h2>
-
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="h4 mb-1" style="color: #257358; font-weight: 700;">
+                        <i class="bi bi-graph-up me-2"></i>Production Analysis Chart
+                    </h2>
+                    <p class="text-muted mb-0 small">Compare multiple wells across gas fields</p>
+                </div>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow-sm position-relative" id="chartContainer">
-                <canvas id="mainChart" class="w-100" style="height: 680px;"></canvas>
-                <div id="mainChartSkeleton" class="skeleton" style="position:absolute; inset:12px 12px 56px 12px; border-radius: 8px;"></div>
-                <div class="mt-3">
-                    <button id="last30Days" class="btn btn-primary btn-sm">Last 30 Days</button>
-                    <button id="lastYear" class="btn btn-primary btn-sm">Last Year</button>
-                    <button id="allData" class="btn btn-primary btn-sm">All Data</button>
+            <div class="bg-white p-4 rounded-lg shadow-sm position-relative" id="chartContainer" style="border: 2px solid #e9ecef; height: 750px;">
+                <canvas id="mainChart" class="w-100" style="height: 650px !important;"></canvas>
+                <div id="mainChartSkeleton" class="skeleton" style="position:absolute; inset:16px 16px 60px 16px; border-radius: 8px;"></div>
+                <div class="mt-4 d-flex gap-2 flex-wrap">
+                    <button id="last7Days" class="btn btn-outline-primary btn-sm period-btn">
+                        <i class="bi bi-calendar-week me-1"></i>Last 7 Days
+                    </button>
+                    <button id="last30Days" class="btn btn-outline-primary btn-sm period-btn">
+                        <i class="bi bi-calendar-month me-1"></i>Last 30 Days
+                    </button>
+                    <button id="last90Days" class="btn btn-outline-primary btn-sm period-btn">
+                        <i class="bi bi-calendar3 me-1"></i>Last 90 Days
+                    </button>
+                    <button id="lastYear" class="btn btn-outline-primary btn-sm period-btn">
+                        <i class="bi bi-calendar-year me-1"></i>Last Year
+                    </button>
+                    <button id="allData" class="btn btn-outline-secondary btn-sm period-btn">
+                        <i class="bi bi-calendar-range me-1"></i>All Data
+                    </button>
                 </div>
             </div>
         </main>
@@ -150,8 +183,8 @@
     }
     
     .custom-select:focus, .custom-input:focus {
-        border-color: white;
-        box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+        border-color: #E98108;
+        box-shadow: 0 0 0 3px rgba(233, 129, 8, 0.2);
         background: white;
     }
     
@@ -160,12 +193,17 @@
         border-radius: 4px;
         background: rgba(255,255,255,0.2);
         transition: all 0.3s ease;
+        cursor: pointer;
     }
     
     .custom-checkbox .form-check-input:checked {
-        background-color: white;
-        border-color: white;
-        color: var(--amber-primary);
+        background-color: #E98108;
+        border-color: #E98108;
+    }
+    
+    .custom-checkbox .form-check-input:hover {
+        border-color: rgba(255,255,255,0.8);
+        transform: scale(1.05);
     }
     
     .custom-checkbox .form-check-label {
@@ -199,40 +237,6 @@
         background: rgba(255,255,255,0.6);
     }
     
-    .btn-amber {
-        background: linear-gradient(135deg, var(--amber-primary) 0%, var(--amber-dark) 100%);
-        border: none;
-        color: white;
-        font-weight: 600;
-        padding: 8px 16px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
-    }
-    
-    .btn-amber:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(245, 158, 11, 0.4);
-        color: white;
-    }
-    
-    .btn-amber-outline {
-        background: transparent;
-        border: 2px solid var(--amber-primary);
-        color: var(--amber-primary);
-        font-weight: 600;
-        padding: 6px 14px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-amber-outline:hover {
-        background: var(--amber-primary);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
-    }
-    
     #clearSelection:hover {
         background: white !important;
         transform: translateY(-2px);
@@ -260,9 +264,50 @@
     #startDate, #endDate { font-size: 12px; }
     .field-wells { margin-left: 0rem; }
     
+    .custom-date-input {
+        background: rgba(255,255,255,0.9);
+        border-color: rgba(255,255,255,0.3);
+        color: #374151;
+        font-weight: 500;
+    }
+    
+    .custom-date-input:focus {
+        background: white;
+        border-color: #E98108;
+        box-shadow: 0 0 0 0.2rem rgba(233, 129, 8, 0.25);
+    }
+    
+    .period-btn {
+        transition: all 0.3s ease;
+        font-weight: 600;
+        border-width: 2px;
+    }
+    
+    .period-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .period-btn.active {
+        background: #257358;
+        border-color: #257358;
+        color: white;
+        box-shadow: 0 4px 8px rgba(37, 115, 88, 0.3);
+    }
+    
+    .period-btn i {
+        font-size: 0.85rem;
+    }
+    
     /* Chart container animations */
     #chartContainer {
         animation: fadeInUp 0.6s ease-out;
+        max-height: 750px;
+        overflow: hidden;
+    }
+    
+    #mainChart {
+        max-height: 650px !important;
     }
     
     @keyframes fadeInUp {
@@ -288,6 +333,7 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let mainChart;
 const colorPalette = [
@@ -302,14 +348,53 @@ function initializeCharts() {
         type: 'line',
         options: {
             responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 2,
             plugins: {
                 title: {
                     display: true,
-                    text: 'Custom Production Analysis'
+                    text: 'Production Analysis - Select wells to begin',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    },
+                    color: '#257358',
+                    padding: 20
                 },
                 tooltip: {
                     mode: 'index',
-                    intersect: false
+                    intersect: false,
+                    backgroundColor: 'rgba(37, 115, 88, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#E98108',
+                    borderWidth: 2,
+                    padding: 12,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(2);
+                            }
+                            return label;
+                        }
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        }
+                    }
                 }
             },
             interaction: {
@@ -322,6 +407,34 @@ function initializeCharts() {
                     type: 'linear',
                     display: true,
                     position: 'left',
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        }
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
                 }
             }
         }
@@ -372,12 +485,16 @@ function updateCharts() {
         .map(checkbox => checkbox.value);
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
-    const xAxis = document.getElementById('xAxisSelector').value;
     const selectedYAxis = Array.from(document.querySelectorAll('input[name="yAxisSelector"]:checked'))
         .map(checkbox => checkbox.value);
     const isLogScale = document.getElementById('logScale').checked;
 
     if (selectedWells.length === 0 || selectedYAxis.length === 0) {
+        // Clear chart if no wells or parameters selected
+        mainChart.data.labels = [];
+        mainChart.data.datasets = [];
+        mainChart.options.plugins.title.text = 'Production Analysis - Select wells and parameters to begin';
+        mainChart.update();
         return;
     }
 
@@ -385,11 +502,20 @@ function updateCharts() {
     mainChart.options.scales.y.type = isLogScale ? 'logarithmic' : 'linear';
 
     // Create promises for all well data requests
-    const promises = selectedWells.map(wellId =>
-        fetch(`/api/well-data/?well_id=${wellId}&start_date=${startDate}&end_date=${endDate}`)
+    const promises = selectedWells.map(wellId => {
+        const params = new URLSearchParams({ 
+            well_id: wellId,
+            start_date: startDate || '',
+            end_date: endDate || ''
+        });
+        return fetch('/api/well-data/?' + params.toString())
             .then(response => response.json())
             .then(data => ({wellId, data}))
-    );
+            .catch(error => {
+                console.error(`Error fetching data for well ${wellId}:`, error);
+                return {wellId, data: []};
+            });
+    });
 
     Promise.all(promises)
         .then(results => {
@@ -407,7 +533,7 @@ function updateCharts() {
             
             // Create a mapping of dates to values for each well
             results.forEach(({wellId, data}) => {
-                const wellName = document.querySelector(`label[for="well_${wellId}"]`).textContent.trim();
+                const wellName = document.querySelector(`label[for="well_${wellId}"]`)?.textContent.trim() || `Well ${wellId}`;
                 const dateMap = new Map(data.map(entry => [entry.date, entry]));
                 
                 selectedYAxis.forEach(yAxis => {
@@ -417,11 +543,18 @@ function updateCharts() {
                     });
                     
                     datasets.push({
-                        label: `${wellName} - ${yAxis.replace('_', ' ').toUpperCase()}`,
+                        label: `${wellName} - ${yAxis.replace(/_/g, ' ').toUpperCase()}`,
                         data: dataPoints,
                         borderColor: colorPalette[colorIndex % colorPalette.length],
-                        tension: 0.1,
-                        spanGaps: true // This will connect points across gaps
+                        backgroundColor: colorPalette[colorIndex % colorPalette.length].replace('rgb', 'rgba').replace(')', ', 0.1)'),
+                        tension: 0.4,
+                        spanGaps: true,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#fff',
+                        pointBorderWidth: 2,
+                        fill: true
                     });
                     colorIndex++;
                 });
@@ -434,17 +567,50 @@ function updateCharts() {
             };
             
             // Update title based on selected parameters group
-            const selectedGroup = document.querySelector('input[name="yAxisSelector"]:checked').dataset.group;
+            const checkedInput = document.querySelector('input[name="yAxisSelector"]:checked');
+            const selectedGroup = checkedInput ? checkedInput.dataset.group : 'rate';
             const groupTitle = selectedGroup === 'rate' ? 'Rate Parameters' : 'Cumulative Parameters';
             mainChart.options.plugins.title.text = `Production Analysis - ${groupTitle}`;
             
             mainChart.update();
             const sk = document.getElementById('mainChartSkeleton');
             if (sk) sk.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            mainChart.data.labels = [];
+            mainChart.data.datasets = [];
+            mainChart.update();
         });
 }
 
 function fetchDataForPeriod(period) {
+    // Remove active class from all buttons
+    document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-primary');
+        if (btn.id === 'allData') {
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-outline-secondary');
+        }
+    });
+    
+    // Add active class to clicked button
+    const buttonMap = {
+        'last7Days': document.getElementById('last7Days'),
+        'last30Days': document.getElementById('last30Days'),
+        'last90Days': document.getElementById('last90Days'),
+        'lastYear': document.getElementById('lastYear'),
+        'allData': document.getElementById('allData')
+    };
+    
+    const activeBtn = buttonMap[period];
+    if (activeBtn) {
+        activeBtn.classList.remove('btn-outline-primary', 'btn-outline-secondary');
+        activeBtn.classList.add('btn-primary', 'active');
+    }
+    
     const selectedWells = Array.from(document.querySelectorAll('input[name="wellSelector"]:checked'))
         .map(checkbox => checkbox.value);
     
@@ -452,36 +618,47 @@ function fetchDataForPeriod(period) {
         return; // No wells selected
     }
 
-    const endDate = new Date();
-    let startDate;
-
     // Fetch the latest date from the selected well's data
-    const wellId = selectedWells[0]; // Assuming we are only dealing with one selected well for simplicity
-    fetch(`/api/well-data/?well_id=${wellId}`)
+    const wellId = selectedWells[0];
+    const params = new URLSearchParams({ well_id: wellId });
+    fetch('/api/well-data/?' + params.toString())
         .then(response => response.json())
         .then(data => {
-            if (data.length === 0) return; // No data available for the selected well
+            if (data.length === 0) return;
 
-            const latestDate = new Date(data[data.length - 1].date); // Get the latest date from the data
+            const latestDate = new Date(data[data.length - 1].date);
+            let startDate;
 
-            if (period === 'last30Days') {
+            if (period === 'last7Days') {
+                startDate = new Date(latestDate);
+                startDate.setDate(latestDate.getDate() - 7);
+            } else if (period === 'last30Days') {
                 startDate = new Date(latestDate);
                 startDate.setDate(latestDate.getDate() - 30);
+            } else if (period === 'last90Days') {
+                startDate = new Date(latestDate);
+                startDate.setDate(latestDate.getDate() - 90);
             } else if (period === 'lastYear') {
                 startDate = new Date(latestDate);
                 startDate.setFullYear(latestDate.getFullYear() - 1);
             } else {
-                startDate = null; // For all data, we will not filter by date
+                // All data - clear date filters
+                document.getElementById('startDate').value = '';
+                document.getElementById('endDate').value = '';
+                updateCharts();
+                return;
             }
 
             const startDateString = startDate ? startDate.toISOString().split('T')[0] : '';
             const endDateString = latestDate.toISOString().split('T')[0];
 
-            // Update the date inputs
             document.getElementById('startDate').value = startDateString;
             document.getElementById('endDate').value = endDateString;
 
             updateCharts();
+        })
+        .catch(error => {
+            console.error('Error fetching period data:', error);
         });
 }
 
@@ -491,15 +668,35 @@ function clearSelectionsAndInitializeChart() {
         checkbox.checked = false;
     });
     document.getElementById('gasFieldSelector').value = '';
+    
+    // Clear y-axis selections
+    document.querySelectorAll('input[name="yAxisSelector"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    // Reset log scale
+    document.getElementById('logScale').checked = false;
 
     // Reset the chart to its initial state
     mainChart.data.labels = [];
     mainChart.data.datasets = [];
-    mainChart.options.plugins.title.text = 'Custom Production Analysis'; // Reset title
-    mainChart.update(); // Update the chart to reflect changes
+    mainChart.options.plugins.title.text = 'Production Analysis - Select wells to begin';
+    mainChart.update();
 
-    // Re-initialize the chart
-    initializeCharts();
+    // Hide all well groups
+    document.querySelectorAll('.field-wells').forEach(div => {
+        div.style.display = 'none';
+    });
+    
+    // Clear active button states
+    document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.classList.remove('active', 'btn-primary');
+        if (btn.id === 'allData') {
+            btn.classList.add('btn-outline-secondary');
+        } else {
+            btn.classList.add('btn-outline-primary');
+        }
+    });
 }
 
 // Initialize charts and set up event listeners
@@ -510,7 +707,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('gasFieldSelector').addEventListener('change', handleGasFieldSelection);
     
     // Add event listeners for all inputs
-    const controls = ['startDate', 'endDate', 'xAxisSelector', 'logScale'];
+    const controls = ['startDate', 'endDate', 'logScale'];
     controls.forEach(id => {
         document.getElementById(id).addEventListener('change', updateCharts);
     });
@@ -530,14 +727,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     
-    // Event listeners for the new buttons
+    // Event listeners for the period buttons
+    document.getElementById('last7Days').addEventListener('click', () => fetchDataForPeriod('last7Days'));
     document.getElementById('last30Days').addEventListener('click', () => fetchDataForPeriod('last30Days'));
+    document.getElementById('last90Days').addEventListener('click', () => fetchDataForPeriod('last90Days'));
     document.getElementById('lastYear').addEventListener('click', () => fetchDataForPeriod('lastYear'));
-    document.getElementById('allData').addEventListener('click', () => {
-        document.getElementById('startDate').value = '';
-        document.getElementById('endDate').value = '';
-        updateCharts();
-    });
+    document.getElementById('allData').addEventListener('click', () => fetchDataForPeriod('allData'));
 
     // Clear selection button functionality
     document.getElementById('clearSelection').addEventListener('click', clearSelectionsAndInitializeChart);

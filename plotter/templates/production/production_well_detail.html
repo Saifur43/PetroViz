@@ -1,0 +1,699 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3" style="background-color: #257358; color: white; min-height: 100vh;">
+            <div class="card-header text-white" style="background-color: #257358; border-radius: 8px 8px 0 0; padding: 10px;">
+                <h5 class="mb-0" style="color: #E98108;">Production Data Filters</h5>
+            </div>
+            
+            <!-- Well Name Display -->
+            <div class="mb-3 mt-3">
+                <div class="well-info-card p-3 rounded" style="background: linear-gradient(135deg, rgba(233, 129, 8, 0.1) 0%, rgba(233, 129, 8, 0.05) 100%); border: 2px solid rgba(233, 129, 8, 0.3);">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-droplet-fill me-2" style="color: #E98108; font-size: 1.5rem;"></i>
+                        <div>
+                            <h6 class="mb-0" style="color: #E98108; font-weight: 700;">{{ well.name }}</h6>
+                            <small style="color: rgba(255,255,255,0.8);">{{ well.gas_field.name }}</small>
+                        </div>
+                    </div>
+                    <a href="{% url 'production_field_detail' well.gas_field.id %}" class="btn btn-sm w-100 mt-2" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); font-weight: 600;">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Field
+                    </a>
+                </div>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,0.2);" />
+
+            <div class="mb-3">
+                <label class="form-label fw-bold" style="color: white; font-size: 0.95rem;">
+                    <i class="bi bi-calendar-range me-1"></i>Date Range
+                </label>
+                <div class="input-group input-group-sm mb-2">
+                    <span class="input-group-text" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;">
+                        <i class="bi bi-calendar-check"></i>
+                    </span>
+                    <input type="date" id="startDate" class="form-control custom-date-input">
+                </div>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;">
+                        <i class="bi bi-calendar-x"></i>
+                    </span>
+                    <input type="date" id="endDate" class="form-control custom-date-input">
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label" style="color: white;">X-Axis</label>
+                <select id="xAxisSelector" class="form-select form-select-sm">
+                    <option value="date">Date</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold" style="color: white; font-size: 0.95rem;">
+                    <i class="bi bi-bar-chart-line me-1"></i>Y-Axis Parameters
+                </label>
+                
+                <!-- Rate Parameters Group -->
+                <div class="parameter-group mb-2 pb-2" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+                    <div class="fw-bold mb-2 d-flex align-items-center" style="color: #E98108; font-size: 0.9rem;">
+                        <i class="bi bi-speedometer2 me-1"></i>Rate Parameters
+                    </div>
+                    <div class="form-check custom-checkbox">
+                        <input class="form-check-input y-axis-input" type="checkbox" 
+                               value="flow_rate" id="y_flow_rate" 
+                               name="yAxisSelector" data-group="rate" checked>
+                        <label class="form-check-label" for="y_flow_rate" style="color: white;">
+                            Flow Rate
+                        </label>
+                    </div>
+                    <div class="form-check custom-checkbox">
+                        <input class="form-check-input y-axis-input" type="checkbox" 
+                               value="water_production" id="y_water_production" 
+                               name="yAxisSelector" data-group="rate">
+                        <label class="form-check-label" for="y_water_production" style="color: white;">
+                            Water Production
+                        </label>
+                    </div>
+                    <div class="form-check custom-checkbox">
+                        <input class="form-check-input y-axis-input" type="checkbox" 
+                               value="condensate_production" id="y_condensate_production" 
+                               name="yAxisSelector" data-group="rate">
+                        <label class="form-check-label" for="y_condensate_production" style="color: white;">
+                            Condensate Production
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Cumulative Parameters Group -->
+                <div class="parameter-group mb-2">
+                    <div class="fw-bold mb-2 d-flex align-items-center" style="color: #E98108; font-size: 0.9rem;">
+                        <i class="bi bi-graph-up-arrow me-1"></i>Cumulative Parameters
+                    </div>
+                    <div class="form-check custom-checkbox">
+                        <input class="form-check-input y-axis-input" type="checkbox" 
+                               value="cumulative_flow_rate" id="y_cumulative_flow_rate" 
+                               name="yAxisSelector" data-group="cumulative">
+                        <label class="form-check-label" for="y_cumulative_flow_rate" style="color: white;">
+                            Cumulative Flow Rate
+                        </label>
+                    </div>
+                    <div class="form-check custom-checkbox">
+                        <input class="form-check-input y-axis-input" type="checkbox" 
+                               value="cumulative_water" id="y_cumulative_water" 
+                               name="yAxisSelector" data-group="cumulative">
+                        <label class="form-check-label" for="y_cumulative_water" style="color: white;">
+                            Cumulative Water
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Y-Axis Scale Option -->
+            <div class="mb-3">
+                <div class="fw-bold mb-2" style="color: white; font-size: 0.95rem;">
+                    <i class="bi bi-sliders me-1"></i>Scale Options
+                </div>
+                <div class="form-check custom-checkbox">
+                    <input class="form-check-input" type="checkbox" id="logScale">
+                    <label class="form-check-label" for="logScale" style="color: white;">
+                        Logarithmic Scale
+                    </label>
+                </div>
+            </div>
+            
+            <button id="clearSelection" class="btn btn-light btn-sm w-100 mb-2" style="font-weight: 600;">
+                <i class="bi bi-arrow-clockwise me-1"></i>Reset Filters
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="h4 mb-1" style="color: #257358; font-weight: 700;">
+                        <i class="bi bi-graph-up me-2"></i>Production Analysis
+                    </h2>
+                    <p class="text-muted mb-0 small">{{ well.name }} - {{ well.gas_field.name }}</p>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm position-relative" id="chartContainer" style="border: 2px solid #e9ecef; height: 750px;">
+                <canvas id="mainChart" class="w-100" style="height: 650px !important;"></canvas>
+                <div id="mainChartSkeleton" class="skeleton" style="position:absolute; inset:16px 16px 60px 16px; border-radius: 8px;"></div>
+                <div class="mt-4 d-flex gap-2 flex-wrap">
+                    <button id="last7Days" class="btn btn-outline-primary btn-sm period-btn">
+                        <i class="bi bi-calendar-week me-1"></i>Last 7 Days
+                    </button>
+                    <button id="last30Days" class="btn btn-primary btn-sm period-btn active">
+                        <i class="bi bi-calendar-month me-1"></i>Last 30 Days
+                    </button>
+                    <button id="last90Days" class="btn btn-outline-primary btn-sm period-btn">
+                        <i class="bi bi-calendar3 me-1"></i>Last 90 Days
+                    </button>
+                    <button id="lastYear" class="btn btn-outline-primary btn-sm period-btn">
+                        <i class="bi bi-calendar-year me-1"></i>Last Year
+                    </button>
+                    <button id="allData" class="btn btn-outline-secondary btn-sm period-btn">
+                        <i class="bi bi-calendar-range me-1"></i>All Data
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+    :root {
+        --amber-primary: #F59E0B;
+        --amber-light: #FEF3C7;
+        --amber-dark: #D97706;
+    }
+    .skeleton { position: relative; overflow: hidden; background: #e9ecef; }
+    .skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+    
+    .text-amber { color: var(--amber-primary) !important; }
+    .filter-section { transition: all 0.3s ease; }
+    .filter-section:hover { transform: translateY(-2px); }
+    
+    .custom-select, .custom-input {
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.9);
+        color: #374151;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .custom-select:focus, .custom-input:focus {
+        border-color: white;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+        background: white;
+    }
+    
+    .custom-checkbox .form-check-input {
+        border: 2px solid rgba(255,255,255,0.5);
+        border-radius: 4px;
+        background: rgba(255,255,255,0.2);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .custom-checkbox .form-check-input:checked {
+        background-color: #E98108;
+        border-color: #E98108;
+    }
+    
+    .custom-checkbox .form-check-input:hover {
+        border-color: rgba(255,255,255,0.8);
+        transform: scale(1.05);
+    }
+    
+    .custom-checkbox .form-check-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .custom-checkbox:hover .form-check-label {
+        color: #FEF3C7 !important;
+        transform: translateX(2px);
+    }
+    
+    .custom-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .custom-scroll::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+    }
+    
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.4);
+        border-radius: 3px;
+    }
+    
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.6);
+    }
+    
+    .btn-amber {
+        background: linear-gradient(135deg, var(--amber-primary) 0%, var(--amber-dark) 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+    }
+    
+    .btn-amber:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(245, 158, 11, 0.4);
+        color: white;
+    }
+    
+    .btn-amber-outline {
+        background: transparent;
+        border: 2px solid var(--amber-primary);
+        color: var(--amber-primary);
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-amber-outline:hover {
+        background: var(--amber-primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+    }
+    
+    #clearSelection:hover {
+        background: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
+    }
+    
+    .sidebar {
+        border-right: 3px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    .text-sm { font-size: 0.875rem; }
+    .form-check-input-sm {
+        width: 0.875rem;
+        height: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    .sidebar { font-size: 0.875rem; }
+    .form-check { margin-bottom: 0.25rem; }
+    .parameter-group { margin-left: 0rem; }
+    input[type="date"] { font-size: 12px; }
+    #startDate, #endDate { font-size: 12px; }
+    
+    .custom-date-input {
+        background: rgba(255,255,255,0.9);
+        border-color: rgba(255,255,255,0.3);
+        color: #374151;
+        font-weight: 500;
+    }
+    
+    .custom-date-input:focus {
+        background: white;
+        border-color: #E98108;
+        box-shadow: 0 0 0 0.2rem rgba(233, 129, 8, 0.25);
+    }
+    
+    .period-btn {
+        transition: all 0.3s ease;
+        font-weight: 600;
+        border-width: 2px;
+    }
+    
+    .period-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .period-btn.active {
+        background: #257358;
+        border-color: #257358;
+        color: white;
+        box-shadow: 0 4px 8px rgba(37, 115, 88, 0.3);
+    }
+    
+    .period-btn i {
+        font-size: 0.85rem;
+    }
+    
+    /* Chart container animations */
+    #chartContainer {
+        animation: fadeInUp 0.6s ease-out;
+        max-height: 750px;
+        overflow: hidden;
+    }
+    
+    #mainChart {
+        max-height: 650px !important;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .sidebar {
+            background: linear-gradient(135deg, #F59E0B 0%, #F97316 100%) !important;
+        }
+        
+        .filter-section {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ well.id|json_script:"well-id" }}
+<script>
+const wellId = JSON.parse(document.getElementById('well-id').textContent);
+let mainChart;
+const colorPalette = [
+    'rgb(153, 102, 255)', 'rgb(54, 162, 235)', 'rgb(255, 206, 86)',
+    'rgb(75, 192, 192)', 'rgb(255, 99, 255)', 'rgb(255, 159, 64)',
+    'rgb(199, 199, 199)', 'rgb(83, 102, 255)', 'rgb(255, 99, 132)'
+];
+
+function initializeCharts() {
+    const mainCtx = document.getElementById('mainChart').getContext('2d');
+    mainChart = new Chart(mainCtx, {
+        type: 'line',
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 2,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Production Analysis - Rate Parameters',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    },
+                    color: '#257358',
+                    padding: 20
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(37, 115, 88, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#E98108',
+                    borderWidth: 2,
+                    padding: 12,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(2);
+                            }
+                            return label;
+                        }
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        }
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        }
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
+                }
+            }
+        }
+    });
+    const sk = document.getElementById('mainChartSkeleton');
+    if (sk) sk.style.display = 'none';
+}
+
+// URL for fetching well data
+const wellDataUrl = "{% url 'well_data' %}";
+
+function handleYAxisSelection(checkbox) {
+    if (checkbox.checked) {
+        const selectedGroup = checkbox.dataset.group;
+        
+        // Uncheck all checkboxes from other groups
+        document.querySelectorAll('.y-axis-input').forEach(input => {
+            if (input.dataset.group !== selectedGroup) {
+                input.checked = false;
+            }
+        });
+    }
+}
+
+function updateCharts() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const xAxis = document.getElementById('xAxisSelector').value;
+    const selectedYAxis = Array.from(document.querySelectorAll('input[name="yAxisSelector"]:checked'))
+        .map(checkbox => checkbox.value);
+    const isLogScale = document.getElementById('logScale').checked;
+
+    if (selectedYAxis.length === 0) {
+        // Clear the chart if no parameters selected
+        mainChart.data.labels = [];
+        mainChart.data.datasets = [];
+        mainChart.update();
+        return;
+    }
+
+    // Update chart scale type
+    mainChart.options.scales.y.type = isLogScale ? 'logarithmic' : 'linear';
+
+    // Fetch data for the single well
+    const params = new URLSearchParams({ well_id: wellId });
+    if (startDate) params.set('start_date', startDate);
+    if (endDate) params.set('end_date', endDate);
+    fetch(wellDataUrl + '?' + params.toString())
+        .then(response => response.json())
+        .then(data => {
+            if (!data || data.length === 0) {
+                // Clear chart if no data
+                mainChart.data.labels = [];
+                mainChart.data.datasets = [];
+                mainChart.update();
+                return;
+            }
+
+            const datasets = [];
+            let colorIndex = 0;
+            
+            const dates = data.map(entry => entry.date);
+            
+            selectedYAxis.forEach(yAxis => {
+                const dataPoints = data.map(entry => entry[yAxis]);
+                
+                datasets.push({
+                    label: yAxis.replace(/_/g, ' ').toUpperCase(),
+                    data: dataPoints,
+                    borderColor: colorPalette[colorIndex % colorPalette.length],
+                    backgroundColor: colorPalette[colorIndex % colorPalette.length].replace('rgb', 'rgba').replace(')', ', 0.1)'),
+                    tension: 0.4,
+                    spanGaps: true,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#fff',
+                    pointBorderWidth: 2,
+                    fill: true
+                });
+                colorIndex++;
+            });
+
+            // Update chart data
+            mainChart.data = {
+                labels: dates,
+                datasets: datasets
+            };
+            
+            // Update title based on selected parameters group
+            const checkedInput = document.querySelector('input[name="yAxisSelector"]:checked');
+            const selectedGroup = checkedInput ? checkedInput.dataset.group : 'rate';
+            const groupTitle = selectedGroup === 'rate' ? 'Rate Parameters' : 'Cumulative Parameters';
+            mainChart.options.plugins.title.text = `Production Analysis - ${groupTitle}`;
+            
+            mainChart.update();
+            const sk = document.getElementById('mainChartSkeleton');
+            if (sk) sk.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            mainChart.data.labels = [];
+            mainChart.data.datasets = [];
+            mainChart.update();
+        });
+}
+
+function fetchDataForPeriod(period) {
+    // Remove active class from all buttons
+    document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-primary');
+        if (btn.id === 'allData') {
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-outline-secondary');
+        }
+    });
+    
+    // Add active class to clicked button
+    const buttonMap = {
+        'last7Days': document.getElementById('last7Days'),
+        'last30Days': document.getElementById('last30Days'),
+        'last90Days': document.getElementById('last90Days'),
+        'lastYear': document.getElementById('lastYear'),
+        'allData': document.getElementById('allData')
+    };
+    
+    const activeBtn = buttonMap[period];
+    if (activeBtn) {
+        activeBtn.classList.remove('btn-outline-primary', 'btn-outline-secondary');
+        activeBtn.classList.add('btn-primary', 'active');
+    }
+    
+    // Fetch the latest date from the well's data
+    const params2 = new URLSearchParams({ well_id: wellId });
+    fetch(wellDataUrl + '?' + params2.toString())
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) return;
+
+            const latestDate = new Date(data[data.length - 1].date);
+            let startDate;
+
+            if (period === 'last7Days') {
+                startDate = new Date(latestDate);
+                startDate.setDate(latestDate.getDate() - 7);
+            } else if (period === 'last30Days') {
+                startDate = new Date(latestDate);
+                startDate.setDate(latestDate.getDate() - 30);
+            } else if (period === 'last90Days') {
+                startDate = new Date(latestDate);
+                startDate.setDate(latestDate.getDate() - 90);
+            } else if (period === 'lastYear') {
+                startDate = new Date(latestDate);
+                startDate.setFullYear(latestDate.getFullYear() - 1);
+            } else {
+                startDate = null;
+            }
+
+            const startDateString = startDate ? startDate.toISOString().split('T')[0] : '';
+            const endDateString = latestDate.toISOString().split('T')[0];
+
+            document.getElementById('startDate').value = startDateString;
+            document.getElementById('endDate').value = endDateString;
+
+            updateCharts();
+        });
+}
+
+function clearSelectionsAndInitializeChart() {
+    // Clear all y-axis selections except the first one (flow_rate)
+    document.querySelectorAll('input[name="yAxisSelector"]').forEach((checkbox, index) => {
+        checkbox.checked = (index === 0); // Only check the first one
+    });
+
+    // Reset log scale
+    document.getElementById('logScale').checked = false;
+
+    // Reset the chart to its initial state
+    mainChart.data.labels = [];
+    mainChart.data.datasets = [];
+    mainChart.options.plugins.title.text = 'Production Analysis - Rate Parameters';
+    mainChart.update();
+
+    // Load last 30 days
+    fetchDataForPeriod('last30Days');
+}
+
+// Initialize charts and set up event listeners
+document.addEventListener('DOMContentLoaded', () => {  
+    initializeCharts();
+    
+    // Add event listeners for all inputs
+    const controls = ['startDate', 'endDate', 'xAxisSelector', 'logScale'];
+    controls.forEach(id => {
+        document.getElementById(id).addEventListener('change', updateCharts);
+    });
+
+    // Add event listeners for y-axis checkboxes with group handling
+    document.querySelectorAll('.y-axis-input')
+        .forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                handleYAxisSelection(checkbox);
+                updateCharts();
+            });
+        });
+    
+    // Event listeners for the period buttons
+    document.getElementById('last7Days').addEventListener('click', () => fetchDataForPeriod('last7Days'));
+    document.getElementById('last30Days').addEventListener('click', () => fetchDataForPeriod('last30Days'));
+    document.getElementById('last90Days').addEventListener('click', () => fetchDataForPeriod('last90Days'));
+    document.getElementById('lastYear').addEventListener('click', () => fetchDataForPeriod('lastYear'));
+    document.getElementById('allData').addEventListener('click', () => fetchDataForPeriod('allData'));
+
+    // Clear selection button functionality
+    document.getElementById('clearSelection').addEventListener('click', clearSelectionsAndInitializeChart);
+    
+    // Load last 30 days on initial page load
+    fetchDataForPeriod('last30Days');
+});
+</script>
+
+{% endblock %}

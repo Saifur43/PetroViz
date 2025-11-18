@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
-from django.db.models import Min, Max
+from django.db.models import Min, Max, Sum
 from django.template.loader import get_template
 from datetime import datetime, timedelta
 from django.http import JsonResponse
@@ -189,7 +189,104 @@ def production_graph(request):
         'min_date': date_range['min_date'],
         'max_date': date_range['max_date']
     }
-    return render(request, 'visualization/production_graph.html', context)
+    return render(request, 'production/production_graph.html', context)
+
+
+@login_required
+def production_fields(request):
+    """Show all gas fields as the entry point for production data exploration."""
+    gas_fields = GasField.objects.all().order_by('name')
+    return render(request, 'production/production_fields.html', {
+        'gas_fields': gas_fields,
+    })
+
+
+@login_required
+def production_field_detail(request, field_id):
+    """Show details for a specific gas field and its wells.
+
+    The page lists wells and provides links to per-well production graphs.
+    """
+    try:
+        gas_field = GasField.objects.prefetch_related('wells').get(id=field_id)
+    except GasField.DoesNotExist:
+        messages.error(request, 'Gas field not found')
+        return redirect('production_fields')
+
+    # Simple aggregates for the field (min/max date across wells)
+    prod_qs = ProductionData.objects.filter(well__gas_field=gas_field)
+    date_range = prod_qs.aggregate(min_date=Min('date'), max_date=Max('date'))
+
+    wells = gas_field.wells.all().order_by('name')
+
+    # Compute field-level aggregates
+    number_of_wells = wells.count()
+    total_area = gas_field.total_area
+    discovery_date = gas_field.discovery_date
+
+    total_cumulative_flow = 0.0
+    total_cumulative_water = 0.0
+    total_cumulative_condensate = 0.0
+    total_latest_flow_rate = 0.0
+
+    for well in wells:
+        latest = ProductionData.objects.filter(well=well).order_by('-date').first()
+        if latest:
+            # Prefer recorded cumulative fields when present
+            try:
+                cum_flow = float(latest.cumulative_flow_rate or 0)
+            except Exception:
+                cum_flow = 0.0
+            total_cumulative_flow += cum_flow
+
+            try:
+                total_cumulative_water += float(latest.cumulative_water or 0)
+            except Exception:
+                # If cumulative_water isn't stored, try computing sum of water_production
+                total_cumulative_water += ProductionData.objects.filter(well=well).aggregate(s=Sum('water_production'))['s'] or 0
+
+            try:
+                total_cumulative_condensate += float(latest.cumulative_condensate or 0)
+            except Exception:
+                total_cumulative_condensate += ProductionData.objects.filter(well=well).aggregate(s=Sum('condensate_production'))['s'] or 0
+
+            try:
+                total_latest_flow_rate += float(latest.flow_rate or 0)
+            except Exception:
+                total_latest_flow_rate += 0.0
+
+    context = {
+        'gas_field': gas_field,
+        'wells': wells,
+        'min_date': date_range['min_date'],
+        'max_date': date_range['max_date'],
+        'number_of_wells': number_of_wells,
+        'total_area': total_area,
+        'discovery_date': discovery_date,
+        'total_cumulative_flow': total_cumulative_flow,
+        'total_cumulative_water': total_cumulative_water,
+        'total_cumulative_condensate': total_cumulative_condensate,
+        'total_latest_flow_rate': total_latest_flow_rate,
+    }
+
+    return render(request, 'production/production_field_detail.html', context)
+
+
+@login_required
+def production_well_detail(request, well_id):
+    """Show production graphs for a single well. The template will fetch JSON from the
+    existing `get_well_data` endpoint and render charts client-side.
+    """
+    try:
+        well = Well.objects.select_related('gas_field').get(id=well_id)
+    except Well.DoesNotExist:
+        messages.error(request, 'Well not found')
+        return redirect('production_fields')
+
+    # Provide a small context; the template uses AJAX to load time-series
+    return render(request, 'production/production_well_detail.html', {
+        'well': well,
+    })
 
 @login_required
 def get_well_data(request):
@@ -265,7 +362,7 @@ def exploration_timeline(request):
         milestones = ExplorationTimeline.objects.all().order_by('year')
     
     categories = ExplorationCategory.objects.all()
-    return render(request, 'visualization/exploration_timeline.html', {'milestones': milestones, 'categories': categories})
+    return render(request, 'visualization/production/exploration_timeline.html', {'milestones': milestones, 'categories': categories})
 
 
 @login_required
