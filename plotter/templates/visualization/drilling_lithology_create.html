@@ -1,148 +1,337 @@
 {% extends 'daily_reports/base_dailyr.html' %}
 
 {% block bha_content %}
-<div class="container">
-  <div class="row">
-    <div class="col-md-8 offset-md-2">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h4 class="card-title">Add Drilling Lithology</h4>
-          <p class="text-muted">Add an interval and lithology percentages. Total must be ≤ 100%.</p>
+<style>
+  /* Form Container */
+  .form-container {
+    max-width: 900px;
+    margin: 2rem auto;
+  }
 
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {% if messages %}
-              {% for message in messages %}
-                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">{{ message }}</div>
-              {% endfor %}
-            {% endif %}
+  /* Modern Form Card */
+  .form-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
 
-            {{ form.non_field_errors }}
+  .form-card-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border: none;
+  }
 
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Drilling Report</label>
-                {{ form.drilling_report }}
-                {{ form.drilling_report.errors }}
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Depth From (m)</label>
-                {{ form.depth_from }}
-                {{ form.depth_from.errors }}
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Depth To (m)</label>
-                {{ form.depth_to }}
-                {{ form.depth_to.errors }}
-              </div>
+  .form-card-header h4 {
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
 
-              <div class="col-12">
-                <label class="form-label">Percentages (total ≤ 100%)</label>
-                <div class="row g-2">
-                  <div class="col-md-3">
-                    <div class="input-group">
-                      <span class="input-group-text">Shale %</span>
-                      {{ form.shale_percentage }}
-                    </div>
-                    {{ form.shale_percentage.errors }}
-                  </div>
-                  <div class="col-md-3">
-                    <div class="input-group">
-                      <span class="input-group-text">Sand %</span>
-                      {{ form.sand_percentage }}
-                    </div>
-                    {{ form.sand_percentage.errors }}
-                  </div>
-                  <div class="col-md-3">
-                    <div class="input-group">
-                      <span class="input-group-text">Clay %</span>
-                      {{ form.clay_percentage }}
-                    </div>
-                    {{ form.clay_percentage.errors }}
-                  </div>
-                  <div class="col-md-3">
-                    <div class="input-group">
-                      <span class="input-group-text">Silt %</span>
-                      {{ form.slit_percentage }}
-                    </div>
-                    {{ form.slit_percentage.errors }}
-                  </div>
-                </div>
-              </div>
+  .form-card-header h4 i {
+    color: var(--secondary-amber);
+    font-size: 1.75rem;
+  }
 
-              <!-- Descriptions for each major lithology -->
-              <div class="col-12 mt-2">
-                <label class="form-label">Lithology Descriptions (optional)</label>
-                <div class="row g-2">
-                  <div class="col-md-6">
-                    <label class="form-label small">Shale description</label>
-                    {{ form.shale_description }}
-                    {{ form.shale_description.errors }}
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label small">Sand description</label>
-                    {{ form.sand_description }}
-                    {{ form.sand_description.errors }}
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label small">Clay description</label>
-                    {{ form.clay_description }}
-                    {{ form.clay_description.errors }}
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label small">Silt description</label>
-                    {{ form.slit_description }}
-                    {{ form.slit_description.errors }}
-                  </div>
-                </div>
-              </div>
+  .form-card-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+  }
 
-              <!-- Coal and Limestone percentages + descriptions -->
-              <div class="col-12 mt-2">
-                <label class="form-label">Other components</label>
-                <div class="row g-2">
-                  <div class="col-md-3">
-                    <div class="input-group">
-                      <span class="input-group-text">Coal %</span>
-                      {{ form.coal_percentage }}
-                    </div>
-                    {{ form.coal_percentage.errors }}
-                  </div>
-                  <div class="col-md-3">
-                    <div class="input-group">
-                      <span class="input-group-text">Limestone %</span>
-                      {{ form.limestone_percentage }}
-                    </div>
-                    {{ form.limestone_percentage.errors }}
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label small">Coal description</label>
-                    {{ form.coal_description }}
-                    {{ form.coal_description.errors }}
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label small">Limestone description</label>
-                    {{ form.limestone_description }}
-                    {{ form.limestone_description.errors }}
-                  </div>
-                </div>
-              </div>
+  .form-card-body {
+    padding: 2rem;
+  }
 
-              <div class="col-12 mt-2">
-                <label class="form-label">Description</label>
-                {{ form.description }}
-                {{ form.description.errors }}
-              </div>
+  /* Section Headers */
+  .section-header {
+    background: linear-gradient(135deg, rgba(19, 83, 163, 0.05) 0%, rgba(37, 115, 88, 0.05) 100%);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--secondary-amber);
+    margin-bottom: 1rem;
+    margin-top: 1.5rem;
+  }
 
+  .section-header:first-child {
+    margin-top: 0;
+  }
+
+  .section-header h6 {
+    margin: 0;
+    font-weight: 700;
+    color: var(--primary-blue);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-header h6 i {
+    color: var(--secondary-amber);
+  }
+
+  /* Form Controls */
+  .form-label {
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .form-label.small {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(19, 83, 163, 0.1);
+  }
+
+  /* Input Groups */
+  .input-group-text {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #e9ecef;
+    border-right: none;
+    font-weight: 600;
+    color: var(--dark-gray);
+    font-size: 0.85rem;
+    border-radius: 8px 0 0 8px;
+  }
+
+  .input-group .form-control {
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .input-group:focus-within .input-group-text {
+    border-color: var(--primary-blue);
+  }
+
+  .input-group:focus-within .form-control {
+    border-color: var(--primary-blue);
+  }
+
+  /* Error Styling */
+  .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+  }
+
+  .errorlist li {
+    color: #dc3545;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+  }
+
+  .alert {
+    border-radius: 8px;
+    border: none;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Action Buttons */
+  .btn-action {
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-primary.btn-action {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+    border: none;
+  }
+
+  .btn-secondary.btn-action {
+    background: #6c757d;
+    border: none;
+  }
+</style>
+
+<div class="container form-container">
+  <div class="card form-card">
+    <div class="form-card-header">
+      <h4>
+        <i class="bi bi-layers"></i>
+        Add Drilling Lithology
+      </h4>
+      <p>Add an interval and lithology percentages. Total must be ≤ 100%.</p>
+    </div>
+    <div class="form-card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        {{ form.non_field_errors }}
+
+        <div class="row g-3">
+          <!-- Basic Information -->
+          <div class="col-12">
+            <div class="section-header">
+              <h6><i class="bi bi-info-circle"></i>Basic Information</h6>
             </div>
+          </div>
 
-            <div class="mt-3 d-flex justify-content-between">
-              <a href="{% url 'drilling_reports_index' %}" class="btn btn-secondary">Cancel</a>
-              <button type="submit" class="btn btn-primary">Save Lithology</button>
+          <div class="col-md-6">
+            <label class="form-label">Drilling Report</label>
+            {{ form.drilling_report }}
+            {{ form.drilling_report.errors }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Depth From (m)</label>
+            {{ form.depth_from }}
+            {{ form.depth_from.errors }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Depth To (m)</label>
+            {{ form.depth_to }}
+            {{ form.depth_to.errors }}
+          </div>
+
+          <!-- Main Lithology Percentages -->
+          <div class="col-12">
+            <div class="section-header">
+              <h6><i class="bi bi-percent"></i>Main Lithology Percentages (total ≤ 100%)</h6>
             </div>
-          </form>
+          </div>
+
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">Shale %</span>
+              {{ form.shale_percentage }}
+            </div>
+            {{ form.shale_percentage.errors }}
+          </div>
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">Sand %</span>
+              {{ form.sand_percentage }}
+            </div>
+            {{ form.sand_percentage.errors }}
+          </div>
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">Clay %</span>
+              {{ form.clay_percentage }}
+            </div>
+            {{ form.clay_percentage.errors }}
+          </div>
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">Silt %</span>
+              {{ form.slit_percentage }}
+            </div>
+            {{ form.slit_percentage.errors }}
+          </div>
+
+          <!-- Lithology Descriptions -->
+          <div class="col-12">
+            <div class="section-header">
+              <h6><i class="bi bi-card-text"></i>Lithology Descriptions (optional)</h6>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small">Shale description</label>
+            {{ form.shale_description }}
+            {{ form.shale_description.errors }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Sand description</label>
+            {{ form.sand_description }}
+            {{ form.sand_description.errors }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Clay description</label>
+            {{ form.clay_description }}
+            {{ form.clay_description.errors }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Silt description</label>
+            {{ form.slit_description }}
+            {{ form.slit_description.errors }}
+          </div>
+
+          <!-- Other Components -->
+          <div class="col-12">
+            <div class="section-header">
+              <h6><i class="bi bi-plus-circle"></i>Other Components</h6>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">Coal %</span>
+              {{ form.coal_percentage }}
+            </div>
+            {{ form.coal_percentage.errors }}
+          </div>
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">Limestone %</span>
+              {{ form.limestone_percentage }}
+            </div>
+            {{ form.limestone_percentage.errors }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Coal description</label>
+            {{ form.coal_description }}
+            {{ form.coal_description.errors }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Limestone description</label>
+            {{ form.limestone_description }}
+            {{ form.limestone_description.errors }}
+          </div>
+
+          <!-- General Description -->
+          <div class="col-12">
+            <div class="section-header">
+              <h6><i class="bi bi-file-text"></i>General Description</h6>
+            </div>
+          </div>
+
+          <div class="col-12">
+            {{ form.description }}
+            {{ form.description.errors }}
+          </div>
         </div>
-      </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{% url 'drilling_reports_index' %}" class="btn btn-secondary btn-action">
+            <i class="bi bi-x-circle me-2"></i>Cancel
+          </a>
+          <button type="submit" class="btn btn-primary btn-action">
+            <i class="bi bi-check-circle me-2"></i>Save Lithology
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

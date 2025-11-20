@@ -1,42 +1,164 @@
 {% extends 'daily_reports/base_dailyr.html' %}
 
 {% block bha_content %}
-<div class="container">
-  <div class="row">
-    <div class="col-md-8 offset-md-2">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h4 class="card-title">Create Drilling Report</h4>
-          <p class="text-muted">Only superusers can create drilling reports.</p>
+<style>
+  /* Form Container */
+  .form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+  }
 
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {% if messages %}
-              {% for message in messages %}
-                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">{{ message }}</div>
-              {% endfor %}
+  /* Modern Form Card */
+  .form-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+
+  .form-card-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border: none;
+  }
+
+  .form-card-header h4 {
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .form-card-header h4 i {
+    color: var(--secondary-amber);
+    font-size: 1.75rem;
+  }
+
+  .form-card-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+  }
+
+  .form-card-body {
+    padding: 2rem;
+  }
+
+  /* Form Controls */
+  .form-label {
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(19, 83, 163, 0.1);
+  }
+
+  .form-text {
+    color: var(--muted-color);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+
+  /* Error Styling */
+  .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+  }
+
+  .errorlist li {
+    color: #dc3545;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+  }
+
+  .alert {
+    border-radius: 8px;
+    border: none;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Action Buttons */
+  .btn-action {
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-primary.btn-action {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+    border: none;
+  }
+
+  .btn-secondary.btn-action {
+    background: #6c757d;
+    border: none;
+  }
+</style>
+
+<div class="container form-container">
+  <div class="card form-card">
+    <div class="form-card-header">
+      <h4>
+        <i class="bi bi-file-earmark-plus"></i>
+        Create Drilling Report
+      </h4>
+      <p>Only superusers can create drilling reports.</p>
+    </div>
+    <div class="form-card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        {{ form.non_field_errors }}
+
+        {% for field in form.visible_fields %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field.errors }}
+            {{ field }}
+            {% if field.help_text %}
+              <div class="form-text">{{ field.help_text }}</div>
             {% endif %}
+          </div>
+        {% endfor %}
 
-            {{ form.non_field_errors }}
-
-            {% for field in form.visible_fields %}
-              <div class="mb-3">
-                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field.errors }}
-                {{ field }}
-                {% if field.help_text %}
-                  <div class="form-text">{{ field.help_text }}</div>
-                {% endif %}
-              </div>
-            {% endfor %}
-
-            <div class="d-flex justify-content-between">
-              <a href="{% url 'drilling_reports_index' %}" class="btn btn-secondary">Cancel</a>
-              <button type="submit" class="btn btn-primary">Create Report</button>
-            </div>
-          </form>
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{% url 'drilling_reports_index' %}" class="btn btn-secondary btn-action">
+            <i class="bi bi-x-circle me-2"></i>Cancel
+          </a>
+          <button type="submit" class="btn btn-primary btn-action">
+            <i class="bi bi-check-circle me-2"></i>Create Report
+          </button>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 </div>

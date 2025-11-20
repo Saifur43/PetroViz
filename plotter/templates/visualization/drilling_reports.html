@@ -28,23 +28,89 @@
     .well-list-item.active {
         background-color: rgba(255,255,255,0.2);
     }
-    .report-card {
-        margin-bottom: 0.6rem;
-        transition: all 0.3s ease;
-        border: 1px solid #e0e0e0;
-        border-radius: 6px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+
+    /* Modern Report Cards - Timeline Style */
+    .reports-container {
+        position: relative;
     }
+
+    .reports-container::before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, var(--primary-blue) 0%, var(--tertiary-green) 100%);
+        border-radius: 2px;
+        opacity: 0.3;
+    }
+
+    .report-card {
+        margin-bottom: 1.5rem;
+        margin-left: 50px;
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        background: white;
+        position: relative;
+        overflow: visible;
+    }
+
+    .report-card::before {
+        content: '';
+        position: absolute;
+        left: -38px;
+        top: 20px;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border: 3px solid var(--primary-blue);
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+
+    .report-card:hover::before {
+        transform: scale(1.3);
+        border-color: var(--secondary-amber);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .report-card:hover {
+        transform: translateX(8px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
     .report-card .card-header {
         cursor: pointer;
-        background: linear-gradient(135deg, #257358 0%, #2d8a6a 100%);
-        padding: 0.5rem 0.8rem;
-        transition: all 0.2s;
-        border-radius: 5px 5px 0 0;
+        background: linear-gradient(135deg, #0a3380ff 0%, #e5eaf3ff 100%);
+        padding: 1rem 1.25rem;
+        transition: all 0.3s ease;
+        border-radius: 12px 12px 0 0;
+        border-bottom: 2px solid transparent;
     }
+
     .report-card .card-header:hover {
-        background: linear-gradient(135deg, #2d8a6a 0%, #257358 100%);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        border-bottom-color: var(--secondary-amber);
+    }
+
+    .report-card.expanded .card-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+        border-bottom-color: var(--secondary-amber);
+    }
+
+    .report-card.expanded .card-header .report-date,
+    .report-card.expanded .card-header .report-depth {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .report-card.expanded .card-header .chevron-icon {
+        color: white;
     }
     .report-card .card-body {
         display: none;
@@ -66,37 +132,176 @@
     .stats-card .card-body {
         padding: 0.6rem 0.8rem;
     }
-    .report-date {
-        color: white !important;
-        background-color: #1a5943;
-        padding: 4px 10px;
-        border-radius: 20px;
+
+    /* Modern Stats Cards */
+    .stats-card-modern {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stats-card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        opacity: 0.1;
+        transition: transform 0.3s ease;
+    }
+
+    .stats-card-modern:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stats-card-modern:hover::before {
+        transform: scale(1.5);
+    }
+
+    .stats-card-modern .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        flex-shrink: 0;
+    }
+
+    .stats-card-reports .stats-icon {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+    }
+
+    .stats-card-reports::before {
+        background: #3B82F6;
+    }
+
+    .stats-card-progress .stats-icon {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+    }
+
+    .stats-card-progress::before {
+        background: #10B981;
+    }
+
+    .stats-card-depth .stats-icon {
+        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        color: white;
+    }
+
+    .stats-card-depth::before {
+        background: #F59E0B;
+    }
+
+    .stats-card-avg .stats-icon {
+        background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+        color: white;
+    }
+
+    .stats-card-avg::before {
+        background: #8B5CF6;
+    }
+
+    .stats-card-modern .stats-content {
+        flex: 1;
+    }
+
+    .stats-card-modern .stats-label {
         font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stats-card-modern .stats-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #333333;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stats-card-modern .stats-unit {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin: 0.25rem 0 0 0;
+    }
+
+    /* Modern Report Badges */
+    .report-date {
+        color: #1a5943 !important;
+        background: linear-gradient(135deg, #e8f5f1 0%, #d4ebe4 100%);
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.875rem;
         margin-right: 10px;
         display: inline-flex;
         align-items: center;
         font-weight: 600;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        border: 1px solid rgba(37, 115, 88, 0.2);
+        transition: all 0.2s ease;
     }
+
+    .report-card.expanded .card-header .report-date {
+        color: white !important;
+    }
+
     .report-date i {
         font-size: 1rem;
         margin-right: 6px;
     }
+
     .report-depth {
-        background: linear-gradient(135deg, #E98108 0%, #d47307 100%);
-        color: white !important;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.85rem;
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        color: #d47307 !important;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.875rem;
         display: inline-flex;
         align-items: center;
         font-weight: 600;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        border: 1px solid rgba(233, 129, 8, 0.2);
+        transition: all 0.2s ease;
     }
-    .report-depth i {
+
+    .report-card.expanded .card-header .report-depth {
         color: white !important;
+    }
+
+    .report-depth i {
+        color: inherit !important;
         margin-right: 6px;
         font-size: 1rem;
+    }
+
+    .report-card .card-header .btn-outline-light {
+        background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%) !important;
+        border: none !important;
+        padding: 6px 12px !important;
+        font-size: 0.875rem !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3) !important;
+    }
+
+    .report-card .card-header .btn-outline-light:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4) !important;
     }
     .lithology-section {
         background-color: white;
@@ -108,12 +313,20 @@
     }
     .chevron-icon {
         transition: transform 0.3s ease;
-        color: white;
-        font-size: 1.2rem;
-        opacity: 0.9;
+        color: #6c757d;
+        font-size: 1.25rem;
+        opacity: 0.8;
     }
+
     .report-card.expanded .chevron-icon {
         transform: rotate(180deg);
+        color: white;
+        opacity: 1;
+    }
+
+    .report-card:not(.expanded) .card-header:hover .chevron-icon {
+        color: var(--primary-blue);
+        opacity: 1;
     }
     .info-row {
         margin-bottom: 8px;
@@ -204,8 +417,6 @@
     .sidebar .card-header { padding: 10px !important; }
     .sidebar h5 { font-size: 1rem !important; margin-bottom: 0 !important; }
     h1.display-5 { font-size: 1.5rem; margin-bottom: 0.8rem !important; }
-    .stats-card h6 { font-size: 0.82rem; margin-bottom: 2px !important; }
-    .stats-card h4 { font-size: 1.3rem; }
     .row.mb-3 { margin-bottom: 0.8rem !important; }
     .col-md-3 { padding-left: 6px; padding-right: 6px; }
     main.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
@@ -213,10 +424,64 @@
     .card.mb-3 { margin-bottom: 0.8rem !important; }
     .position-sticky .card .card-body { padding: 0.8rem; }
     .position-sticky h6 { font-size: 0.9rem; margin-bottom: 6px !important; }
-    .filter-chip { display: none; align-items: center; gap: 6px; background: #e9f5f1; color: #0f5132; border: 1px solid #badbcc; border-radius: 20px; padding: 4px 10px; font-size: 0.8rem; }
-    .filter-chip .btn-clear { background: transparent; border: 0; color: #0f5132; cursor: pointer; padding: 0 4px; }
-    .reports-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .reports-toolbar .btn { padding: 2px 8px; font-size: 0.8rem; }
+    
+    /* Modern Toolbar */
+    .reports-toolbar { 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+    }
+
+    .reports-toolbar .btn { 
+        padding: 8px 16px;
+        font-size: 0.875rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid #dee2e6;
+        background: white;
+        color: #495057;
+    }
+
+    .reports-toolbar .btn:hover {
+        background: var(--primary-blue);
+        color: white;
+        border-color: var(--primary-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(19, 83, 163, 0.2);
+    }
+
+    .filter-chip { 
+        display: none; 
+        align-items: center; 
+        gap: 8px; 
+        background: linear-gradient(135deg, #d1f4e0 0%, #b8e6cc 100%);
+        color: #0f5132; 
+        border: 1px solid #9dd6b8;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        box-shadow: 0 2px 6px rgba(15, 81, 50, 0.1);
+    }
+
+    .filter-chip .btn-clear { 
+        background: transparent;
+        border: 0;
+        color: #0f5132;
+        cursor: pointer;
+        padding: 0 4px;
+        transition: transform 0.2s ease;
+    }
+
+    .filter-chip .btn-clear:hover {
+        transform: scale(1.2);
+    }
 </style>
 
 <div class="container-fluid" style="padding-left: 5%;padding-right: 5%;">
@@ -240,44 +505,52 @@
             
             <!-- Statistics Cards -->
             {% if stats %}
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <div class="card stats-card">
-                        <div class="card-body">
-                            <h6 class="card-title text-muted mb-1">
-                                <i class="bi bi-file-earmark-text me-1"></i>Total Reports
-                            </h6>
-                            <h4 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.total_reports }}</h4>
+            <div class="row g-3 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="stats-card-modern stats-card-reports">
+                        <div class="stats-icon">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h6 class="stats-label">Total Reports</h6>
+                            <h3 class="stats-value">{{ stats.total_reports }}</h3>
+                            <p class="stats-unit">reports</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card stats-card">
-                        <div class="card-body">
-                            <h6 class="card-title text-muted mb-1">
-                                <i class="bi bi-arrow-down-circle me-1"></i>Total Depth Progress
-                            </h6>
-                            <h4 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.depth_progress|floatformat:1 }} m</h4>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stats-card-modern stats-card-progress">
+                        <div class="stats-icon">
+                            <i class="bi bi-arrow-down-circle"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h6 class="stats-label">Total Depth Progress</h6>
+                            <h3 class="stats-value">{{ stats.depth_progress|floatformat:1 }}</h3>
+                            <p class="stats-unit">meters</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card stats-card">
-                        <div class="card-body">
-                            <h6 class="card-title text-muted mb-1">
-                                <i class="bi bi-geo-alt me-1"></i>Latest Depth
-                            </h6>
-                            <h4 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.latest_depth|floatformat:1 }} m</h4>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stats-card-modern stats-card-depth">
+                        <div class="stats-icon">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h6 class="stats-label">Latest Depth</h6>
+                            <h3 class="stats-value">{{ stats.latest_depth|floatformat:1 }}</h3>
+                            <p class="stats-unit">meters</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card stats-card">
-                        <div class="card-body">
-                            <h6 class="card-title text-muted mb-1">
-                                <i class="bi bi-speedometer2 me-1"></i>Avg. Progress/Day
-                            </h6>
-                            <h4 class="card-text mb-0" style="color: #257358; font-weight: 700;">{{ stats.avg_progress_per_day|floatformat:1 }} m</h4>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stats-card-modern stats-card-avg">
+                        <div class="stats-icon">
+                            <i class="bi bi-speedometer2"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h6 class="stats-label">Avg. Progress/Day</h6>
+                            <h3 class="stats-value">{{ stats.avg_progress_per_day|floatformat:1 }}</h3>
+                            <p class="stats-unit">m/day</p>
                         </div>
                     </div>
                 </div>

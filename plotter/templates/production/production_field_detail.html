@@ -1,76 +1,675 @@
 {% extends 'production/base_production.html' %}
 
 {% block bha_content %}
-<div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col-12 d-flex align-items-center justify-content-between">
-            <div>
-                <h6 style="color: #257358; font-size: 1.6em; font-weight: 700;">
-                    <i class="bi bi-list-ul me-2"></i>Field: {{ gas_field.name }}
-                </h6>
-                {% if gas_field.description %}
-                    <p class="text-muted small mb-0">{{ gas_field.description }}</p>
-                {% endif %}
-            </div>
-            <div>
-                <a href="{% url 'production_fields' %}" class="btn btn-outline-secondary">Back to fields</a>
+<div class="container-fluid px-4 py-3">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="field-header">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <h2 class="field-title mb-2">
+                            <i class="bi bi-geo-alt-fill me-2"></i>{{ gas_field.name }}
+                        </h2>
+                        {% if gas_field.description %}
+                            <p class="field-description mb-0">{{ gas_field.description }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="{% url 'production_fields' %}" class="btn btn-modern-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Fields
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h6 class="card-title" style="color:#1a5943;">Wells</h6>
-                    <div class="list-group list-group-flush">
+    <!-- Stats Cards Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card-modern stats-card-gas">
+                <div class="stats-icon">
+                    <i class="bi bi-fire"></i>
+                </div>
+                <div class="stats-content">
+                    <h6 class="stats-label">Total Gas Production</h6>
+                    <h3 class="stats-value">{% if total_cumulative_flow %}{{ total_cumulative_flow|floatformat:2 }}{% else %}0{% endif %}</h3>
+                    <p class="stats-unit">MMscf</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card-modern stats-card-water">
+                <div class="stats-icon">
+                    <i class="bi bi-droplet-fill"></i>
+                </div>
+                <div class="stats-content">
+                    <h6 class="stats-label">Total Water</h6>
+                    <h3 class="stats-value">{% if total_cumulative_water %}{{ total_cumulative_water|floatformat:2 }}{% else %}0{% endif %}</h3>
+                    <p class="stats-unit">bbl</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card-modern stats-card-condensate">
+                <div class="stats-icon">
+                    <i class="bi bi-moisture"></i>
+                </div>
+                <div class="stats-content">
+                    <h6 class="stats-label">Total Condensate</h6>
+                    <h3 class="stats-value">{% if total_cumulative_condensate %}{{ total_cumulative_condensate|floatformat:2 }}{% else %}0{% endif %}</h3>
+                    <p class="stats-unit">bbl</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card-modern stats-card-wells">
+                <div class="stats-icon">
+                    <i class="bi bi-diagram-3-fill"></i>
+                </div>
+                <div class="stats-content">
+                    <h6 class="stats-label">Active Wells</h6>
+                    <h3 class="stats-value">{{ number_of_wells }}</h3>
+                    <p class="stats-unit">wells</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-3">
+        <!-- Wells List Sidebar -->
+        <div class="col-lg-3">
+            <div class="card modern-card wells-card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-list-ul me-2"></i>Wells</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="wells-list">
                         {% for well in wells %}
-                            <a href="{% url 'production_well_detail' well.id %}" class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-0" style="font-size:1em;">{{ well.name }}</h6>
-                                    <small class="text-muted">{{ well.type }}</small>
+                            <a href="{% url 'production_well_detail' well.id %}" class="well-item">
+                                <div class="well-icon">
+                                    <i class="bi bi-circle-fill"></i>
                                 </div>
-                                {% if well.location %}<small class="text-muted">{{ well.location }}</small>{% endif %}
+                                <div class="well-info">
+                                    <h6 class="well-name">{{ well.name }}</h6>
+                                    <span class="well-type">{{ well.type }}</span>
+                                    {% if well.location %}
+                                        <p class="well-location"><i class="bi bi-geo-alt"></i> {{ well.location }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="well-arrow">
+                                    <i class="bi bi-chevron-right"></i>
+                                </div>
                             </a>
                         {% empty %}
-                            <div class="alert alert-info">No wells found for this field.</div>
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p>No wells found for this field.</p>
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-9">
-            <div class="card shadow-sm">
+        <!-- Charts and Data Section -->
+        <div class="col-lg-9">
+            <!-- Production Distribution Chart -->
+            <div class="card modern-card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-pie-chart-fill me-2"></i>Production Distribution</h6>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Field Overview</h5>
+                    <div style="max-width: 400px; margin: 0 auto;">
+                        <canvas id="productionDistributionChart" height="60"></canvas>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="row">
+            <!-- Field Overview Card -->
+            <div class="card modern-card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Field Overview</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>Discovery date:</strong> {% if discovery_date %}{{ discovery_date|date:"d M, Y" }}{% else %}N/A{% endif %}</p>
-                            <p class="mb-1"><strong>Total area:</strong> {% if total_area %}{{ total_area }} km<sup>2</sup>{% else %}N/A{% endif %}</p>
-                            <p class="mb-1"><strong>Number of wells:</strong> {{ number_of_wells }}</p>
+                            <div class="info-item">
+                                <i class="bi bi-calendar-event info-icon"></i>
+                                <div>
+                                    <label>Discovery Date</label>
+                                    <p>{% if discovery_date %}{{ discovery_date|date:"d M, Y" }}{% else %}N/A{% endif %}</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <i class="bi bi-bounding-box info-icon"></i>
+                                <div>
+                                    <label>Total Area</label>
+                                    <p>{% if total_area %}{{ total_area }} km<sup>2</sup>{% else %}N/A{% endif %}</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="mt-0">Production Summary</h6>
-                            <p class="mb-1"><strong>Total cumulative gas:</strong> {% if total_cumulative_flow %}{{ total_cumulative_flow|floatformat:2 }} MMscf{% else %}0{% endif %}</p>
-                            <p class="mb-1"><strong>Total cumulative water:</strong> {% if total_cumulative_water %}{{ total_cumulative_water|floatformat:2 }} bbl{% else %}0{% endif %}</p>
-                            <p class="mb-1"><strong>Total cumulative condensate:</strong> {% if total_cumulative_condensate %}{{ total_cumulative_condensate|floatformat:2 }} bbl{% else %}0{% endif %}</p>
-                            <p class="mb-1"><strong>Latest combined flow-rate:</strong> {% if total_latest_flow_rate %}{{ total_latest_flow_rate|floatformat:2 }} MMscf/d{% else %}0{% endif %}</p>
+                            <div class="info-item">
+                                <i class="bi bi-speedometer2 info-icon"></i>
+                                <div>
+                                    <label>Latest Flow Rate</label>
+                                    <p>{% if total_latest_flow_rate %}{{ total_latest_flow_rate|floatformat:2 }} MMscf/d{% else %}0 MMscf/d{% endif %}</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <i class="bi bi-clock-history info-icon"></i>
+                                <div>
+                                    <label>Data Period</label>
+                                    <p>
+                                        {% if min_date and max_date %}
+                                            {{ min_date }} to {{ max_date }}
+                                        {% else %}
+                                            No data available
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <hr />
-                    <p class="small text-muted mb-0">
-                        {% if min_date and max_date %}
-                            Data available from <strong>{{ min_date }}</strong> to <strong>{{ max_date }}</strong>
-                        {% else %}
-                            No production data for this field yet.
-                        {% endif %}
-                    </p>
+            <!-- Production Metrics Chart -->
+            <div class="card modern-card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-bar-chart-fill me-2"></i>Production Metrics</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="productionMetricsChart" height="80"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Field Header */
+    .field-header {
+        background: linear-gradient(135deg, rgba(19, 83, 163, 0.05) 0%, rgba(37, 115, 88, 0.05) 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid var(--secondary-amber);
+    }
+
+    .field-title {
+        color: var(--tertiary-green);
+        font-weight: 700;
+        font-size: 1.75rem;
+        margin: 0;
+    }
+
+    .field-description {
+        color: var(--muted-color);
+        font-size: 0.95rem;
+    }
+
+    /* Modern Stats Cards */
+    .stats-card-modern {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stats-card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        opacity: 0.1;
+        transition: transform 0.3s ease;
+    }
+
+    .stats-card-modern:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stats-card-modern:hover::before {
+        transform: scale(1.5);
+    }
+
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        flex-shrink: 0;
+    }
+
+    .stats-card-gas .stats-icon {
+        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        color: white;
+    }
+
+    .stats-card-gas::before {
+        background: #F59E0B;
+    }
+
+    .stats-card-water .stats-icon {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+    }
+
+    .stats-card-water::before {
+        background: #3B82F6;
+    }
+
+    .stats-card-condensate .stats-icon {
+        background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+        color: white;
+    }
+
+    .stats-card-condensate::before {
+        background: #8B5CF6;
+    }
+
+    .stats-card-wells .stats-icon {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+    }
+
+    .stats-card-wells::before {
+        background: #10B981;
+    }
+
+    .stats-content {
+        flex: 1;
+    }
+
+    .stats-label {
+        font-size: 0.85rem;
+        color: var(--muted-color);
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stats-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark-gray);
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stats-unit {
+        font-size: 0.8rem;
+        color: var(--muted-color);
+        margin: 0.25rem 0 0 0;
+    }
+
+    /* Modern Card */
+    .modern-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .modern-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .modern-card .card-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+        color: white;
+        border: none;
+        padding: 1rem 1.25rem;
+        font-weight: 600;
+    }
+
+    .modern-card .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Wells List */
+    .wells-card .card-body {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .wells-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .well-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+    }
+
+    .well-item:last-child {
+        border-bottom: none;
+    }
+
+    .well-item:hover {
+        background: linear-gradient(135deg, rgba(19, 83, 163, 0.05) 0%, rgba(37, 115, 88, 0.05) 100%);
+        transform: translateX(4px);
+    }
+
+    .well-icon {
+        width: 12px;
+        height: 12px;
+        flex-shrink: 0;
+    }
+
+    .well-icon i {
+        color: var(--tertiary-green);
+        font-size: 0.75rem;
+    }
+
+    .well-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .well-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--dark-gray);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .well-type {
+        font-size: 0.75rem;
+        color: var(--muted-color);
+        background: rgba(19, 83, 163, 0.1);
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .well-location {
+        font-size: 0.8rem;
+        color: var(--muted-color);
+        margin: 0.25rem 0 0 0;
+    }
+
+    .well-location i {
+        font-size: 0.7rem;
+    }
+
+    .well-arrow {
+        color: var(--muted-color);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .well-item:hover .well-arrow {
+        opacity: 1;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--muted-color);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    /* Info Items */
+    .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        transition: background 0.2s ease;
+    }
+
+    .info-item:hover {
+        background: rgba(19, 83, 163, 0.05);
+    }
+
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.25rem;
+    }
+
+    .info-item label {
+        font-size: 0.8rem;
+        color: var(--muted-color);
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item p {
+        font-size: 0.95rem;
+        color: var(--dark-gray);
+        font-weight: 600;
+        margin: 0;
+    }
+
+    /* Button Modern */
+    .btn-modern-secondary {
+        background: white;
+        border: 2px solid var(--primary-blue);
+        color: var(--primary-blue);
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-modern-secondary:hover {
+        background: var(--primary-blue);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(19, 83, 163, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .field-title {
+            font-size: 1.5rem;
+        }
+
+        .stats-card-modern {
+            padding: 1rem;
+        }
+
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+
+        .stats-value {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    // Production Distribution Chart
+    const distributionCtx = document.getElementById('productionDistributionChart').getContext('2d');
+    const distributionChart = new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Gas (MMscf)', 'Water (bbl)', 'Condensate (bbl)'],
+            datasets: [{
+                data: [
+                    {% if total_cumulative_flow %}{{ total_cumulative_flow }}{% else %}0{% endif %},
+                    {% if total_cumulative_water %}{{ total_cumulative_water }}{% else %}0{% endif %},
+                    {% if total_cumulative_condensate %}{{ total_cumulative_condensate }}{% else %}0{% endif %}
+                ],
+                backgroundColor: [
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(139, 92, 246, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(139, 92, 246, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            family: 'Inter, sans-serif'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14,
+                        family: 'Inter, sans-serif'
+                    },
+                    bodyFont: {
+                        size: 13,
+                        family: 'Inter, sans-serif'
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += context.parsed.toFixed(2);
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Production Metrics Chart
+    const metricsCtx = document.getElementById('productionMetricsChart').getContext('2d');
+    const metricsChart = new Chart(metricsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Gas Production', 'Water Production', 'Condensate Production'],
+            datasets: [{
+                label: 'Total Production',
+                data: [
+                    {% if total_cumulative_flow %}{{ total_cumulative_flow }}{% else %}0{% endif %},
+                    {% if total_cumulative_water %}{{ total_cumulative_water }}{% else %}0{% endif %},
+                    {% if total_cumulative_condensate %}{{ total_cumulative_condensate }}{% else %}0{% endif %}
+                ],
+                backgroundColor: [
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(59, 130, 246, 0.7)',
+                    'rgba(139, 92, 246, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(139, 92, 246, 1)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14,
+                        family: 'Inter, sans-serif'
+                    },
+                    bodyFont: {
+                        size: 13,
+                        family: 'Inter, sans-serif'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        font: {
+                            family: 'Inter, sans-serif'
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            family: 'Inter, sans-serif'
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

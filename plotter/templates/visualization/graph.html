@@ -3,59 +3,315 @@
 {% block title %}Core Data Visualization{% endblock %}
 
 {% block content %}
+<style>
+    /* Modern Sidebar */
+    .petro-sidebar {
+        background: #257358;
+        color: white;
+        min-height: 100vh;
+        padding: 1.5rem;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-header {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-header h5 {
+        color: var(--secondary-amber);
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .sidebar-form .form-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .sidebar-form .form-select {
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.6rem 0.75rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .sidebar-form .form-select:focus {
+        border-color: var(--secondary-amber);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        background: white;
+    }
+
+    .sidebar-form .btn-primary {
+        background: linear-gradient(135deg, var(--secondary-amber) 0%, #d97706 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.7rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+
+    .sidebar-form .btn-primary:hover {
+        background: linear-gradient(135deg, #d97706 0%, var(--secondary-amber) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Modern Analysis Cards */
+    .analysis-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .analysis-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .analysis-card .card-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+        color: white;
+        border: none;
+        padding: 1rem 1.25rem;
+        font-weight: 600;
+    }
+
+    .analysis-card .card-header h6 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .analysis-card .card-header h6::before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: var(--secondary-amber);
+        border-radius: 2px;
+    }
+
+    .analysis-card .card-body {
+        background: white;
+        padding: 1.25rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, rgba(19, 83, 163, 0.05) 0%, rgba(37, 115, 88, 0.05) 100%);
+        padding: 1.25rem 1.5rem;
+        border-radius: 10px;
+        border-left: 4px solid var(--secondary-amber);
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header h6 {
+        color: var(--primary-blue);
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header h6 i {
+        color: var(--secondary-amber);
+        font-size: 1.5rem;
+    }
+
+    /* Empty State */
+    .empty-state-petro {
+        min-height: 60vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 3rem;
+    }
+
+    .empty-state-petro i {
+        font-size: 5rem;
+        color: var(--primary-blue);
+        opacity: 0.3;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state-petro h3 {
+        color: var(--dark-gray);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state-petro p {
+        color: var(--muted-color);
+        margin: 0;
+    }
+
+    /* Table Styling */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table {
+        margin: 0;
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .table thead th {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--dark-gray);
+        border-bottom: 2px solid var(--primary-blue);
+        padding: 0.75rem 0.5rem;
+    }
+
+    .table tbody tr {
+        transition: background 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(19, 83, 163, 0.05);
+    }
+
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+        vertical-align: middle;
+    }
+
+    /* Badge Enhancements */
+    .badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.75rem;
+    }
+
+    /* Chart Container */
+    .chart-container {
+        position: relative;
+        height: calc(100vh - 200px);
+        width: 100%;
+    }
+
+    /* Skeleton Loader */
+    .skeleton {
+        position: relative;
+        overflow: hidden;
+        background: #e9ecef;
+        border-radius: 8px;
+    }
+
+    .skeleton::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shimmer 1.2s infinite;
+    }
+
+    @keyframes shimmer {
+        100% { transform: translateX(100%); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .page-header h6 {
+            font-size: 1.1rem;
+        }
+
+        .chart-container {
+            height: 400px;
+        }
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar Navigation -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3" style="background: linear-gradient(180deg, #257358 0%, #1a5943 100%); color: white; min-height: 100vh;">
-            <div class="card-header text-white" style="background-color: #257358; border-radius: 8px 8px 0 0; padding: 10px;">
-                <h5 class="mb-0" style="color: #E98108;">Selection Controls</h5>
+        <nav class="col-md-3 col-lg-2 d-md-block petro-sidebar">
+            <div class="sidebar-header">
+                <h5><i class="bi bi-sliders me-2"></i>Selection Controls</h5>
             </div>
-                <form method="GET">
-                    <div class="mb-3">
-                        <label class="form-label" style="color: white;">Select Well</label>
-                        <select name="well_name" class="form-select" onchange="this.form.submit()">
-                            <option value="">Choose Well</option>
-                            {% for well in well_names %}
-                            <option value="{{ well }}" {% if well == selected_well %}selected{% endif %}>{{ well }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+            <form method="GET" class="sidebar-form">
+                <div class="mb-3">
+                    <label class="form-label">Select Well</label>
+                    <select name="well_name" class="form-select" onchange="this.form.submit()">
+                        <option value="">Choose Well</option>
+                        {% for well in well_names %}
+                        <option value="{{ well }}" {% if well == selected_well %}selected{% endif %}>{{ well }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                    {% if selected_well %}
-                    <div class="mb-3">
-                        <label class="form-label" style="color: white;">Select Core</label>
-                        <select name="core_no" class="form-select" onchange="this.form.submit()">
-                            <option value="">Choose Core</option>
-                            {% for core in core_numbers %}
-                            <option value="{{ core }}" {% if core|stringformat:"i" == selected_core %}selected{% endif %}>
-                                Core {{ core }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    {% endif %}
+                {% if selected_well %}
+                <div class="mb-3">
+                    <label class="form-label">Select Core</label>
+                    <select name="core_no" class="form-select" onchange="this.form.submit()">
+                        <option value="">Choose Core</option>
+                        {% for core in core_numbers %}
+                        <option value="{{ core }}" {% if core|stringformat:"i" == selected_core %}selected{% endif %}>
+                            Core {{ core }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
 
-                    <div class="d-grid">
-                        <a href="{% url 'graph_view' %}" class="btn btn-primary">Clear Selection</a>
-                    </div>
-                </form>
+                <div class="d-grid">
+                    <a href="{% url 'graph_view' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Clear Selection
+                    </a>
+                </div>
+            </form>
         </nav>
 
         {% if selected_well and selected_core %}
         <!-- Main Content -->
         <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
-            <h6 class="mb-0">Core Analysis: {{ selected_well }} - Core {{ selected_core }}</h6>
-            <div class="row">
+            <div class="page-header">
+                <h6>
+                    <i class="bi bi-graph-up"></i>
+                    Core Analysis: {{ selected_well }} - Core {{ selected_core }}
+                </h6>
+            </div>
+
+            <div class="row g-3">
                 <!-- Core Analysis Chart -->
                 <div class="col-md-4 col-lg-2">
-                    <div class="card">
-                        <div class="card-header text-white" style="background-color: #257358;">
-                            <h6 class="mb-0">Petro Analysis</h6>
+                    <div class="card analysis-card">
+                        <div class="card-header">
+                            <h6>Petro Analysis</h6>
                         </div>
-                        <div class="card-body">
-                            <div style="height: calc(100vh - 200px); width: 100%; position: relative;">
+                        <div class="card-body p-0">
+                            <div class="chart-container">
                                 <canvas id="coreDataChart"></canvas>
-                                <div id="coreChartSkeleton" class="skeleton" style="position:absolute; inset:0; border-radius: 6px;"></div>
+                                <div id="coreChartSkeleton" class="skeleton" style="position:absolute; inset:0;"></div>
                             </div>
                         </div>
                     </div>
@@ -63,16 +319,19 @@
 
                 <!-- Core Image -->
                 <div class="col-md-4 col-lg-2">
-                    <div class="card">
-                        <div class="card-header text-white" style="background-color: #257358;">
-                            <h6 class="mb-0">Core Image</h6>
+                    <div class="card analysis-card">
+                        <div class="card-header">
+                            <h6>Core Image</h6>
                         </div>
-                        <div class="card-body d-flex align-items-stretch justify-content-center" style="height: calc(100vh - 200px);">
+                        <div class="card-body d-flex align-items-stretch justify-content-center p-2" style="height: calc(100vh - 200px);">
                             {% if core_img_url %}
-                            <img src="{{ core_img_url }}" alt="Core Image" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                            <img src="{{ core_img_url }}" alt="Core Image" style="max-height: 100%; max-width: 100%; object-fit: contain; border-radius: 8px;">
                             {% else %}
                             <div class="d-flex align-items-center justify-content-center w-100">
-                                <p class="text-muted">No core image available</p>
+                                <div class="text-center">
+                                    <i class="bi bi-image" style="font-size: 3rem; color: #dee2e6;"></i>
+                                    <p class="text-muted mt-2 mb-0">No core image available</p>
+                                </div>
                             </div>
                             {% endif %}
                         </div>
@@ -81,16 +340,19 @@
 
                 <!-- Litho Image -->
                 <div class="col-md-4 col-lg-2">
-                    <div class="card">
-                        <div class="card-header text-white" style="background-color: #257358;">
-                            <h6 class="mb-0">Litho Log</h6>
+                    <div class="card analysis-card">
+                        <div class="card-header">
+                            <h6>Litho Log</h6>
                         </div>
-                        <div class="card-body d-flex align-items-stretch justify-content-center" style="height: calc(100vh - 200px);">
+                        <div class="card-body d-flex align-items-stretch justify-content-center p-2" style="height: calc(100vh - 200px);">
                             {% if litho_image_url %}
-                            <img src="{{ litho_image_url }}" alt="Litho Image" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                            <img src="{{ litho_image_url }}" alt="Litho Image" style="max-height: 100%; max-width: 100%; object-fit: contain; border-radius: 8px;">
                             {% else %}
                             <div class="d-flex align-items-center justify-content-center w-100">
-                                <p class="text-muted">No litho image available</p>
+                                <div class="text-center">
+                                    <i class="bi bi-layers" style="font-size: 3rem; color: #dee2e6;"></i>
+                                    <p class="text-muted mt-2 mb-0">No litho image available</p>
+                                </div>
                             </div>
                             {% endif %}
                         </div>
@@ -99,57 +361,22 @@
 
                 <!-- Grain Size Analysis -->
                 <div class="col-md-4 col-lg-2">
-                    <div class="card">
-                        <div class="card-header text-white" style="background-color: #257358;">
-                            <h6 class="mb-0">Grain Size Analysis</h6>
+                    <div class="card analysis-card">
+                        <div class="card-header">
+                            <h6>Grain Size Analysis</h6>
                         </div>
                         <div class="card-body" style="height: calc(100vh - 200px); overflow-y: auto;">
                             {% if grain_size_data %}
                                 <div style="height: 300px; width: 100%; margin-bottom: 20px; position: relative;">
                                     <canvas id="grainSizeChart"></canvas>
-                                    <div id="grainChartSkeleton" class="skeleton" style="position:absolute; inset:0; border-radius: 6px;"></div>
+                                    <div id="grainChartSkeleton" class="skeleton" style="position:absolute; inset:0;"></div>
                                 </div>
-                               <!--
-                              
-                                <div class="table-responsive">
-                                    <table class="table table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Depth Range (m)</th>
-                                                <th>Lithology</th>
-                                                <th>Gravel %</th>
-                                                <th>C.Sand %</th>
-                                                <th>M.Sand %</th>
-                                                <th>F.Sand %</th>
-                                                <th>VF.Sand %</th>
-                                                <th>Silt %</th>
-                                                <th>Clay %</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in grain_size_data %}
-                                            <tr>
-                                                <td>{{ item.sampling_depth_start }}-{{ item.sampling_depth_end }}</td>
-                                                <td>{{ item.lithology|truncatechars:15 }}</td>
-                                                <td>{{ item.gravel_percent|floatformat:1|default:"-" }}</td>
-                                                <td>{{ item.coarse_sand_percent|floatformat:1|default:"-" }}</td>
-                                                <td>{{ item.medium_sand_percent|floatformat:1|default:"-" }}</td>
-                                                <td>{{ item.fine_sand_percent|floatformat:1|default:"-" }}</td>
-                                                <td>{{ item.very_fine_sand_percent|floatformat:1|default:"-" }}</td>
-                                                <td>{{ item.silt_percent|floatformat:1|default:"-" }}</td>
-                                                <td>{{ item.clay_percent|floatformat:1|default:"-" }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
-                                -->
-
-
                             {% else %}
                             <div class="d-flex align-items-center justify-content-center h-100">
-                                <p class="text-muted">No grain size data available</p>
+                                <div class="text-center">
+                                    <i class="bi bi-bar-chart" style="font-size: 3rem; color: #dee2e6;"></i>
+                                    <p class="text-muted mt-2 mb-0">No grain size data available</p>
+                                </div>
                             </div>
                             {% endif %}
                         </div>
@@ -158,13 +385,12 @@
 
                 <!-- Mineralogy Analysis -->
                 <div class="col-md-4 col-lg-2">
-                    <div class="card">
-                        <div class="card-header text-white" style="background-color: #257358;">
-                            <h6 class="mb-0">Mineralogy Analysis</h6>
+                    <div class="card analysis-card">
+                        <div class="card-header">
+                            <h6>Mineralogy Analysis</h6>
                         </div>
                         <div class="card-body" style="height: calc(100vh - 200px); overflow-y: auto;">
                             {% if bulk_mineralogy or clay_mineralogy %}
-                                <!-- Group mineralogy data by depth range -->
                                 {% regroup bulk_mineralogy by sampling_depth_start as bulk_depth_groups %}
                                 {% regroup clay_mineralogy by sampling_depth_start as clay_depth_groups %}
                                 
@@ -178,7 +404,6 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <!-- Process bulk mineralogy depth groups -->
                                             {% for bulk_group in bulk_depth_groups %}
                                             <tr>
                                                 <td class="align-top">
@@ -187,7 +412,7 @@
                                                 <td class="align-top">
                                                     {% for mineral in bulk_group.list %}
                                                         <div class="mb-1">
-                                                            <span class="badge bg-primary me-1" style="font-size: 0.7rem;">{{ mineral.display_mineral_name|truncatechars:10 }}</span>
+                                                            <span class="badge bg-primary me-1">{{ mineral.display_mineral_name|truncatechars:10 }}</span>
                                                             <small class="text-muted">{{ mineral.percentage|floatformat:1|default:"-" }}%</small>
                                                         </div>
                                                     {% endfor %}
@@ -197,7 +422,7 @@
                                                         {% if clay_group.grouper == bulk_group.grouper %}
                                                             {% for mineral in clay_group.list %}
                                                                 <div class="mb-1">
-                                                                    <span class="badge bg-success me-1" style="font-size: 0.7rem;">{{ mineral.display_mineral_name|truncatechars:10 }}</span>
+                                                                    <span class="badge bg-success me-1">{{ mineral.display_mineral_name|truncatechars:10 }}</span>
                                                                     <small class="text-muted">{{ mineral.percentage|floatformat:1|default:"-" }}%</small>
                                                                 </div>
                                                             {% endfor %}
@@ -207,7 +432,6 @@
                                             </tr>
                                             {% endfor %}
                                             
-                                            <!-- Process clay-only depth groups -->
                                             {% for clay_group in clay_depth_groups %}
                                                 {% with found_in_bulk=False %}
                                                     {% for bulk_group in bulk_depth_groups %}
@@ -227,7 +451,7 @@
                                                         <td class="align-top">
                                                             {% for mineral in clay_group.list %}
                                                                 <div class="mb-1">
-                                                                    <span class="badge bg-success me-1" style="font-size: 0.7rem;">{{ mineral.display_mineral_name|truncatechars:10 }}</span>
+                                                                    <span class="badge bg-success me-1">{{ mineral.display_mineral_name|truncatechars:10 }}</span>
                                                                     <small class="text-muted">{{ mineral.percentage|floatformat:1|default:"-" }}%</small>
                                                                 </div>
                                                             {% endfor %}
@@ -240,16 +464,18 @@
                                     </table>
                                 </div>
                                 
-                                <!-- Legend -->
                                 <div class="mt-2">
                                     <small class="text-muted">
-                                        <span class="badge bg-primary me-2" style="font-size: 0.7rem;">Bulk</span>
-                                        <span class="badge bg-success" style="font-size: 0.7rem;">Clay</span>
+                                        <span class="badge bg-primary me-2">Bulk</span>
+                                        <span class="badge bg-success">Clay</span>
                                     </small>
                                 </div>
                             {% else %}
                             <div class="d-flex align-items-center justify-content-center h-100">
-                                <p class="text-muted">No mineralogy data available</p>
+                                <div class="text-center">
+                                    <i class="bi bi-gem" style="font-size: 3rem; color: #dee2e6;"></i>
+                                    <p class="text-muted mt-2 mb-0">No mineralogy data available</p>
+                                </div>
                             </div>
                             {% endif %}
                         </div>
@@ -258,9 +484,9 @@
 
                 <!-- Fossils Analysis -->
                 <div class="col-md-4 col-lg-2">
-                    <div class="card">
-                        <div class="card-header text-white" style="background-color: #257358;">
-                            <h6 class="mb-0">Fossils Analysis</h6>
+                    <div class="card analysis-card">
+                        <div class="card-header">
+                            <h6>Fossils Analysis</h6>
                         </div>
                         <div class="card-body" style="height: calc(100vh - 200px); overflow-y: auto;">
                             {% if fossils_data %}
@@ -299,11 +525,10 @@
                                     </table>
                                 </div>
                                 
-                                <!-- Age and Environment Information -->
                                 {% regroup fossils_data by age_indication as age_groups %}
                                 {% if age_groups %}
                                 <div class="mt-3">
-                                    <h6 class="text-info">Age Indications</h6>
+                                    <h6 class="text-info" style="font-size: 0.9rem;">Age Indications</h6>
                                     {% for age_group in age_groups %}
                                         {% if age_group.grouper %}
                                         <div class="badge bg-info me-1 mb-1">{{ age_group.grouper }}</div>
@@ -313,7 +538,10 @@
                                 {% endif %}
                             {% else %}
                             <div class="d-flex align-items-center justify-content-center h-100">
-                                <p class="text-muted">No fossils data available</p>
+                                <div class="text-center">
+                                    <i class="bi bi-bug" style="font-size: 3rem; color: #dee2e6;"></i>
+                                    <p class="text-muted mt-2 mb-0">No fossils data available</p>
+                                </div>
                             </div>
                             {% endif %}
                         </div>
@@ -323,8 +551,12 @@
         </main>
 
         {% else %}
-        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3 text-center d-flex align-items-center justify-content-center">
-            <h3 class="text-muted">Please select a well and core to view data</h3>
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
+            <div class="empty-state-petro">
+                <i class="bi bi-clipboard-data"></i>
+                <h3>No Data Selected</h3>
+                <p>Please select a well and core from the sidebar to view analysis data</p>
+            </div>
         </main>
         {% endif %}
     </div>
@@ -334,12 +566,6 @@
 {{ chart_data|json_script:"chart-data" }}
 {{ grain_size_chart_data|json_script:"grain-size-data" }}
 <script>
-    // simple skeleton styles
-    (function(){
-        const s = document.createElement('style');
-        s.textContent = `.skeleton{position:relative;overflow:hidden;background:#e9ecef}.skeleton::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);animation:shimmer 1.2s infinite}@keyframes shimmer{100%{transform:translateX(100%)}}`;
-        document.head.appendChild(s);
-    })();
     // Core Data Chart (Porosity and Permeability)
     const ctx = document.getElementById('coreDataChart').getContext('2d');
     const chartData = JSON.parse(document.getElementById('chart-data')?.textContent || 'null');

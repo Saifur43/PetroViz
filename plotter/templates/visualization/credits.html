@@ -1,150 +1,311 @@
 {% extends 'base.html' %}
 
-{% block title %}Credits - BOGDP{% endblock %}
+{% block title %}Credits - PetroVis{% endblock %}
 
 {% block content %}
+<style>
+    /* Page Header */
+    .container-fluid{
+        padding: 1rem;
+        padding-left: 10rem;
+        padding-right: 10rem;
+    }
+    .page-title {
+        background: linear-gradient(135deg, rgba(19, 83, 163, 0.05) 0%, rgba(37, 115, 88, 0.05) 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        border-left: 4px solid var(--secondary-amber);
+        margin-bottom: 2rem;
+    }
+
+    .page-title h2 {
+        color: var(--primary-blue);
+        font-weight: 700;
+        font-size: 1.75rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-title h2 i {
+        color: var(--secondary-amber);
+        font-size: 2rem;
+    }
+
+    /* Modern Cards */
+    .modern-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .modern-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .modern-card .card-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+        color: white;
+        border: none;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+    }
+
+    .modern-card .card-header h5 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modern-card .card-header h5::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: var(--secondary-amber);
+        border-radius: 2px;
+    }
+
+    .modern-card.card-green .card-header {
+        background: linear-gradient(135deg, var(--tertiary-green) 0%, #1a5943 100%);
+    }
+
+    .modern-card.card-amber .card-header {
+        background: linear-gradient(135deg, var(--secondary-amber) 0%, #d97706 100%);
+    }
+
+    /* Developer Cards */
+    .developer-card {
+        padding: 1.5rem;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        background: white;
+        height: 100%;
+    }
+
+    .developer-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-blue);
+    }
+
+    .developer-card .avatar {
+        width: 80px;
+        height: 80px;
+        min-width: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--primary-blue);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .developer-card h6 {
+        color: var(--primary-blue);
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .developer-card .text-muted {
+        font-size: 0.85rem;
+        color: #6c757d !important;
+    }
+
+    .developer-card p {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 0.75rem;
+    }
+
+    .developer-card p strong {
+        color: var(--tertiary-green);
+        font-weight: 600;
+    }
+
+    /* Info Section */
+    .info-item {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .info-item h6 {
+        color: var(--primary-blue);
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item p {
+        color: var(--dark-gray);
+        margin: 0;
+    }
+
+    /* Badge Styling */
+    .badge {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.8rem;
+    }
+
+    /* Acknowledgment Section */
+    .acknowledgment-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .acknowledgment-list li {
+        padding: 0.75rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .acknowledgment-list li i {
+        color: var(--tertiary-green);
+        font-size: 1.1rem;
+    }
+
+    .footer-text {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #e9ecef;
+    }
+
+    .footer-text p {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin: 0.25rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .page-title h2 {
+            font-size: 1.5rem;
+        }
+
+        .developer-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar Navigation -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background: linear-gradient(180deg, #257358 0%, #1a5943 100%); color: white; padding: 16px; min-height: 100vh;">
-            <div class="mb-3 d-flex align-items-center" style="gap:8px;">
-                <i class="bi bi-grid-3x3-gap" style="font-size: 1.1rem; color:#E98108;"></i>
-                <h5 class="mb-0" style="color:#E98108; font-weight:700;">Dashboard Menu</h5>
-            </div>
-            <ul class="nav flex-column sidebar-menu">
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'graph_view' %}active{% endif %}"
-                       href="{% url 'graph_view' %}">
-                        <i class="bi bi-activity me-2"></i>
-                        <span>Petro Physical</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'production_graph' %}active{% endif %}"
-                       href="{% url 'production_graph' %}">
-                        <i class="bi bi-bar-chart-line me-2"></i>
-                        <span>Production</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'exploration_timeline' %}active{% endif %}"
-                       href="{% url 'exploration_timeline' %}">
-                        <i class="bi bi-clock-history me-2"></i>
-                        <span>Exploration Timeline</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'drilling_reports_index' %}active{% endif %}"
-                       href="{% url 'drilling_reports_index' %}">
-                        <i class="bi bi-journal-text me-2"></i>
-                        <span>Drilling Reports</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'credits' %}active{% endif %}"
-                       href="{% url 'credits' %}">
-                        <i class="bi bi-people me-2"></i>
-                        <span>Credits</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
         <!-- Main Content -->
-        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h3" style="font-weight:700; color:#1353A3;">BOGDP TEAM - BAPEX</h2>
+        <main class="col-12 px-4 pt-3">
+            <div class="page-title">
+                <h2>
+                    <i class="bi bi-people-fill"></i>
+                    BOGDP TEAM - BAPEX
+                </h2>
             </div>
 
             <div class="row">
                 <!-- Development Team Card -->
                 <div class="col-lg-8 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header text-white" style="background-color: #1353A3;">
-                            <h5 class="mb-0"><i class="fas fa-code me-2"></i>Development Team</h5>
+                    <div class="card modern-card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-code-slash me-2"></i>Development Team</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6 mb-4">
-                                    <div class="developer-card p-3 border rounded">
+                                    <div class="developer-card">
                                         <div class="d-flex align-items-center mb-3">
-                                            <div class="avatar rounded-circle me-3" style="width: 50px; height: 50px; overflow: hidden;">
-                                                <img src="https://ui-avatars.com/api/?name=Saifur+Rahman&background=1353A3&color=fff&size=50" alt="Saifur Rahman Shimu" class="w-100 h-100" style="object-fit: cover;">
+                                            <div class="avatar me-3">
+                                                <img src="https://bapex.com.bd/sites/default/files/files/bapex.portal.gov.bd/officer_list/26724138_6ea5_4f02_bfa5_92ffc5f621ad/2024-04-29-08-30-90e9ffc93640716c446abea5ce65565e.jpeg" alt="Saifur Rahman Shimu" class="w-100 h-100" style="object-fit: cover;">
                                             </div>
                                             <div>
-                                                <h6 class="mb-0 fw-bold">Saifur Rahman Shimu</h6>
+                                                <h6>Saifur Rahman Shimu</h6>
                                                 <small class="text-muted">Assistant Manager (ICT)</small>
                                             </div>
                                         </div>
-                                        <p class="mb-2"><strong>Role:</strong> Project Architecture & Full Stack Development</p>
-                                        <p class="mb-2"><strong>Technologies:</strong> Django, Python, Database Design</p>
-                                        <p class="mb-0"><strong>Contributions:</strong> Core application structure, Data Migrations, Feature Implementation, Monitorning</p>
+                                        <p><strong>Role:</strong> Project Architecture & Full Stack Development</p>
+                                        <p><strong>Technologies:</strong> Django, Python, Database Design</p>
+                                        <p class="mb-0"><strong>Contributions:</strong> Core application structure, Data Migrations, Feature Implementation, Monitoring</p>
                                     </div>
                                 </div>
                                 
                                 <div class="col-md-6 mb-4">
-                                    <div class="developer-card p-3 border rounded">
+                                    <div class="developer-card">
                                         <div class="d-flex align-items-center mb-3">
-                                            <div class="avatar rounded-circle me-3" style="width: 50px; height: 50px; overflow: hidden;">
-                                                <img src="https://ui-avatars.com/api/?name=Niaz+Angqur&background=28A745&color=fff&size=50" alt="Md Khalid Ahammed Khan" class="w-100 h-100" style="object-fit: cover;">
+                                            <div class="avatar me-3">
+                                                <img src="https://bapex.com.bd/sites/default/files/files/bapex.portal.gov.bd/officer_list/9394d57b_95c8_466d_9f12_eceb779ab7d2/2020-10-14-16-12-eb674ee7f9934a6997ef0527bc077d9f.jpg" alt="SK. Niaz Ahammed Angqur" class="w-100 h-100" style="object-fit: cover;">
                                             </div>
                                             <div>
-                                                <h6 class="mb-0 fw-bold">SK. Niaz Ahammed Angqur</h6>
+                                                <h6>SK. Niaz Ahammed Angqur</h6>
                                                 <small class="text-muted">Deputy Manager</small>
                                             </div>
                                         </div>
-                                        <p class="mb-2"><strong>Role:</strong> Planning</p>
-                                        <p class="mb-0"><strong>Contributions:</strong> Project Planning, Feature Introduction, Monitorning</p>
+                                        <p><strong>Role:</strong> Planning</p>
+                                        <p class="mb-0"><strong>Contributions:</strong> Project Planning, Feature Introduction, Monitoring</p>
                                     </div>
                                 </div>
                                 
                                 <div class="col-md-6 mb-4">
-                                    <div class="developer-card p-3 border rounded">
+                                    <div class="developer-card">
                                         <div class="d-flex align-items-center mb-3">
-                                            <div class="avatar rounded-circle me-3" style="width: 50px; height: 50px; overflow: hidden;">
-                                                <img src="https://ui-avatars.com/api/?name=Abdul+Batin&background=FFC107&color=000&size=50" alt="Md. Abdul Batin" class="w-100 h-100" style="object-fit: cover;">
+                                            <div class="avatar me-3">
+                                                <img src="https://bapex.com.bd/sites/default/files/files/bapex.portal.gov.bd/officer_list/1afc97ab_1f91_4c0e_a5f1_b54e1bff8277/2019-12-26-16-22-5e952458688aaf846a965445af337c4c.jpg" alt="Md. Abdul Batin" class="w-100 h-100" style="object-fit: cover;">
                                             </div>
                                             <div>
-                                                <h6 class="mb-0 fw-bold">Md. Abdul Batin</h6>
+                                                <h6>Md. Abdul Batin</h6>
                                                 <small class="text-muted">Manager</small>
                                             </div>
                                         </div>
-                                        <p class="mb-2"><strong>Role:</strong> Planning</p>
-                                        <p class="mb-0"><strong>Contributions:</strong> Project Planning, Feature Introduction, Monitorning</p>
+                                        <p><strong>Role:</strong> Planning</p>
+                                        <p class="mb-0"><strong>Contributions:</strong> Project Planning, Feature Introduction, Monitoring</p>
                                     </div>
                                 </div>
                                 
                                 <div class="col-md-6 mb-4">
-                                    <div class="developer-card p-3 border rounded">
+                                    <div class="developer-card">
                                         <div class="d-flex align-items-center mb-3">
-                                            <div class="avatar rounded-circle me-3" style="width: 50px; height: 50px; overflow: hidden;">
-                                                <img src="https://ui-avatars.com/api/?name=Khalid+Ahammed&background=17A2B8&color=fff&size=50" alt="Most. Shahanaj Hossain" class="w-100 h-100" style="object-fit: cover;">
+                                            <div class="avatar me-3">
+                                                <img src="https://bapex.com.bd/sites/default/files/files/bapex.portal.gov.bd/officer_list/b0692b9a_594d_4d95_85b2_212688719a6e/2020-01-08-11-23-da8e483e6a726209d5a7599151f553d9.jpg" alt="Md Khalid Ahammed Khan" class="w-100 h-100" style="object-fit: cover;">
                                             </div>
                                             <div>
-                                                <h6 class="mb-0 fw-bold">Md Khalid Ahammed Khan</h6>
+                                                <h6>Md Khalid Ahammed Khan</h6>
                                                 <small class="text-muted">Manager</small>
                                             </div>
-                                            
                                         </div>
-                                        <p class="mb-2"><strong>Role:</strong> Data Processing & Management</p>
-                                        <p class="mb-2"><strong>Role:</strong> Planning</p>
-                                        <p class="mb-0"><strong>Contributions:</strong> Project Planning, Feature Introduction, Monitorning</p>
+                                        <p><strong>Role:</strong> Data Processing & Management, Planning</p>
+                                        <p class="mb-0"><strong>Contributions:</strong> Project Planning, Feature Introduction, Monitoring</p>
                                     </div>
                                 </div>
+
                                 <div class="col-md-6 mb-4">
-                                    <div class="developer-card p-3 border rounded">
+                                    <div class="developer-card">
                                         <div class="d-flex align-items-center mb-3">
-                                            <div class="avatar rounded-circle me-3" style="width: 50px; height: 50px; overflow: hidden;">
-                                                <img src="https://ui-avatars.com/api/?name=Shahanaj+Hossain&background=FFC107&color=000&size=50" alt="Most. Shahanaj Hossain" class="w-100 h-100" style="object-fit: cover;">
+                                            <div class="avatar me-3">
+                                                <img src="https://bapex.com.bd/sites/default/files/files/bapex.portal.gov.bd/officer_list/7c370481_724b_486c_b402_058afcca2261/2019-12-26-16-32-006d9f334a181b061e28a4a380307f39.jpg" alt="Most. Shahanaj Hossain" class="w-100 h-100" style="object-fit: cover;">
                                             </div>
                                             <div>
-                                                <h6 class="mb-0 fw-bold">Most. Shahanaj Hossain</h6>
+                                                <h6>Most. Shahanaj Hossain</h6>
                                                 <small class="text-muted">DGM and Team Lead</small>
                                             </div>
-
                                         </div>
-                                        <p class="mb-2"><strong>Role:</strong> Planning</p>
-                                        <p class="mb-0"><strong>Contributions:</strong> Project Planning, Feature Introduction, Monitorning</p>
+                                        <p><strong>Role:</strong> Planning</p>
+                                        <p class="mb-0"><strong>Contributions:</strong> Project Planning, Feature Introduction, Monitoring</p>
                                     </div>
                                 </div>
                             </div>
@@ -154,60 +315,64 @@
 
                 <!-- Project Information Card -->
                 <div class="col-lg-4 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header text-white" style="background-color: #257358;">
-                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Project Information</h5>
+                    <div class="card modern-card card-green">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle me-2"></i>Project Information</h5>
                         </div>
                         <div class="card-body">
-                            <div class="mb-3">
-                                <h6 class="fw-bold text-primary">BOGDP and PetroVis</h6>
-                                <p class="mb-2 text-muted">E&D Data Management and Visualization Platform for BAPEX</p>
+                            <div class="info-item">
+                                <h6>Project Name</h6>
+                                <p class="fw-bold">BOGDP and PetroVis</p>
+                                <p class="text-muted small">E&D Data Management and Visualization Platform for BAPEX</p>
                             </div>
                             
-                            <div class="mb-3">
-                                <h6 class="fw-bold">Version</h6>
-                                <p class="mb-2">v1.0.0</p>
+                            <div class="info-item">
+                                <h6>Version</h6>
+                                <p>v1.0.0</p>
                             </div>
                             
-                            <div class="mb-3">
-                                <h6 class="fw-bold">Development Period</h6>
-                                <p class="mb-2">2024 - Present</p>
+                            <div class="info-item">
+                                <h6>Development Period</h6>
+                                <p>2024 - Present</p>
                             </div>
                             
-                            <div class="mb-3">
-                                <h6 class="fw-bold">Technology Stack</h6>
-                                <div class="d-flex flex-wrap gap-1">
+                            <div class="info-item">
+                                <h6>Technology Stack</h6>
+                                <div class="d-flex flex-wrap gap-2">
                                     <span class="badge bg-primary">Django</span>
                                     <span class="badge bg-success">Python</span>
-                                    <span class="badge bg-warning">Bootstrap</span>
+                                    <span class="badge bg-warning text-dark">Bootstrap</span>
                                     <span class="badge bg-info">Chart.js</span>
                                     <span class="badge bg-secondary">PostgreSQL</span>
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <h6 class="fw-bold">Purpose</h6>
-                                <p class="mb-0 small">Providing comprehensive data managment and visualization tools for BAPEX.</p>
+                            <div class="info-item">
+                                <h6>Purpose</h6>
+                                <p class="small mb-0">Providing comprehensive data management and visualization tools for BAPEX.</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Acknowledgments Card -->
-                    <div class="card shadow-sm mt-4">
-                        <div class="card-header text-white" style="background-color: #F59E0B;">
-                            <h5 class="mb-0"><i class="fas fa-heart me-2"></i>Acknowledgments</h5>
+                    <div class="card modern-card card-amber mt-4">
+                        <div class="card-header">
+                            <h5><i class="bi bi-heart-fill me-2"></i>Acknowledgments</h5>
                         </div>
                         <div class="card-body">
-                            <div class="mb-3">
-                                <h6 class="fw-bold">Special Thanks</h6>
-                                <ul class="list-unstyled small">
-                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>CEGIS, Development Partner</li>
+                            <div class="info-item">
+                                <h6>Special Thanks</h6>
+                                <ul class="acknowledgment-list">
+                                    <li>
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>CEGIS, Development Partner</span>
+                                    </li>
                                 </ul>
                             </div>
                             
-                            <div class="text-center mt-4">
-                                <p class="small text-muted mb-0">Built with ❤️ for BAPEX</p>
-                                <p class="small text-muted">© 2025 R&D, BAPEX</p>
+                            <div class="footer-text">
+                                <p class="fw-bold">Built with ❤️ for BAPEX</p>
+                                <p>© 2025 R&D, BAPEX</p>
                             </div>
                         </div>
                     </div>
@@ -216,30 +381,4 @@
         </main>
     </div>
 </div>
-
-<style>
-    .sidebar { border-right: 1px solid rgba(255,255,255,0.12); }
-    .sidebar-menu { gap: 4px; }
-    .sidebar .nav-link { color: #f8fafc; padding: 10px 12px; border-radius: 6px; transition: background-color 0.2s, transform 0.1s; font-size: 0.95rem; }
-    .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.12); transform: translateX(2px); }
-    .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.18); }
-    
-    .developer-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    
-    .avatar {
-        min-width: 50px;
-    }
-    
-    .badge {
-        font-size: 0.75rem;
-    }
-    
-    .card {
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-    }
-</style>
 {% endblock %}

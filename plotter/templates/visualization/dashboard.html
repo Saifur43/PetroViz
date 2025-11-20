@@ -6,10 +6,10 @@
 <div class="container-fluid h-100">
     <div class="row h-100">
         <!-- Sidebar Navigation -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background: linear-gradient(180deg, #257358 0%, #1a5943 100%); color: white; padding: 16px; min-height: 100vh;">
-            <div class="mb-3 d-flex align-items-center" style="gap:8px;">
-                <i class="bi bi-grid-3x3-gap" style="font-size: 1.1rem; color:#E98108;"></i>
-                <h5 class="mb-0" style="color:#E98108; font-weight:700;">Dashboard Menu</h5>
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background: linear-gradient(180deg, var(--tertiary-green) 0%, #1a5943 100%); color: white; padding: 20px 16px; min-height: 100vh; box-shadow: 2px 0 10px rgba(0,0,0,0.1);">
+            <div class="mb-4 d-flex align-items-center" style="gap:10px; padding-bottom: 15px; border-bottom: 2px solid rgba(245,158,11,0.3);">
+                <i class="bi bi-grid-3x3-gap" style="font-size: 1.2rem; color:var(--secondary-amber);"></i>
+                <h5 class="mb-0" style="color:var(--secondary-amber); font-weight:700; letter-spacing: 0.5px;">DASHBOARD</h5>
             </div>
             <ul class="nav flex-column sidebar-menu">
                 <li class="nav-item">
@@ -183,10 +183,24 @@
 
 <style>
     .sidebar { border-right: 1px solid rgba(255,255,255,0.12); }
-    .sidebar-menu { gap: 4px; }
-    .sidebar .nav-link { color: #f8fafc; padding: 10px 12px; border-radius: 6px; transition: background-color 0.2s, transform 0.1s; font-size: 0.95rem; }
-    .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.12); transform: translateX(2px); }
-    .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.18); }
+    .sidebar-menu { gap: 6px; }
+    .sidebar .nav-link { 
+        color: #f8fafc; 
+        padding: 12px 14px; 
+        border-radius: 8px; 
+        transition: all 0.3s ease; 
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+    .sidebar .nav-link:hover { 
+        background-color: rgba(255, 255, 255, 0.15); 
+        transform: translateX(4px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .sidebar .nav-link.active { 
+        background-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
     
     /* Modern Card Styling */
     .modern-card {
@@ -369,7 +383,7 @@
     
     /* Stats Card Enhancement */
     .stats-card {
-        border-left: 4px solid #E98108;
+        border-left: 4px solid var(--secondary-amber);
         border-radius: 8px;
         transition: transform 0.2s, box-shadow 0.2s;
     }
