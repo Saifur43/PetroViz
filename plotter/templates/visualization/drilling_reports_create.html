@@ -117,6 +117,66 @@
     background: #6c757d;
     border: none;
   }
+
+  /* PDF Upload Button */
+  .btn-pdf-upload {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-pdf-upload:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  }
+
+  .btn-pdf-upload:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .pdf-upload-container {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+  }
+
+  .pdf-upload-container.dragover {
+    border-color: var(--primary-blue);
+    background: rgba(19, 83, 163, 0.05);
+  }
+
+  #pdf_file_input {
+    display: none;
+  }
+
+  .upload-status {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .upload-status.success {
+    color: #28a745;
+  }
+
+  .upload-status.error {
+    color: #dc3545;
+  }
+
+  .upload-status.info {
+    color: #17a2b8;
+  }
 </style>
 
 <div class="container form-container">
@@ -129,7 +189,25 @@
       <p>Only superusers can create drilling reports.</p>
     </div>
     <div class="form-card-body">
-      <form method="post" novalidate>
+      <!-- PDF Upload Section -->
+      <div class="pdf-upload-container" id="pdf_upload_container">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <strong><i class="bi bi-file-earmark-pdf me-2"></i>Upload PDF to Auto-fill Form</strong>
+            <p class="mb-0 text-muted" style="font-size: 0.85rem;">Upload a drilling report PDF to automatically populate form fields</p>
+          </div>
+          <div>
+            <input type="file" id="pdf_file_input" accept=".pdf" />
+            <button type="button" class="btn-pdf-upload" id="pdf_upload_btn">
+              <i class="bi bi-cloud-upload"></i>
+              Choose PDF
+            </button>
+          </div>
+        </div>
+        <div class="upload-status" id="upload_status"></div>
+      </div>
+
+      <form method="post" novalidate id="drilling_report_form">
         {% csrf_token %}
         {% if messages %}
           {% for message in messages %}
@@ -162,5 +240,127 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const pdfInput = document.getElementById('pdf_file_input');
+  const pdfUploadBtn = document.getElementById('pdf_upload_btn');
+  const uploadContainer = document.getElementById('pdf_upload_container');
+  const uploadStatus = document.getElementById('upload_status');
+  const form = document.getElementById('drilling_report_form');
+
+  // Click button to trigger file input
+  pdfUploadBtn.addEventListener('click', function() {
+    pdfInput.click();
+  });
+
+  // Handle file selection
+  pdfInput.addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+      uploadPDF(e.target.files[0]);
+    }
+  });
+
+  // Drag and drop functionality
+  uploadContainer.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    uploadContainer.classList.add('dragover');
+  });
+
+  uploadContainer.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    uploadContainer.classList.remove('dragover');
+  });
+
+  uploadContainer.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadContainer.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0 && files[0].type === 'application/pdf') {
+      pdfInput.files = files;
+      uploadPDF(files[0]);
+    } else {
+      showStatus('Please drop a PDF file', 'error');
+    }
+  });
+
+  function uploadPDF(file) {
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      showStatus('Please select a PDF file', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('pdf_file', file);
+
+    pdfUploadBtn.disabled = true;
+    pdfUploadBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+    showStatus('Uploading and parsing PDF...', 'info');
+
+    fetch('{% url "upload_pdf_drilling_report" %}', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        populateForm(data.data);
+        showStatus(data.message || 'PDF parsed successfully! Form fields populated.', 'success');
+      } else {
+        showStatus(data.error || 'Failed to parse PDF', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showStatus('Error uploading PDF: ' + error.message, 'error');
+    })
+    .finally(() => {
+      pdfUploadBtn.disabled = false;
+      pdfUploadBtn.innerHTML = '<i class="bi bi-cloud-upload"></i> Choose PDF';
+      pdfInput.value = ''; // Reset input
+    });
+  }
+
+  function populateForm(data) {
+    // Populate form fields with extracted data
+    Object.keys(data).forEach(key => {
+      const field = form.querySelector(`[name="${key}"]`);
+      if (field) {
+        if (field.type === 'date') {
+          field.value = data[key];
+        } else if (field.type === 'number') {
+          field.value = data[key] || '';
+        } else if (field.tagName === 'SELECT') {
+          field.value = data[key] || '';
+        } else {
+          field.value = data[key] || '';
+        }
+      }
+    });
+
+    // Trigger change events to update any dependent fields
+    Object.keys(data).forEach(key => {
+      const field = form.querySelector(`[name="${key}"]`);
+      if (field) {
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  }
+
+  function showStatus(message, type) {
+    uploadStatus.textContent = message;
+    uploadStatus.className = 'upload-status ' + type;
+    if (type === 'success') {
+      setTimeout(() => {
+        uploadStatus.textContent = '';
+        uploadStatus.className = 'upload-status';
+      }, 5000);
+    }
+  }
+});
+</script>
 
 {% endblock %}

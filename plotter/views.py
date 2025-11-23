@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 from django.http import JsonResponse
 from collections import defaultdict
 from .utils import compare_lithology_with_prognosis
+import os
+import importlib.util
 from django.template.loader import render_to_string
 from io import BytesIO
 from xhtml2pdf import pisa
@@ -29,6 +31,16 @@ from .models import (
     DailyDrillingReport, WellPrognosis, DrillingLithology
 )
 from .forms import DailyDrillingReportForm, DrillingLithologyForm
+
+# Load the `plotter/utils/pdf_parser.py` module directly to avoid
+# "not a package" errors when a `plotter/utils.py` module exists.
+_pdf_parser_path = os.path.join(os.path.dirname(__file__), 'utils', 'pdf_parser.py')
+spec = importlib.util.spec_from_file_location('plotter.utils.pdf_parser', _pdf_parser_path)
+pdf_parser = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(pdf_parser)
+parse_pdf_text = pdf_parser.parse_pdf_text
+extract_drilling_report_data = pdf_parser.extract_drilling_report_data
+extract_lithology_data = pdf_parser.extract_lithology_data
 
 def login_view(request):
     """Handle user login"""
@@ -444,12 +456,13 @@ def create_drilling_lithology(request):
         if form.is_valid():
             litho = form.save()
             messages.success(request, 'Drilling lithology saved successfully.')
-            # Redirect to the drilling reports list for that well
+            # Do not redirect — re-render the same form and show success message.
+            # Pre-fill the form with the same drilling report so user can add another interval.
             try:
-                well_id = litho.drilling_report.well.id
-                return redirect('drilling_reports', well_id=well_id)
+                initial = {'drilling_report': litho.drilling_report.id}
             except Exception:
-                return redirect('drilling_reports_index')
+                initial = {}
+            form = DrillingLithologyForm(initial=initial)
         else:
             messages.error(request, 'Please fix the errors below.')
     else:
@@ -458,6 +471,110 @@ def create_drilling_lithology(request):
     return render(request, 'visualization/drilling_lithology_create.html', {
         'form': form,
     })
+
+
+@login_required
+def upload_pdf_drilling_report(request):
+    """Handle PDF upload for drilling report form population."""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Permission denied'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+    
+    if 'pdf_file' not in request.FILES:
+        return JsonResponse({'error': 'No PDF file provided'}, status=400)
+    
+    pdf_file = request.FILES['pdf_file']
+    
+    # Validate file type
+    if not pdf_file.name.lower().endswith('.pdf'):
+        return JsonResponse({'error': 'File must be a PDF'}, status=400)
+    
+    try:
+        # Extract text from PDF
+        text = parse_pdf_text(pdf_file)
+        
+        # Extract data - pass filename for well name extraction
+        filename = pdf_file.name if hasattr(pdf_file, 'name') else None
+        extracted_data = extract_drilling_report_data(text, filename=filename)
+        
+        # Try to match well name to existing well
+        well_id = None
+        if 'well_name' in extracted_data:
+            try:
+                well = Well.objects.get(name__iexact=extracted_data['well_name'])
+                well_id = well.id
+                extracted_data['well'] = well_id
+            except Well.DoesNotExist:
+                # Try partial match
+                wells = Well.objects.filter(name__icontains=extracted_data['well_name'])
+                if wells.count() == 1:
+                    well_id = wells.first().id
+                    extracted_data['well'] = well_id
+        
+        return JsonResponse({
+            'success': True,
+            'data': extracted_data,
+            'message': 'PDF parsed successfully'
+        })
+    except ImportError as e:
+        return JsonResponse({
+            'error': 'PDF parsing library not installed. Please install PyPDF2 or pdfplumber: pip install PyPDF2'
+        }, status=500)
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Error parsing PDF: {str(e)}'
+        }, status=500)
+
+
+@login_required
+def upload_pdf_lithology(request):
+    """Handle PDF upload for lithology form population."""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Permission denied'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+    
+    if 'pdf_file' not in request.FILES:
+        return JsonResponse({'error': 'No PDF file provided'}, status=400)
+    
+    pdf_file = request.FILES['pdf_file']
+    
+    # Validate file type
+    if not pdf_file.name.lower().endswith('.pdf'):
+        return JsonResponse({'error': 'File must be a PDF'}, status=400)
+    
+    try:
+        # Extract text from PDF
+        text = parse_pdf_text(pdf_file)
+        
+        # Extract lithology data
+        lithologies = extract_lithology_data(text)
+        
+        if lithologies:
+            # Return all lithologies with metadata
+            return JsonResponse({
+                'success': True,
+                'data': lithologies[0],  # Return first lithology interval for immediate population
+                'all_lithologies': lithologies,  # Return all intervals
+                'count': len(lithologies),
+                'message': f'Found {len(lithologies)} lithology interval(s). Select an interval to populate the form.'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'No lithology data found in PDF. Please check the format.'
+            })
+    except ImportError as e:
+        return JsonResponse({
+            'error': 'PDF parsing library not installed. Please install PyPDF2 or pdfplumber: pip install PyPDF2'
+        }, status=500)
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Error parsing PDF: {str(e)}'
+        }, status=500)
 
 def calculate_drilling_efficiency(reports):
     """Calculate drilling efficiency based on daily progress and operational time"""

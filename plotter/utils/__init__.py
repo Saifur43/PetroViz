@@ -3,13 +3,7 @@ def compare_lithology_with_prognosis(lithology, well):
     Compare drilling lithology with well prognosis data.
     Returns a tuple of (comparison_status, match_type)
     """
-    # Use a relative import when possible, but fall back to absolute
-    # import to avoid "attempted relative import with no known parent package"
-    # which can occur in some runtime/import scenarios.
-    try:
-        from .models import WellPrognosis
-    except Exception:
-        from plotter.models import WellPrognosis
+    from plotter.models import WellPrognosis
     
     # Get prognosis data for comparison
     prognosis = WellPrognosis.objects.filter(
