@@ -1,0 +1,52 @@
+{% if stats %}
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stats-card-modern stats-card-reports">
+            <div class="stats-icon">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div class="stats-content">
+                <h6 class="stats-label">Total Reports</h6>
+                <h3 class="stats-value">{{ stats.total_reports }}</h3>
+                <p class="stats-unit">reports</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stats-card-modern stats-card-progress">
+            <div class="stats-icon">
+                <i class="bi bi-arrow-down-circle"></i>
+            </div>
+            <div class="stats-content">
+                <h6 class="stats-label">Total Depth Progress</h6>
+                <h3 class="stats-value">{{ stats.depth_progress|floatformat:1 }}</h3>
+                <p class="stats-unit">meters</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stats-card-modern stats-card-depth">
+            <div class="stats-icon">
+                <i class="bi bi-geo-alt"></i>
+            </div>
+            <div class="stats-content">
+                <h6 class="stats-label">Latest Depth</h6>
+                <h3 class="stats-value">{{ stats.latest_depth|floatformat:1 }}</h3>
+                <p class="stats-unit">meters</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stats-card-modern stats-card-avg">
+            <div class="stats-icon">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <div class="stats-content">
+                <h6 class="stats-label">Avg. Progress/Day</h6>
+                <h3 class="stats-value">{{ stats.avg_progress_per_day|floatformat:1 }}</h3>
+                <p class="stats-unit">m/day</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

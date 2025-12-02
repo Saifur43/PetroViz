@@ -677,10 +677,13 @@ def drilling_reports(request, well_id=None):
         processed_reports.append({
             'id': report.id,
             'well_name': report.well.name,
+            'report_no': report.report_no,
             'date': report.date.strftime('%d %b, %Y'),
             'date_iso': report.date.strftime('%Y-%m-%d'),  # Add ISO format for URL
             'depth_start': report.depth_start,
             'depth_end': report.depth_end,
+            'depth_start_tvd': report.depth_start_tvd,
+            'depth_end_tvd': report.depth_end_tvd,
             'current_operation': report.current_operation,
             'lithologies': lithologies,
             'gas_show': report.gas_show,

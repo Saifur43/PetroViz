@@ -1,0 +1,135 @@
+{% load static %}
+<div class="card report-card" data-report-id="{{ report.id }}" data-depth-start="{{ report.depth_start }}" data-depth-end="{{ report.depth_end }}">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <span class="report-date">
+                <i class="bi bi-calendar-check"></i>{{ report.date}}
+            </span>
+            <div class="depth-badges">
+                <span class="report-depth-md">
+                    <i class="bi bi-arrows-expand"></i>{{ report.depth_start|floatformat:1 }} - {{ report.depth_end|floatformat:1 }} m
+                </span>
+                {% if report.depth_start_tvd and report.depth_end_tvd %}
+                <span class="report-depth-tvd">
+                    <i class="bi bi-arrows-expand"></i>{{ report.depth_start_tvd|floatformat:1 }} - {{ report.depth_end_tvd|floatformat:1 }} m
+                </span>
+                {% endif %}
+            </div>
+            {% with report_date=report.date|date:'Y-m-d' %}
+            <a href="{% url 'generate_drilling_reports_pdf' %}?well={{ selected_well }}&date={{ report.date_iso }}" 
+                class="btn btn-sm btn-outline-light ms-2" 
+                target="_blank"
+                style="background-color: #570505; padding: 3px 8px; font-size: 0.85rem;"
+                title="Download PDF Report for {{ report.date }}">
+                <i class="bi bi-file-pdf"></i>
+            </a>
+            {% endwith %}
+        </div>
+        <i class="bi bi-chevron-down chevron-icon"></i>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-section-modern">
+                    <h6>
+                        <i class="bi bi-info-circle"></i>Report Details
+                    </h6>
+                    <div class="info-row-modern {% if report.gas_show %}gas-show-highlight{% endif %}">
+                        <strong><i class="bi bi-activity me-1"></i>Present Activity</strong> 
+                        <span>{{ report.present_activity|default:"Not specified"|safe }}</span>
+                    </div>
+                    <div class="info-row-modern">
+                        <strong><i class="bi bi-calendar4-event me-1"></i>Next Program</strong> 
+                        <span>{{ report.next_program|default:"Not specified"|safe }}</span>
+                    </div>
+                    <div class="info-row-modern {% if report.gas_show %}gas-show-highlight{% endif %}">
+                        <strong><i class="bi bi-cloud me-1"></i>Gas Show:</strong> 
+                        <span>{{ report.gas_show|default:"None" }}</span>
+                        {% if report.gas_show %}
+                        <span class="gas-show-badge">
+                            <i class="bi bi-exclamation-triangle-fill"></i>GAS DETECTED
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="info-row-modern">
+                        <strong><i class="bi bi-gear me-1"></i>Drilling Operation:</strong> 
+                        <span>{{ report.current_operation|default:"Not specified"|safe }}</span>
+                    </div>
+                    <div class="info-row-modern">
+                        <strong><i class="bi bi-chat-left-text me-1"></i>Comments:</strong> <br>
+                        <span style="margin-top: 4px; display: inline-block;">{{ report.comments|default:"No comments"|safe|linebreaksbr }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="lithology-section">
+                    <h6 style="color: #257358; font-weight: 600;">
+                        <i class="bi bi-layers-fill me-2"></i>Lithology Compositions
+                    </h6>
+                    
+                    {% if report.lithologies %}
+                    <div class="lithology-legend">
+                        <div class="d-flex flex-wrap justify-content-center">
+                            <span class="legend-item">
+                                <span class="legend-color" style="background:#666666;"></span>
+                                Shale
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color" style="background:#FFD700;"></span>
+                                Sand
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color" style="background:#CD853F;"></span>
+                                Clay
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color" style="background:#DEB887;"></span>
+                                Silt
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% for lithology in report.lithologies %}
+                    <div class="lithology-entry">
+                        <div class="d-flex align-items-center">
+                            <div class="lithology-chart-container me-2" style="flex-grow: 1;">
+                                <canvas class="lithologyChartRow"
+                                    id="chart-{{ report.id }}-{{ forloop.counter }}"
+                                    data-shale="{{ lithology.shale }}"
+                                    data-sand="{{ lithology.sand }}"
+                                    data-clay="{{ lithology.clay }}"
+                                    data-slit="{{ lithology.slit }}"
+                                    data-depth-range="{{ lithology.depth_range }}">
+                                </canvas>
+                                <div class="chart-skeleton skeleton" style="position:absolute; inset:0; display:block;"></div>
+                            </div>
+                            <div class="depth-label" style="min-width: 110px; text-align: right; background: none; padding: 3px 6px;">
+                                <span class="badge bg-secondary" style="font-size: 0.6rem;">
+                                    <i class="bi bi-arrows-collapse-vertical me-1"></i>
+                                    {{ lithology.depth_range }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mt-1 ms-1">
+                            <small style="font-size: 0.85rem;"><strong>Dominant Lithology:</strong> {{ lithology.dominant_lithology|title }} ({{ lithology.dominant_percentage }}%)</small>
+                        </div>
+                        {% if lithology.prognosis_comparison %}
+                        <div class="mt-1 ms-1">
+                            <div class="alert alert-{{ lithology.comparison_type }} py-1 mb-0" style="font-size: 0.82em;">
+                                <i class="bi {% if lithology.comparison_type == 'success' %}bi-check-circle{% elif lithology.comparison_type == 'warning' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %} me-1"></i>
+                                <strong>Prognosis:</strong> {{ lithology.prognosis_comparison }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-light text-center py-2" role="alert" style="font-size: 0.9rem;">
+                        <i class="bi bi-exclamation-circle me-2"></i>No lithology data available for this interval
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

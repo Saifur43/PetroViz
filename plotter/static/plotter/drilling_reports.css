@@ -1,0 +1,638 @@
+/* Drilling Reports Styles */
+.lithology-chart-container {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    margin: 0 auto;
+}
+
+.skeleton { 
+    position: relative; 
+    overflow: hidden; 
+    background: #e9ecef; 
+    border-radius: 4px; 
+}
+
+.skeleton::after { 
+    content: ''; 
+    position: absolute; 
+    inset: 0; 
+    transform: translateX(-100%); 
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); 
+    animation: shimmer 1.2s infinite; 
+}
+
+@keyframes shimmer { 
+    100% { transform: translateX(100%); } 
+}
+
+/* Modern Report Cards - Timeline Style */
+.reports-container {
+    position: relative;
+}
+
+.reports-container::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--primary-blue) 0%, var(--tertiary-green) 100%);
+    border-radius: 2px;
+    opacity: 0.3;
+}
+
+.report-card {
+    margin-bottom: 1.5rem;
+    margin-left: 50px;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    background: white;
+    position: relative;
+    overflow: visible;
+}
+
+.report-card::before {
+    content: '';
+    position: absolute;
+    left: -38px;
+    top: 20px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border: 3px solid var(--primary-blue);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.report-card:hover::before {
+    transform: scale(1.3);
+    border-color: var(--secondary-amber);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.report-card:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.report-card .card-header {
+    cursor: pointer;
+    background: linear-gradient(135deg, #0a3380ff 0%, #e5eaf3ff 100%);
+    padding: 1.25rem 1.5rem;
+    transition: all 0.3s ease;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 2px solid transparent;
+}
+
+.report-card .card-header:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    border-bottom-color: var(--secondary-amber);
+}
+
+.report-card.expanded .card-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+    border-bottom-color: var(--secondary-amber);
+}
+
+.report-card.expanded .card-header .report-date,
+.report-card.expanded .card-header .report-depth {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white !important;
+}
+
+.report-card .card-body {
+    display: none;
+    padding: 1.5rem;
+    background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
+}
+
+.report-card.expanded .card-body {
+    display: block;
+}
+
+/* Modern Depth Badges - MD and TVD separated */
+.depth-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.report-depth-md {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    color: #d47307 !important;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    border: 1px solid rgba(233, 129, 8, 0.2);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.report-depth-md::before {
+    content: 'MD';
+    font-size: 0.7rem;
+    background: rgba(212, 115, 7, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 6px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.report-depth-tvd {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #1565c0 !important;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    border: 1px solid rgba(21, 101, 192, 0.2);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.report-depth-tvd::before {
+    content: 'TVD';
+    font-size: 0.7rem;
+    background: rgba(21, 101, 192, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 6px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.report-date {
+    color: #1a5943 !important;
+    background: linear-gradient(135deg, #e8f5f1 0%, #d4ebe4 100%);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    margin-right: 10px;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    border: 1px solid rgba(37, 115, 88, 0.2);
+    transition: all 0.2s ease;
+}
+
+.report-date i {
+    font-size: 1rem;
+    margin-right: 6px;
+}
+
+.chevron-icon {
+    transition: transform 0.3s ease;
+    color: #6c757d;
+    font-size: 1.25rem;
+    opacity: 0.8;
+}
+
+.report-card.expanded .chevron-icon {
+    transform: rotate(180deg);
+    color: white;
+    opacity: 1;
+}
+
+.report-card:not(.expanded) .card-header:hover .chevron-icon {
+    color: var(--primary-blue);
+    opacity: 1;
+}
+
+/* Modern Info Section */
+.info-section-modern {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 1rem;
+}
+
+.info-section-modern h6 {
+    font-size: 1rem;
+    margin-bottom: 1rem !important;
+    color: #257358;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e8f5f1;
+}
+
+.info-row-modern {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(to right, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 8px;
+    border-left: 3px solid #257358;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.info-row-modern:hover {
+    background: linear-gradient(to right, #e9ecef 0%, #f8f9fa 100%);
+    transform: translateX(4px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.info-row-modern strong {
+    color: #257358;
+    min-width: 140px;
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Gas Show Highlight */
+.gas-show-highlight {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%) !important;
+    border-left: 4px solid #ffc107 !important;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3) !important;
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3); }
+    50% { box-shadow: 0 4px 16px rgba(255, 193, 7, 0.5); }
+}
+
+.gas-show-badge {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #856404 !important;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 8px;
+    box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.gas-show-badge i {
+    font-size: 1rem;
+}
+
+/* Lithology Section */
+.lithology-section {
+    background-color: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-top: 0;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.lithology-legend {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border: 1px solid #dee2e6;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 12px;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.lithology-entry {
+    padding: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+}
+
+.lithology-entry:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+/* Stats Cards */
+.stats-card-modern {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stats-card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    opacity: 0.1;
+    transition: transform 0.3s ease;
+}
+
+.stats-card-modern:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stats-card-modern:hover::before {
+    transform: scale(1.5);
+}
+
+.stats-card-modern .stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    flex-shrink: 0;
+}
+
+.stats-card-reports .stats-icon {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    color: white;
+}
+
+.stats-card-progress .stats-icon {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
+}
+
+.stats-card-depth .stats-icon {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: white;
+}
+
+.stats-card-avg .stats-icon {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    color: white;
+}
+
+.stats-card-modern .stats-content {
+    flex: 1;
+}
+
+.stats-card-modern .stats-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-card-modern .stats-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #333333;
+    margin: 0;
+    line-height: 1;
+}
+
+.stats-card-modern .stats-unit {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin: 0.25rem 0 0 0;
+}
+
+/* Toolbar */
+.reports-toolbar { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.reports-toolbar .btn { 
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid #dee2e6;
+    background: white;
+    color: #495057;
+}
+
+.reports-toolbar .btn:hover {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(19, 83, 163, 0.2);
+}
+
+.filter-chip { 
+    display: none; 
+    align-items: center; 
+    gap: 8px; 
+    background: linear-gradient(135deg, #d1f4e0 0%, #b8e6cc 100%);
+    color: #0f5132; 
+    border: 1px solid #9dd6b8;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(15, 81, 50, 0.1);
+}
+
+.filter-chip .btn-clear { 
+    background: transparent;
+    border: 0;
+    color: #0f5132;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: transform 0.2s ease;
+}
+
+.filter-chip .btn-clear:hover {
+    transform: scale(1.2);
+}
+
+/* Prognosis styles */
+.prognosis-bar-v { 
+    display: flex; 
+    flex-direction: column;
+    align-self: start; 
+    width: 150px; 
+    height: 100%; 
+    border-radius: 6px; 
+    overflow: hidden; 
+    border: 1px solid #e0e0e0; 
+}
+
+.prognosis-segment { 
+    height: 100%; 
+    position: relative; 
+    cursor: pointer; 
+}
+
+.prognosis-segment:focus { 
+    outline: 2px solid #257358; 
+    outline-offset: -2px; 
+}
+
+.prognosis-segment.active { 
+    box-shadow: inset 0 0 0 2px #257358; 
+}
+
+.prognosis-segment:hover::after { 
+    content: attr(data-tooltip); 
+    position: absolute; 
+    left: 4px; 
+    right: 4px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    background: rgba(0,0,0,0.85); 
+    color: #fff; 
+    padding: 3px 6px; 
+    border-radius: 3px; 
+    white-space: normal; 
+    word-break: break-word; 
+    font-size: 11px; 
+    z-index: 2; 
+    text-align: center; 
+    max-width: calc(100% - 8px); 
+}
+
+.prognosis-legend .legend-item { 
+    display: inline-flex; 
+    align-items: center; 
+    margin-right: 10px; 
+    margin-bottom: 4px; 
+    font-size: 0.82rem; 
+}
+
+.prognosis-legend .legend-color { 
+    width: 12px; 
+    height: 12px; 
+    border-radius: 2px; 
+    display: inline-block; 
+    margin-right: 5px; 
+    border: 1px solid rgba(0,0,0,0.1); 
+}
+
+.prognosis-depth-labels-v { 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    margin-left: 6px; 
+    font-size: 11px; 
+    color: #6c757d; 
+}
+
+.prognosis-tick { 
+    position: relative; 
+    display: flex; 
+    align-items: center; 
+    gap: 4px; 
+}
+
+.prognosis-tick-line { 
+    width: 6px; 
+    height: 1px; 
+    background: #adb5bd; 
+    display: inline-block; 
+}
+
+.prognosis-target { 
+    outline: 2px dashed rgba(0,0,0,0.25); 
+    outline-offset: -2px; 
+}
+
+.prognosis-wrap { 
+    display: flex; 
+    align-items: stretch; 
+    justify-content: center; 
+    gap: 8px; 
+}
+
+.prognosis-bar-v { 
+    position: relative; 
+}
+
+.prognosis-marker { 
+    position: absolute; 
+    left: 0; 
+    right: 0; 
+    height: 2px; 
+    background: #E98108; 
+    z-index: 3; 
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.08); 
+}
+
+.prognosis-marker-label { 
+    position: absolute; 
+    right: 4px; 
+    transform: translateY(-50%); 
+    padding: 2px 6px; 
+    background: #E98108; 
+    color: #fff; 
+    border-radius: 3px; 
+    font-size: 11px; 
+    z-index: 4; 
+    white-space: nowrap; 
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .report-card {
+        margin-left: 30px;
+    }
+    
+    .report-card::before {
+        left: -28px;
+    }
+    
+    .depth-badges {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
