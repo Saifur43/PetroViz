@@ -1,0 +1,518 @@
+{% load static %}
+<style>
+/* Inline styles for modal content */
+.report-card {
+    margin-bottom: 0;
+    margin-left: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: white;
+}
+
+.report-card::before {
+    display: none;
+}
+
+.report-card .card-header {
+    background: linear-gradient(135deg, #0a3380ff 0%, #e5eaf3ff 100%);
+    padding: 1rem 1.25rem;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+}
+
+.report-card .card-body {
+    padding: 1.25rem;
+}
+
+.depth-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.report-depth-md {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    color: #d47307 !important;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    border: 1px solid rgba(233, 129, 8, 0.2);
+}
+
+.report-depth-md::before {
+    content: 'MD';
+    font-size: 0.65rem;
+    background: rgba(212, 115, 7, 0.15);
+    padding: 2px 5px;
+    border-radius: 4px;
+    margin-right: 5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.report-depth-tvd {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #1565c0 !important;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    border: 1px solid rgba(21, 101, 192, 0.2);
+}
+
+.report-depth-tvd::before {
+    content: 'TVD';
+    font-size: 0.65rem;
+    background: rgba(21, 101, 192, 0.15);
+    padding: 2px 5px;
+    border-radius: 4px;
+    margin-right: 5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.report-date {
+    color: #1a5943 !important;
+    background: linear-gradient(135deg, #e8f5f1 0%, #d4ebe4 100%);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    margin-right: 8px;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    border: 1px solid rgba(37, 115, 88, 0.2);
+}
+
+.info-section-modern {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    margin-bottom: 1rem;
+}
+
+.info-section-modern h6 {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem !important;
+    color: #257358;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e8f5f1;
+}
+
+.info-row-modern {
+    margin-bottom: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    background: linear-gradient(to right, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 6px;
+    border-left: 3px solid #257358;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.info-row-modern:hover {
+    background: linear-gradient(to right, #e9ecef 0%, #f8f9fa 100%);
+    transform: translateX(3px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+.gas-show-highlight {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%) !important;
+    border-left: 4px solid #ffc107 !important;
+    box-shadow: 0 3px 10px rgba(255, 193, 7, 0.25) !important;
+}
+
+.gas-show-badge {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #856404 !important;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+}
+
+.gas-show-table-wrapper {
+    border-radius: 8px;
+    border: 1px solid #fcd34d;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.gas-show-table {
+    margin-bottom: 0;
+    font-size: 0.75rem;
+}
+
+.gas-show-table thead {
+    background: #fff7ed;
+    color: #9a3412;
+}
+
+.gas-show-table th {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #fcd34d;
+    padding: 0.5rem;
+}
+
+.gas-show-table td {
+    vertical-align: middle;
+    padding: 0.5rem;
+}
+
+.lithology-section {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-top: 0;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.lithology-section h6 {
+    color: #257358;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+}
+
+.lithology-legend {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    border: 1px solid #dee2e6;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 10px;
+    margin-bottom: 3px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.lithology-entry {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent;
+    border-radius: 0;
+    border: none;
+    transition: none;
+    line-height: 0 !important;
+    display: flex;
+    align-items: stretch;
+    height: 35px;
+    vertical-align: top;
+}
+
+.lithology-entry:hover {
+    background: transparent;
+}
+
+.lithology-chart-container {
+    position: relative;
+    width: 100%;
+    height: 35px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+    display: block;
+    flex: 1;
+    overflow: hidden;
+}
+
+.lithology-chart-container canvas {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    vertical-align: top;
+    height: 35px !important;
+}
+
+.depth-label-right {
+    min-width: 120px;
+    text-align: right;
+    padding: 0 8px;
+    font-size: 0.75rem;
+    color: #6c757d;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    line-height: 1.2;
+}
+
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+
+.skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}
+
+.depth-label {
+    min-width: 100px;
+    text-align: right;
+}
+</style>
+
+<div class="card report-card"
+    data-report-id="{{ report.id }}"
+    data-depth-start="{{ report.depth_start }}"
+    data-depth-end="{{ report.depth_end }}"
+    data-has-gas="{{ report.gas_show|yesno:'true,false' }}"
+    data-gas-measurements="{{ report.gas_show_measurements|length }}">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            {% if report.report_no %}
+            <span class="badge bg-primary" style="font-size: 0.75rem;">
+                #{{ report.report_no }}
+            </span>
+            {% endif %}
+            <span class="report-date">
+                <i class="bi bi-calendar-check"></i>{{ report.date}}
+            </span>
+            
+            <div class="depth-badges">
+                <span class="report-depth-md">
+                    <i class="bi bi-arrows-expand"></i>{{ report.depth_start|floatformat:1 }} - {{ report.depth_end|floatformat:1 }} m
+                </span>
+                {% if report.depth_start_tvd and report.depth_end_tvd %}
+                <span class="report-depth-tvd">
+                    <i class="bi bi-arrows-expand"></i>{{ report.depth_start_tvd|floatformat:1 }} - {{ report.depth_end_tvd|floatformat:1 }} m
+                </span>
+                {% endif %}
+            </div>
+            {% with report_date=report.date|date:'Y-m-d' %}
+            <a href="{% url 'generate_drilling_reports_pdf' %}?well={{ selected_well }}&date={{ report.date_iso }}" 
+                class="btn btn-sm btn-outline-light ms-2" 
+                target="_blank"
+                style="background-color: #570505; padding: 3px 8px; font-size: 0.8rem;"
+                title="Download PDF Report for {{ report.date }}">
+                <i class="bi bi-file-pdf"></i>
+            </a>
+            {% endwith %}
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-section-modern">
+                    <h6>
+                        <i class="bi bi-info-circle"></i>Report Details
+                    </h6>
+
+                    <div class="info-row-modern {% if report.gas_show %}gas-show-highlight{% endif %}">
+                        <div class="fw-semibold text-muted" style="font-size: 0.75rem;">
+                            <i class="bi bi-activity me-1"></i>Present Activity
+                        </div>
+                        <div class="mt-1">
+                            {{ report.present_activity|default:"Not specified"|safe }}
+                        </div>
+                    </div>
+
+                    <div class="info-row-modern">
+                        <div class="fw-semibold text-muted" style="font-size: 0.75rem;">
+                            <i class="bi bi-calendar4-event me-1"></i>Next Program
+                        </div>
+                        <div class="mt-1">
+                            {{ report.next_program|default:"Not specified"|safe }}
+                        </div>
+                    </div>
+
+                    <div class="info-row-modern {% if report.gas_show %}gas-show-highlight{% endif %}">
+                        <div class="fw-semibold text-muted d-flex align-items-center" style="font-size: 0.75rem;">
+                            <i class="bi bi-cloud me-1"></i>Gas Show
+                        </div>
+                        <div class="mt-1 d-flex flex-wrap align-items-center gap-2">
+                            <span>{{ report.gas_show|yesno:"Yes,No" }}</span>
+                            {% if report.gas_show %}
+                            <span class="gas-show-badge">
+                                <i class="bi bi-exclamation-triangle-fill"></i>GAS DETECTED
+                            </span>
+                            {% endif %}
+                            {% if report.gas_show_peak %}
+                            <span class="badge text-bg-warning" style="font-size: 0.7rem;">
+                                Peak {{ report.gas_show_peak|floatformat:1 }}%
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-row-modern">
+                        <div class="fw-semibold text-muted" style="font-size: 0.75rem;">
+                            <i class="bi bi-gear me-1"></i>Drilling Operation
+                        </div>
+                        <div class="mt-1">
+                            {{ report.current_operation|default:"Not specified"|safe }}
+                        </div>
+                    </div>
+
+                    <div class="info-row-modern">
+                        <div class="fw-semibold text-muted" style="font-size: 0.75rem;">
+                            <i class="bi bi-chat-left-text me-1"></i>Comments
+                        </div>
+                        <div class="mt-1">
+                            {{ report.comments|default:"No comments"|safe|linebreaksbr }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if report.gas_show_measurements %}
+                <div class="mt-3">
+                    <div class="info-section-modern gas-show-table-wrapper">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0" style="color: #257358; font-weight: 600; font-size: 0.9rem;">
+                                <i class="bi bi-graph-up-arrow"></i>Gas Show Measurements
+                            </h6>
+                            <a class="btn btn-sm btn-outline-secondary"
+                               href="{% url 'gas_show_measurements' report.id %}"
+                               target="_blank"
+                               style="font-size: 0.7rem; padding: 2px 6px;">
+                                <i class="bi bi-braces"></i> JSON
+                            </a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm gas-show-table">
+                                <thead>
+                                    <tr>
+                                        <th>Formation</th>
+                                        <th>Depth Range (m)</th>
+                                        <th>Max (%)</th>
+                                        <th>BG (%)</th>
+                                        <th>Above BG (%)</th>
+                                        <th>C1 (%)</th>
+                                        <th>C2 (%)</th>
+                                        <th>C3 (%)</th>
+                                        <th>iC4 (%)</th>
+                                        <th>nC5 (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for measurement in report.gas_show_measurements %}
+                                    <tr>
+                                        <td>{{ measurement.formation }}</td>
+                                        <td>{{ measurement.start_depth_m|floatformat:1 }} - {{ measurement.end_depth_m|floatformat:1 }}</td>
+                                        <td>{{ measurement.max_percent|floatformat:1 }}</td>
+                                        <td>{{ measurement.bg_percent|floatformat:1 }}</td>
+                                        <td>{{ measurement.above_bg_percent|floatformat:1 }}</td>
+                                        <td>{{ measurement.c1_percent|floatformat:1 }}</td>
+                                        <td>{{ measurement.c2_percent|floatformat:1 }}</td>
+                                        <td>{{ measurement.c3_percent|floatformat:1 }}</td>
+                                        <td>{{ measurement.ic4_percent|floatformat:1 }}</td>
+                                        <td>{{ measurement.nc5_percent|floatformat:1 }}</td>
+                                    </tr>
+                                    {% if measurement.remarks %}
+                                    <tr>
+                                        <td colspan="10" class="text-muted" style="font-size: 0.7rem;">
+                                            <i class="bi bi-chat-left-quote"></i> {{ measurement.remarks }}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <div class="lithology-section">
+                    <h6 style="color: #257358; font-weight: 600; font-size: 0.95rem;">
+                        <i class="bi bi-layers-fill me-2"></i>Lithology Compositions
+                    </h6>
+                    
+                    {% if report.lithologies %}
+                    <div class="lithology-legend">
+                        <div class="d-flex flex-wrap justify-content-center">
+                            <span class="legend-item">
+                                <span class="legend-color" style="background:#666666;"></span>
+                                Shale
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color" style="background:#FFD700;"></span>
+                                Sand
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color" style="background:#CD853F;"></span>
+                                Clay
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color" style="background:#DEB887;"></span>
+                                Silt
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div style="border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; background: white; line-height: 0; font-size: 0; display: flex; flex-direction: column;">
+                    {% for lithology in report.lithologies %}
+                    <div class="lithology-entry" style="line-height: 0; font-size: 0; height: 35px; min-height: 35px; max-height: 35px;">
+                        <div class="lithology-chart-container" style="line-height: 0; font-size: 0; height: 35px; min-height: 35px; max-height: 35px;">
+                            <canvas class="lithologyChartRow"
+                                id="chart-{{ report.id }}-{{ forloop.counter }}"
+                                data-shale="{{ lithology.shale }}"
+                                data-sand="{{ lithology.sand }}"
+                                data-clay="{{ lithology.clay }}"
+                                data-slit="{{ lithology.slit }}"
+                                data-depth-range="{{ lithology.depth_range }}"
+                                style="display: block !important; margin: 0 !important; padding: 0 !important; line-height: 0 !important; vertical-align: top !important; height: 35px !important; width: 100% !important;">
+                            </canvas>
+                            <div class="chart-skeleton skeleton" style="position:absolute; inset:0; display:block; line-height: 0;"></div>
+                        </div>
+                        <div class="depth-label-right" style="font-size: 0.75rem; line-height: 1.2; height: 35px; display: flex; align-items: center;">
+                            {{ lithology.depth_range }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-light text-center py-2" role="alert" style="font-size: 0.85rem;">
+                        <i class="bi bi-exclamation-circle me-2"></i>No lithology data available for this interval
+                    </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

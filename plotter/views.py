@@ -418,6 +418,84 @@ def drilling_reports_index(request):
 
 
 @login_required
+def drilling_reports_list(request, well_id):
+    """Show a list of drilling reports for a specific well."""
+    # Get the well object
+    well = get_object_or_404(Well, pk=well_id)
+    
+    # Get filter parameters
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    depth_from = request.GET.get('depth_from')
+    depth_to = request.GET.get('depth_to')
+    gas_show = request.GET.get('gas_show')
+    
+    # Start with reports for this well only
+    reports_qs = DailyDrillingReport.objects.select_related('well').filter(well_id=well_id)
+    
+    # Apply date filters
+    if start_date:
+        reports_qs = reports_qs.filter(date__gte=start_date)
+    if end_date:
+        reports_qs = reports_qs.filter(date__lte=end_date)
+    
+    # Apply depth range filters
+    if depth_from:
+        try:
+            depth_from_float = float(depth_from)
+            reports_qs = reports_qs.filter(depth_end__gte=depth_from_float)
+        except (ValueError, TypeError):
+            pass
+    if depth_to:
+        try:
+            depth_to_float = float(depth_to)
+            reports_qs = reports_qs.filter(depth_start__lte=depth_to_float)
+        except (ValueError, TypeError):
+            pass
+    
+    # Apply gas show filter
+    if gas_show == 'yes':
+        reports_qs = reports_qs.filter(gas_show=True)
+    elif gas_show == 'no':
+        reports_qs = reports_qs.filter(gas_show=False)
+    
+    # Order by date (newest first)
+    reports_qs = reports_qs.order_by('-date', '-depth_start')
+    
+    # Process reports for template
+    reports = []
+    for report in reports_qs:
+        reports.append({
+            'id': report.id,
+            'well_id': report.well.id,
+            'well_name': report.well.name,
+            'report_no': report.report_no,
+            'date': report.date.strftime('%d %b, %Y') if report.date else '—',
+            'date_iso': report.date.strftime('%Y-%m-%d') if report.date else '',
+            'depth_start': report.depth_start,
+            'depth_end': report.depth_end,
+            'depth_start_tvd': report.depth_start_tvd,
+            'depth_end_tvd': report.depth_end_tvd,
+            'present_activity': report.present_activity,
+            'current_operation': report.current_operation,
+            'gas_show': report.gas_show,
+        })
+    
+    context = {
+        'reports': reports,
+        'well': well,
+        'well_id': well_id,
+        'start_date': start_date,
+        'end_date': end_date,
+        'depth_from': depth_from,
+        'depth_to': depth_to,
+        'gas_show': gas_show,
+    }
+    
+    return render(request, 'visualization/drilling_reports.html', context)
+
+
+@login_required
 def create_drilling_report(request):
     """Create a new DailyDrillingReport. Only superusers allowed."""
     if not request.user.is_superuser:
@@ -740,9 +818,7 @@ def drilling_reports(request, well_id=None):
         
         stats = {
             'total_reports': reports.count(),
-            'depth_progress': latest_report.depth_end - earliest_report.depth_start,
             'latest_depth': latest_report.depth_end,
-            'avg_progress_per_day': (latest_report.depth_end - earliest_report.depth_start) / total_days,
             'drilling_efficiency': calculate_drilling_efficiency(reports)
         }
     
@@ -914,6 +990,98 @@ def drilling_reports(request, well_id=None):
         except Well.DoesNotExist:
             prognosis_data = None
 
+    # Get well trajectory data (3D: MD, TVD, Northing, Easting) from survey stations
+    trajectory_data = None
+    latest_depth_point = None
+    if well_id:
+        try:
+            selected_well_obj = Well.objects.get(id=well_id)
+            survey_stations = selected_well_obj.survey_stations.all().order_by('md')
+            if survey_stations.exists():
+                trajectory_data = [
+                    {
+                        'md': float(station.md),
+                        'tvd': float(station.tvd) if station.tvd is not None else float(station.md),
+                        'northing': float(station.northing) if station.northing is not None else 0.0,
+                        'easting': float(station.easting) if station.easting is not None else 0.0
+                    }
+                    for station in survey_stations
+                ]
+                
+                # Calculate latest depth point if we have latest depth from reports
+                if stats and stats.get('latest_depth'):
+                    latest_md = float(stats['latest_depth'])
+                    stations_list = list(survey_stations)
+                    
+                    # If latest MD is beyond last station, interpolate/extrapolate
+                    if latest_md > stations_list[-1].md:
+                        # Extrapolate using last two stations
+                        if len(stations_list) >= 2:
+                            last = stations_list[-1]
+                            prev = stations_list[-2]
+                            
+                            # Calculate direction vector from previous to last station
+                            delta_md = last.md - prev.md
+                            if delta_md > 0:
+                                ratio = (latest_md - last.md) / delta_md
+                                
+                                latest_depth_point = {
+                                    'md': latest_md,
+                                    'tvd': float(last.tvd) + ratio * (float(last.tvd) - float(prev.tvd)) if last.tvd and prev.tvd else latest_md,
+                                    'northing': float(last.northing) + ratio * (float(last.northing) - float(prev.northing)) if last.northing and prev.northing else 0.0,
+                                    'easting': float(last.easting) + ratio * (float(last.easting) - float(prev.easting)) if last.easting and prev.easting else 0.0
+                                }
+                            else:
+                                # Use last station if can't extrapolate
+                                latest_depth_point = {
+                                    'md': latest_md,
+                                    'tvd': float(last.tvd) if last.tvd is not None else latest_md,
+                                    'northing': float(last.northing) if last.northing is not None else 0.0,
+                                    'easting': float(last.easting) if last.easting is not None else 0.0
+                                }
+                        else:
+                            # Only one station, use it
+                            last = stations_list[0]
+                            latest_depth_point = {
+                                'md': latest_md,
+                                'tvd': float(last.tvd) if last.tvd is not None else latest_md,
+                                'northing': float(last.northing) if last.northing is not None else 0.0,
+                                'easting': float(last.easting) if last.easting is not None else 0.0
+                            }
+                    else:
+                        # Interpolate between stations
+                        for idx in range(1, len(stations_list)):
+                            current = stations_list[idx]
+                            prev = stations_list[idx - 1]
+                            if latest_md <= current.md:
+                                if current.md == prev.md:
+                                    latest_depth_point = {
+                                        'md': latest_md,
+                                        'tvd': float(current.tvd) if current.tvd is not None else latest_md,
+                                        'northing': float(current.northing) if current.northing is not None else 0.0,
+                                        'easting': float(current.easting) if current.easting is not None else 0.0
+                                    }
+                                else:
+                                    ratio = (latest_md - prev.md) / (current.md - prev.md)
+                                    latest_depth_point = {
+                                        'md': latest_md,
+                                        'tvd': float(prev.tvd or prev.md) + ratio * (float(current.tvd or current.md) - float(prev.tvd or prev.md)),
+                                        'northing': float(prev.northing or 0.0) + ratio * (float(current.northing or 0.0) - float(prev.northing or 0.0)),
+                                        'easting': float(prev.easting or 0.0) + ratio * (float(current.easting or 0.0) - float(prev.easting or 0.0))
+                                    }
+                                break
+                        # If not found, use last station
+                        if not latest_depth_point:
+                            last = stations_list[-1]
+                            latest_depth_point = {
+                                'md': latest_md,
+                                'tvd': float(last.tvd) if last.tvd is not None else latest_md,
+                                'northing': float(last.northing) if last.northing is not None else 0.0,
+                                'easting': float(last.easting) if last.easting is not None else 0.0
+                            }
+        except Well.DoesNotExist:
+            trajectory_data = None
+
     context = {
         'reports': processed_reports,
         'wells': wells,
@@ -928,6 +1096,9 @@ def drilling_reports(request, well_id=None):
         'prognosis_range': prognosis_range,
         'gas_show_summary': gas_show_summary,
         'gas_show_measurements_all': gas_show_measurements_all,
+        'trajectory_data': trajectory_data,
+        'latest_depth': stats['latest_depth'] if stats else None,
+        'latest_depth_point': latest_depth_point,
     }
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -936,7 +1107,7 @@ def drilling_reports(request, well_id=None):
             'stats': stats
         })
     
-    return render(request, 'visualization/drilling_reports.html', context)
+    return render(request, 'visualization/drilling_reports_dashboard.html', context)
 
 @login_required
 def gas_show_measurements_view(request, report_id):
@@ -969,6 +1140,97 @@ def gas_show_measurements_view(request, report_id):
         'measurements': measurements,
         'has_measurements': bool(measurements),
     })
+
+
+@login_required
+def drilling_report_detail(request, report_id):
+    """Return detailed view of a single drilling report."""
+    report = get_object_or_404(
+        DailyDrillingReport.objects.select_related('well').prefetch_related('lithologies', 'gas_show_measurements'),
+        pk=report_id
+    )
+    
+    # Process lithologies
+    lithologies = []
+    for litho in report.lithologies.all():
+        lithology_percentages = {
+            'shale': litho.shale_percentage or 0,
+            'sand': litho.sand_percentage or 0,
+            'clay': litho.clay_percentage or 0,
+            'slit': litho.slit_percentage or 0
+        }
+        dominant_lithology = max(lithology_percentages, key=lithology_percentages.get)
+        
+        prognosis_comparison, comparison_type = compare_lithology_with_prognosis(litho, report.well)
+        
+        lithologies.append({
+            'depth_range': f"{litho.depth_from}-{litho.depth_to}m",
+            'depth_from': litho.depth_from,
+            'depth_to': litho.depth_to,
+            'shale': round(litho.shale_percentage or 0, 1),
+            'sand': round(litho.sand_percentage or 0, 1),
+            'clay': round(litho.clay_percentage or 0, 1),
+            'slit': round(litho.slit_percentage or 0, 1),
+            'total': round((litho.shale_percentage or 0) + 
+                         (litho.sand_percentage or 0) + 
+                         (litho.clay_percentage or 0) + 
+                         (litho.slit_percentage or 0), 1),
+            'dominant_lithology': dominant_lithology,
+            'dominant_percentage': round(lithology_percentages[dominant_lithology], 1),
+            'prognosis_comparison': prognosis_comparison,
+            'comparison_type': comparison_type,
+            'description': litho.description
+        })
+    
+    # Process gas show measurements
+    gas_show_measurements = []
+    for gsm in report.gas_show_measurements.all():
+        gas_show_measurements.append({
+            'formation': gsm.formation,
+            'start_depth_m': gsm.start_depth_m,
+            'end_depth_m': gsm.end_depth_m,
+            'max_percent': gsm.max_percent,
+            'bg_percent': gsm.bg_percent,
+            'above_bg_percent': gsm.above_bg_percent,
+            'c1_percent': gsm.c1_percent,
+            'c2_percent': gsm.c2_percent,
+            'c3_percent': gsm.c3_percent,
+            'ic4_percent': gsm.ic4_percent,
+            'nc5_percent': gsm.nc5_percent,
+            'remarks': gsm.remarks,
+        })
+    
+    processed_report = {
+        'id': report.id,
+        'well_id': report.well.id,
+        'well_name': report.well.name,
+        'report_no': report.report_no,
+        'date': report.date.strftime('%d %b, %Y') if report.date else '—',
+        'date_iso': report.date.strftime('%Y-%m-%d') if report.date else '',
+        'depth_start': report.depth_start,
+        'depth_end': report.depth_end,
+        'depth_start_tvd': report.depth_start_tvd,
+        'depth_end_tvd': report.depth_end_tvd,
+        'current_operation': report.current_operation,
+        'present_activity': report.present_activity,
+        'next_program': report.next_program,
+        'gas_show': report.gas_show,
+        'comments': report.comments,
+        'lithologies': lithologies,
+        'gas_show_measurements': gas_show_measurements,
+        'gas_show_peak': max((gsm['max_percent'] for gsm in gas_show_measurements), default=None) if gas_show_measurements else None,
+        'daily_progress': report.depth_end - report.depth_start,
+    }
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'report': processed_report})
+    
+    context = {
+        'report': processed_report,
+        'selected_well': str(report.well.id),
+    }
+    
+    return render(request, 'visualization/drilling_report_detail.html', context)
 
 
 @login_required

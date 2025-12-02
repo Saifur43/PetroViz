@@ -3,22 +3,613 @@
 
 {% block content %}
 <style>
-/* Drilling Reports Styles */
-.lithology-chart-container {
+/* Reports List Styles */
+.reports-list-container {
+    padding: 1rem 0;
+}
+
+.reports-header {
+    background: linear-gradient(135deg, rgba(19, 83, 163, 0.05) 0%, rgba(37, 115, 88, 0.05) 100%);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--secondary-amber);
+    margin-bottom: 1rem;
+}
+
+.reports-header h1 {
+    color: var(--primary-blue);
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.reports-header p {
+    color: var(--muted-color);
+    font-size: 0.85rem;
+    margin: 0.25rem 0 0 0;
+}
+
+.reports-filters {
+    background: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 1rem;
+}
+
+.reports-filters .form-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.reports-filters .form-control,
+.reports-filters .form-select {
+    font-size: 0.875rem;
+    padding: 0.4rem 0.75rem;
+}
+
+.reports-table-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.reports-table {
+    margin-bottom: 0;
+}
+
+.reports-table thead {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+    color: white;
+}
+
+.reports-table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 1rem;
+    border: none;
+}
+
+.reports-table tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.reports-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateX(2px);
+}
+
+.reports-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.well-badge {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #1565c0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-block;
+}
+
+.date-badge {
+    background: linear-gradient(135deg, #e8f5f1 0%, #d4ebe4 100%);
+    color: #1a5943;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.depth-badge {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    color: #d47307;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-block;
+}
+
+.gas-show-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.gas-show-yes {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+    color: #856404;
+}
+
+.gas-show-no {
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-view {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(19, 83, 163, 0.3);
+    color: white;
+}
+
+.btn-dashboard {
+    background: linear-gradient(135deg, var(--tertiary-green) 0%, #1a5943 100%);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-dashboard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(37, 115, 88, 0.3);
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--muted-color);
+    opacity: 0.3;
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h4 {
+    color: var(--dark-gray);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--muted-color);
+    margin: 0;
+}
+
+</style>
+
+<div class="container-fluid" style="padding-left: 5%;padding-right: 5%;">
+    <div class="row">
+        <main class="col-12 px-4 pt-2">
+            <div class="reports-list-container">
+                <!-- Header -->
+                <div class="reports-header">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h1>
+                                <i class="bi bi-journal-text me-2"></i>Daily Geological Reports List
+                            </h1>
+                            <p class="mb-0"><strong>{{ well.name }}</strong></p>
+                        </div>
+                        <div>
+                            <a href="{% url 'drilling_reports' well_id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="reports-filters">
+                    {% if start_date or end_date or depth_from or depth_to or gas_show %}
+                    <div class="mb-2">
+                        <div class="d-flex align-items-center gap-1 flex-wrap">
+                            <span class="badge bg-info text-dark" style="font-size: 0.75rem;">
+                                <i class="bi bi-funnel-fill me-1"></i>Active:
+                            </span>
+                            {% if start_date %}
+                            <span class="badge bg-secondary" style="font-size: 0.7rem;">
+                                From: {{ start_date }}
+                                <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6em;" onclick="clearFilter('start_date')"></button>
+                            </span>
+                            {% endif %}
+                            {% if end_date %}
+                            <span class="badge bg-secondary" style="font-size: 0.7rem;">
+                                To: {{ end_date }}
+                                <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6em;" onclick="clearFilter('end_date')"></button>
+                            </span>
+                            {% endif %}
+                            {% if depth_from %}
+                            <span class="badge bg-secondary" style="font-size: 0.7rem;">
+                                Depth From: {{ depth_from }}m
+                                <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6em;" onclick="clearFilter('depth_from')"></button>
+                            </span>
+                            {% endif %}
+                            {% if depth_to %}
+                            <span class="badge bg-secondary" style="font-size: 0.7rem;">
+                                Depth To: {{ depth_to }}m
+                                <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6em;" onclick="clearFilter('depth_to')"></button>
+                            </span>
+                            {% endif %}
+                            {% if gas_show %}
+                            <span class="badge bg-secondary" style="font-size: 0.7rem;">
+                                Gas Show: {{ gas_show|title }}
+                                <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6em;" onclick="clearFilter('gas_show')"></button>
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <form method="get" id="filterForm" class="row g-2">
+                        <div class="col-md-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="depth_from" class="form-label">Depth From (m)</label>
+                            <input type="number" name="depth_from" id="depth_from" class="form-control" step="0.1" value="{{ depth_from }}" placeholder="Min depth">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="depth_to" class="form-label">Depth To (m)</label>
+                            <input type="number" name="depth_to" id="depth_to" class="form-control" step="0.1" value="{{ depth_to }}" placeholder="Max depth">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="gas_show" class="form-label">Gas Show</label>
+                            <select name="gas_show" id="gas_show" class="form-select">
+                                <option value="">All</option>
+                                <option value="yes" {% if gas_show == 'yes' %}selected{% endif %}>Yes</option>
+                                <option value="no" {% if gas_show == 'no' %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                                <i class="bi bi-funnel me-1"></i>Apply Filters
+                            </button>
+                            <a href="{% url 'drilling_reports_list' well_id %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-x-circle me-1"></i>Clear All
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Reports Table -->
+                {% if reports %}
+                <div class="reports-table-wrapper">
+                    <div class="table-responsive">
+                        <table class="table reports-table">
+                            <thead>
+                                <tr>
+                                    <th>Report #</th>
+                                    <th>Date</th>
+                                    <th>Depth Range (MD)</th>
+                                    <th>Depth Range (TVD)</th>
+                                    <th>Gas Show</th>
+                                    <th>Activity</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                <tr>
+                                    <td>
+                                        {% if report.report_no %}
+                                        <span class="badge bg-primary">#{{ report.report_no }}</span>
+                                        {% else %}
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="date-badge">{{ report.date }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="depth-badge">
+                                            {{ report.depth_start|floatformat:1 }} - {{ report.depth_end|floatformat:1 }} m
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if report.depth_start_tvd and report.depth_end_tvd %}
+                                        <span class="depth-badge">
+                                            {{ report.depth_start_tvd|floatformat:1 }} - {{ report.depth_end_tvd|floatformat:1 }} m
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="gas-show-indicator {% if report.gas_show %}gas-show-yes{% else %}gas-show-no{% endif %}">
+                                            <i class="bi {% if report.gas_show %}bi-fire{% else %}bi-dash-circle{% endif %}"></i>
+                                            {{ report.gas_show|yesno:"Yes,No" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ report.present_activity}}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button type="button" class="btn-view" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#reportDetailModal"
+                                                    data-report-id="{{ report.id }}"
+                                                    title="View Report Details">
+                                                <i class="bi bi-eye"></i>
+                                                View
+                                            </button>
+                                        
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <h4>No Reports Found</h4>
+                    <p>No drilling reports match your current filters. Try adjusting your search criteria.</p>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Report Detail Modal -->
+<div class="modal fade" id="reportDetailModal" tabindex="-1" aria-labelledby="reportDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportDetailModalLabel">
+                    <i class="bi bi-file-earmark-text me-2"></i>Report Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="reportDetailContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading report details...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load report detail when modal is shown
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('reportDetailModal');
+    const modalContent = document.getElementById('reportDetailContent');
+    
+    modal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const reportId = button.getAttribute('data-report-id');
+        
+        // Reset content
+        modalContent.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading report details...</p>
+            </div>
+        `;
+        
+        // Load report detail
+        fetch(`/drilling-reports/detail/${reportId}/`)
+            .then(response => response.text())
+            .then(html => {
+                modalContent.innerHTML = html;
+                
+                // Initialize charts after content is loaded
+                if (typeof Chart !== 'undefined') {
+                    setTimeout(() => {
+                        initializeReportCharts();
+                    }, 100);
+                }
+            })
+            .catch(error => {
+                modalContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Error loading report details. Please try again.
+                    </div>
+                `;
+                console.error('Error:', error);
+            });
+    });
+    
+    function initializeReportCharts() {
+        const chartInstances = new Map();
+        
+        document.querySelectorAll('.lithologyChartRow').forEach(canvas => {
+            if (chartInstances.has(canvas.id)) return;
+            
+            const ctx = canvas.getContext('2d');
+            const data = {
+                shale: parseFloat(canvas.dataset.shale) || 0,
+                sand: parseFloat(canvas.dataset.sand) || 0,
+                clay: parseFloat(canvas.dataset.clay) || 0,
+                slit: parseFloat(canvas.dataset.slit) || 0,
+            };
+            
+            ['shale', 'sand', 'clay', 'slit'].forEach(key => {
+                if (isNaN(data[key])) data[key] = 0;
+                data[key] = parseFloat(data[key].toFixed(1));
+            });
+            
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [''],
+                    datasets: [
+                        {
+                            label: 'Shale',
+                            data: [data.shale],
+                            backgroundColor: '#666666',
+                            borderColor: '#444444',
+                            borderWidth: 0
+                        },
+                        {
+                            label: 'Sand',
+                            data: [data.sand],
+                            backgroundColor: '#FFD700',
+                            borderColor: '#B8860B',
+                            borderWidth: 0
+                        },
+                        {
+                            label: 'Clay',
+                            data: [data.clay],
+                            backgroundColor: '#CD853F',
+                            borderColor: '#8B4513',
+                            borderWidth: 0
+                        },
+                        {
+                            label: 'Silt',
+                            data: [data.slit],
+                            backgroundColor: '#DEB887',
+                            borderColor: '#D2691E',
+                            borderWidth: 0
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: 0
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 10,
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            callbacks: {
+                                label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            max: 100,
+                            min: 0,
+                            ticks: {
+                                display: false
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            display: false,
+                            grid: { display: false }
+                        }
+                    },
+                    animation: { 
+                        duration: 400,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+            
+            chartInstances.set(canvas.id, chart);
+            const skeleton = canvas.parentElement.querySelector('.chart-skeleton');
+            if (skeleton) skeleton.style.display = 'none';
+        });
+    }
+});
+
+// Clear individual filter
+function clearFilter(filterName) {
+    const form = document.getElementById('filterForm');
+    const input = form.querySelector(`[name="${filterName}"]`);
+    if (input) {
+        input.value = '';
+        form.submit();
+    }
+}
+</script>
+
+<style>
+/* Modal specific styles */
+#reportDetailModal .modal-dialog {
+    max-width: 90%;
+}
+
+#reportDetailModal .report-card {
+    margin-left: 0;
+    box-shadow: none;
+}
+
+#reportDetailModal .report-card::before {
+    display: none;
+}
+
+#reportDetailModal .lithology-chart-container {
     position: relative;
     width: 100%;
     height: 60px;
     margin: 0 auto;
 }
 
-.skeleton { 
+#reportDetailModal .skeleton { 
     position: relative; 
     overflow: hidden; 
     background: #e9ecef; 
     border-radius: 4px; 
 }
 
-.skeleton::after { 
+#reportDetailModal .skeleton::after { 
     content: ''; 
     position: absolute; 
     inset: 0; 
@@ -30,1240 +621,6 @@
 @keyframes shimmer { 
     100% { transform: translateX(100%); } 
 }
-
-/* Modern Report Cards - Timeline Style */
-.reports-container {
-    position: relative;
-}
-
-.reports-container::before {
-    content: '';
-    position: absolute;
-    left: 20px;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(180deg, var(--primary-blue) 0%, var(--tertiary-green) 100%);
-    border-radius: 2px;
-    opacity: 0.3;
-}
-
-.report-card {
-    margin-bottom: 1.5rem;
-    margin-left: 50px;
-    transition: all 0.3s ease;
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    background: white;
-    position: relative;
-    overflow: visible;
-}
-
-.report-card::before {
-    content: '';
-    position: absolute;
-    left: -38px;
-    top: 20px;
-    width: 16px;
-    height: 16px;
-    background: white;
-    border: 3px solid var(--primary-blue);
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    z-index: 2;
-    transition: all 0.3s ease;
-}
-
-.report-card:hover::before {
-    transform: scale(1.3);
-    border-color: var(--secondary-amber);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-}
-
-.report-card:hover {
-    transform: translateX(8px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-.report-card .card-header {
-    cursor: pointer;
-    background: linear-gradient(135deg, #0a3380ff 0%, #e5eaf3ff 100%);
-    padding: 1.25rem 1.5rem;
-    transition: all 0.3s ease;
-    border-radius: 16px 16px 0 0;
-    border-bottom: 2px solid transparent;
-}
-
-.report-card .card-header:hover {
-    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-    border-bottom-color: var(--secondary-amber);
-}
-
-.report-card.expanded .card-header {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, #0d3d7a 100%);
-    border-bottom-color: var(--secondary-amber);
-}
-
-.report-card.expanded .card-header .report-date,
-.report-card.expanded .card-header .report-depth {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white !important;
-}
-
-.report-card .card-body {
-    display: none;
-    padding: 1.5rem;
-    background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
-}
-
-.report-card.expanded .card-body {
-    display: block;
-}
-
-/* Modern Depth Badges - MD and TVD separated */
-.depth-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-}
-
-.report-depth-md {
-    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-    color: #d47307 !important;
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-size: 0.875rem;
-    display: inline-flex;
-    align-items: center;
-    font-weight: 600;
-    border: 1px solid rgba(233, 129, 8, 0.2);
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.report-depth-md::before {
-    content: 'MD';
-    font-size: 0.7rem;
-    background: rgba(212, 115, 7, 0.15);
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-right: 6px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.report-depth-tvd {
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    color: #1565c0 !important;
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-size: 0.875rem;
-    display: inline-flex;
-    align-items: center;
-    font-weight: 600;
-    border: 1px solid rgba(21, 101, 192, 0.2);
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.report-depth-tvd::before {
-    content: 'TVD';
-    font-size: 0.7rem;
-    background: rgba(21, 101, 192, 0.15);
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-right: 6px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.report-date {
-    color: #1a5943 !important;
-    background: linear-gradient(135deg, #e8f5f1 0%, #d4ebe4 100%);
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-size: 0.875rem;
-    margin-right: 10px;
-    display: inline-flex;
-    align-items: center;
-    font-weight: 600;
-    border: 1px solid rgba(37, 115, 88, 0.2);
-    transition: all 0.2s ease;
-}
-
-.report-date i {
-    font-size: 1rem;
-    margin-right: 6px;
-}
-
-.chevron-icon {
-    transition: transform 0.3s ease;
-    color: #6c757d;
-    font-size: 1.25rem;
-    opacity: 0.8;
-}
-
-.report-card.expanded .chevron-icon {
-    transform: rotate(180deg);
-    color: white;
-    opacity: 1;
-}
-
-.report-card:not(.expanded) .card-header:hover .chevron-icon {
-    color: var(--primary-blue);
-    opacity: 1;
-}
-
-/* Modern Info Section */
-.info-section-modern {
-    background: white;
-    padding: 1.25rem;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    margin-bottom: 1rem;
-}
-
-.info-section-modern h6 {
-    font-size: 1rem;
-    margin-bottom: 1rem !important;
-    color: #257358;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid #e8f5f1;
-}
-
-.info-row-modern {
-    margin-bottom: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: linear-gradient(to right, #f8f9fa 0%, #ffffff 100%);
-    border-radius: 8px;
-    border-left: 3px solid #257358;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-
-.info-row-modern:hover {
-    background: linear-gradient(to right, #e9ecef 0%, #f8f9fa 100%);
-    transform: translateX(4px);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.info-row-modern strong {
-    color: #257358;
-    min-width: 140px;
-    display: inline-block;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-/* Gas Show Highlight */
-.gas-show-highlight {
-    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%) !important;
-    border-left: 4px solid #ffc107 !important;
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3) !important;
-    animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3); }
-    50% { box-shadow: 0 4px 16px rgba(255, 193, 7, 0.5); }
-}
-
-.gas-show-badge {
-    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-    color: #856404 !important;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: 8px;
-    box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
-    animation: pulse-badge 2s ease-in-out infinite;
-}
-
-@keyframes pulse-badge {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-.gas-show-badge i {
-    font-size: 1rem;
-}
-
-.gas-show-summary-card {
-    background: linear-gradient(135deg, #fff8e1 0%, #fef3c7 100%);
-    border-left: 4px solid #f59e0b;
-    margin-bottom: 0.85rem;
-    padding: 0.85rem 1rem;
-}
-
-.gas-show-summary-card h6 {
-    font-size: 0.95rem;
-    margin-bottom: 0.35rem !important;
-}
-
-.gas-summary-metric {
-    display: flex;
-    flex-direction: column;
-    padding: 0.35rem 0;
-}
-
-.gas-summary-metric .label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    color: #b45309;
-    letter-spacing: 0.05em;
-}
-
-.gas-summary-metric .value {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #92400e;
-}
-
-.gas-summary-latest {
-    background: rgba(255, 255, 255, 0.7);
-    padding: 0.6rem 0.9rem;
-    border-radius: 8px;
-    border: 1px solid rgba(245, 158, 11, 0.2);
-    font-size: 0.82rem;
-}
-
-.gas-show-table-wrapper {
-    border-radius: 10px;
-    border: 1px solid #fcd34d;
-    overflow: hidden;
-}
-
-.gas-show-table {
-    margin-bottom: 0;
-    font-size: 0.8rem;
-}
-
-.gas-show-table thead {
-    background: #fff7ed;
-    color: #9a3412;
-}
-
-.gas-show-table th {
-    text-transform: uppercase;
-    font-size: 0.72rem;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid #fcd34d;
-}
-
-.gas-show-table td {
-    vertical-align: middle;
-}
-
-/* Lithology Section */
-.lithology-section {
-    background-color: white;
-    padding: 1.25rem;
-    border-radius: 12px;
-    margin-top: 0;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.lithology-legend {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    border: 1px solid #dee2e6;
-}
-
-.legend-item {
-    display: inline-flex;
-    align-items: center;
-    margin-right: 12px;
-    margin-bottom: 4px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.legend-color {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-right: 6px;
-    border-radius: 3px;
-    border: 1px solid rgba(0,0,0,0.1);
-}
-
-.lithology-entry {
-    padding: 12px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    border-radius: 8px;
-    margin-bottom: 8px;
-    border: 1px solid #e0e0e0;
-    transition: all 0.2s ease;
-}
-
-.lithology-entry:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
-}
-
-/* Stats Cards */
-.stats-card-modern {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.stats-card-modern::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    opacity: 0.1;
-    transition: transform 0.3s ease;
-}
-
-.stats-card-modern:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.stats-card-modern:hover::before {
-    transform: scale(1.5);
-}
-
-.stats-card-modern .stats-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-    flex-shrink: 0;
-}
-
-.stats-card-reports .stats-icon {
-    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-    color: white;
-}
-
-.stats-card-progress .stats-icon {
-    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    color: white;
-}
-
-.stats-card-depth .stats-icon {
-    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-    color: white;
-}
-
-.stats-card-avg .stats-icon {
-    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
-    color: white;
-}
-
-.stats-card-modern .stats-content {
-    flex: 1;
-}
-
-.stats-card-modern .stats-label {
-    font-size: 0.85rem;
-    color: #6c757d;
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.stats-card-modern .stats-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #333333;
-    margin: 0;
-    line-height: 1;
-}
-
-.stats-card-modern .stats-unit {
-    font-size: 0.8rem;
-    color: #6c757d;
-    margin: 0.25rem 0 0 0;
-}
-
-/* Toolbar */
-.reports-toolbar { 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 10px;
-    border: 1px solid #dee2e6;
-}
-
-.reports-toolbar .btn { 
-    padding: 8px 16px;
-    font-size: 0.875rem;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    border: 1px solid #dee2e6;
-    background: white;
-    color: #495057;
-}
-
-.reports-toolbar .btn:hover {
-    background: var(--primary-blue);
-    color: white;
-    border-color: var(--primary-blue);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(19, 83, 163, 0.2);
-}
-
-.filter-chip { 
-    display: none; 
-    align-items: center; 
-    gap: 8px; 
-    background: linear-gradient(135deg, #d1f4e0 0%, #b8e6cc 100%);
-    color: #0f5132; 
-    border: 1px solid #9dd6b8;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    box-shadow: 0 2px 6px rgba(15, 81, 50, 0.1);
-}
-
-.filter-chip .btn-clear { 
-    background: transparent;
-    border: 0;
-    color: #0f5132;
-    cursor: pointer;
-    padding: 0 4px;
-    transition: transform 0.2s ease;
-}
-
-.filter-chip .btn-clear:hover {
-    transform: scale(1.2);
-}
-
-/* Prognosis styles */
-.prognosis-bar-v { 
-    display: flex; 
-    flex-direction: column;
-    align-self: start; 
-    width: 150px; 
-    height: 100%; 
-    border-radius: 6px; 
-    overflow: hidden; 
-    border: 1px solid #e0e0e0; 
-}
-
-.prognosis-segment { 
-    height: 100%; 
-    position: relative; 
-    cursor: pointer; 
-}
-
-.prognosis-segment:focus { 
-    outline: 2px solid #257358; 
-    outline-offset: -2px; 
-}
-
-.prognosis-segment.active { 
-    box-shadow: inset 0 0 0 2px #257358; 
-}
-
-.prognosis-segment:hover::after { 
-    content: attr(data-tooltip); 
-    position: absolute; 
-    left: 4px; 
-    right: 4px; 
-    top: 50%; 
-    transform: translateY(-50%); 
-    background: rgba(0,0,0,0.85); 
-    color: #fff; 
-    padding: 3px 6px; 
-    border-radius: 3px; 
-    white-space: normal; 
-    word-break: break-word; 
-    font-size: 11px; 
-    z-index: 2; 
-    text-align: center; 
-    max-width: calc(100% - 8px); 
-}
-
-.prognosis-legend .legend-item { 
-    display: inline-flex; 
-    align-items: center; 
-    margin-right: 10px; 
-    margin-bottom: 4px; 
-    font-size: 0.82rem; 
-}
-
-.prognosis-legend .legend-color { 
-    width: 12px; 
-    height: 12px; 
-    border-radius: 2px; 
-    display: inline-block; 
-    margin-right: 5px; 
-    border: 1px solid rgba(0,0,0,0.1); 
-}
-
-.prognosis-depth-labels-v { 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: space-between; 
-    margin-left: 6px; 
-    font-size: 11px; 
-    color: #6c757d; 
-}
-
-.prognosis-tick { 
-    position: relative; 
-    display: flex; 
-    align-items: center; 
-    gap: 4px; 
-}
-
-.prognosis-tick-line { 
-    width: 6px; 
-    height: 1px; 
-    background: #adb5bd; 
-    display: inline-block; 
-}
-
-.prognosis-target { 
-    outline: 2px dashed rgba(0,0,0,0.25); 
-    outline-offset: -2px; 
-}
-
-.prognosis-wrap { 
-    display: flex; 
-    align-items: stretch; 
-    justify-content: center; 
-    gap: 8px; 
-}
-
-.prognosis-bar-v { 
-    position: relative; 
-}
-
-.prognosis-marker { 
-    position: absolute; 
-    left: 0; 
-    right: 0; 
-    height: 2px; 
-    background: #E98108; 
-    z-index: 3; 
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.08); 
-}
-
-.prognosis-marker-label { 
-    position: absolute; 
-    right: 4px; 
-    transform: translateY(-50%); 
-    padding: 2px 6px; 
-    background: #E98108; 
-    color: #fff; 
-    border-radius: 3px; 
-    font-size: 11px; 
-    z-index: 4; 
-    white-space: nowrap; 
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .report-card {
-        margin-left: 30px;
-    }
-    
-    .report-card::before {
-        left: -28px;
-    }
-    
-    .depth-badges {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
 </style>
-
-<div class="container-fluid" style="padding-left: 5%;padding-right: 5%;">
-    <div class="row">
-        <main class="col-12 px-4 pt-3">
-            {% if selected_well %}
-            <div class="row g-2">
-                <div class="col-lg-9 col-xl-9">
-                    <div class="mb-3">
-                        <h1 class="display-5 fw-bold">
-                            {% for well in wells %}
-                                {% if well.id|stringformat:'s' == selected_well %}
-                                <h6 style="color: #257358; font-size: 1.5em;font-weight: 800;">
-                                    <i class="bi bi-display me-2"></i>{{ well.name }} Drilling Reports
-                                </h6>
-                                {% endif %} 
-                            {% endfor %}
-                        </h1>
-                    </div>
-                    
-                    <!-- Statistics Cards -->
-                    {% include 'daily_reports/report_stats.html' %}
-
-                    {% if gas_show_summary %}
-                    <div class="info-section-modern gas-show-summary-card" role="button"
-                         data-bs-toggle="modal" data-bs-target="#gasShowModal"
-                         style="cursor: pointer;">
-                        <h6>
-                            <i class="bi bi-fire"></i>Gas Show Measurements Snapshot
-                        </h6>
-                        <div class="row gy-3 align-items-center">
-                            <div class="col-6 col-md-4">
-                                <div class="gas-summary-metric">
-                                    <span class="label">Total entries</span>
-                                    <span class="value">{{ gas_show_summary.total_count }}</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-4">
-                                <div class="gas-summary-metric">
-                                    <span class="label">Peak Max (%)</span>
-                                    <span class="value">
-                                        {% if gas_show_summary.max_peak %}
-                                            {{ gas_show_summary.max_peak|floatformat:1 }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <div class="gas-summary-metric">
-                                    <span class="label">Avg Above BG (%)</span>
-                                    <span class="value">
-                                        {% if gas_show_summary.avg_above_bg %}
-                                            {{ gas_show_summary.avg_above_bg|floatformat:1 }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </span>
-                                </div>
-                            </div>
-                            {% if gas_show_summary.latest %}
-                            <div class="col-12">
-                                <div class="gas-summary-latest">
-                                    <strong>Latest measurement:</strong>
-                                    {{ gas_show_summary.latest.drilling_report.well.name }}
-                                    on {{ gas_show_summary.latest.drilling_report.date|date:"d M, Y" }}
-                                    at {{ gas_show_summary.latest.depth_m|floatformat:1 }} m —
-                                    Formation {{ gas_show_summary.latest.formation }},
-                                    Max {{ gas_show_summary.latest.max_percent|floatformat:1 }}%
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Reports toolbar -->
-                    <div class="reports-toolbar">
-                        <button class="btn btn-sm btn-outline-secondary" id="btn-expand-all">
-                            <i class="bi bi-arrows-expand"></i> Expand all
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" id="btn-collapse-all">
-                            <i class="bi bi-arrows-collapse"></i> Collapse all
-                        </button>
-                        <span class="filter-chip" id="prognosis-filter-chip">
-                            <i class="bi bi-funnel"></i>
-                            <span id="filter-label">Filtered</span>
-                            <button class="btn-clear" id="btn-clear-filter" title="Clear filter">
-                                <i class="bi bi-x-circle"></i>
-                            </button>
-                        </span>
-                    </div>
-
-                    <!-- Reports Cards -->
-                    <div class="reports-container" id="reports-container">
-                        {% for report in reports %}
-                            {% include 'daily_reports/report_card.html' %}
-                        {% empty %}
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>No drilling reports found for this well.
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                
-                <!-- Prognosis Sidebar -->
-                {% include 'daily_reports/prognosis_sidebar.html' %}
-            </div>
-            {% else %}
-            <div class="text-center mt-5">
-                <i class="bi bi-inbox" style="font-size: 3.5rem; color: #257358;"></i>
-                <h3 class="mt-3" style="font-size: 1.3rem;">No well selected</h3>
-                <p class="text-muted" style="font-size: 0.95rem;">
-                    Please choose a well from the <a href="{% url 'drilling_reports_index' %}">wells list</a> to view drilling reports.
-                </p>
-            </div>
-            {% endif %}
-        </main>
-    </div>
-</div>
-
-<script>
-// Drilling Reports Visualizer
-class DrillingReportsVisualizer {
-    constructor() {
-        this.chartInstances = new Map();
-        this.initializeEventListeners();
-    }
-
-    initializeEventListeners() {
-        document.querySelectorAll('.report-card .card-header').forEach(header => {
-            header.addEventListener('click', (e) => this.handleCardClick(e));
-        });
-
-        this.expandFirstCard();
-    }
-
-    handleCardClick(event) {
-        const header = event.currentTarget;
-        const card = header.closest('.report-card');
-        const wasExpanded = card.classList.contains('expanded');
-        const isBulk = !!window.__bulkOp;
-        
-        if (!isBulk) {
-            document.querySelectorAll('.report-card').forEach(c => {
-                if (c !== card) {
-                    c.classList.remove('expanded');
-                    c.querySelectorAll('.lithologyChartRow').forEach(canvas => {
-                        const chartId = canvas.id;
-                        if (this.chartInstances.has(chartId)) {
-                            this.chartInstances.get(chartId).destroy();
-                            this.chartInstances.delete(chartId);
-                        }
-                    });
-                }
-            });
-        }
-
-        if (!wasExpanded) {
-            card.classList.add('expanded');
-            this.renderChartsInCard(card);
-        } else {
-            card.classList.remove('expanded');
-        }
-    }
-
-    renderChartsInCard(card) {
-        setTimeout(() => {
-            card.querySelectorAll('.lithologyChartRow').forEach(canvas => {
-                if (!this.chartInstances.has(canvas.id)) {
-                    this.renderLithologyChart(canvas);
-                }
-            });
-        }, 50);
-    }
-
-    renderLithologyChart(canvas) {
-        if (!canvas || !canvas.getContext('2d')) return;
-
-        const ctx = canvas.getContext('2d');
-        const data = this.getLithologyData(canvas);
-
-        if (this.chartInstances.has(canvas.id)) {
-            this.chartInstances.get(canvas.id).destroy();
-        }
-
-        const chart = new Chart(ctx, this.getChartConfig(data));
-        this.chartInstances.set(canvas.id, chart);
-        const skeleton = canvas.parentElement.querySelector('.chart-skeleton');
-        if (skeleton) skeleton.style.display = 'none';
-    }
-
-    getLithologyData(canvas) {
-        const data = {
-            shale: parseFloat(canvas.dataset.shale) || 0,
-            sand: parseFloat(canvas.dataset.sand) || 0,
-            clay: parseFloat(canvas.dataset.clay) || 0,
-            slit: parseFloat(canvas.dataset.slit) || 0,
-            depthRange: canvas.dataset.depthRange || ''
-        };
-
-        ['shale', 'sand', 'clay', 'slit'].forEach(key => {
-            if (isNaN(data[key])) data[key] = 0;
-            data[key] = parseFloat(data[key].toFixed(1));
-        });
-
-        return data;
-    }
-
-    getChartConfig(data) {
-        return {
-            type: 'bar',
-            data: {
-                labels: [''],
-                datasets: [
-                    {
-                        label: 'Shale',
-                        data: [data.shale],
-                        backgroundColor: '#666666',
-                        borderColor: '#444444',
-                        borderWidth: 0
-                    },
-                    {
-                        label: 'Sand',
-                        data: [data.sand],
-                        backgroundColor: '#FFD700',
-                        borderColor: '#B8860B',
-                        borderWidth: 0
-                    },
-                    {
-                        label: 'Clay',
-                        data: [data.clay],
-                        backgroundColor: '#CD853F',
-                        borderColor: '#8B4513',
-                        borderWidth: 0
-                    },
-                    {
-                        label: 'Silt',
-                        data: [data.slit],
-                        backgroundColor: '#DEB887',
-                        borderColor: '#D2691E',
-                        borderWidth: 0
-                    }
-                ]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        left: 2,
-                        right: 2,
-                        top: 2,
-                        bottom: 2
-                    }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 10,
-                        titleFont: { size: 13, weight: 'bold' },
-                        bodyFont: { size: 12 },
-                        callbacks: {
-                            label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%`
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        stacked: true,
-                        max: 100,
-                        min: 0,
-                        ticks: {
-                            display: true,
-                            font: {
-                                size: 8,
-                                weight: '400'
-                            },
-                            maxRotation: 0,
-                            autoSkip: true,
-                            autoSkipPadding: 12,
-                            callback: (value) => value + '%'
-                        },
-                        grid: {
-                            display: true,
-                            color: 'rgba(0, 0, 0, 0.08)'
-                        }
-                    },
-                    y: {
-                        stacked: true,
-                        display: false,
-                        grid: { display: false }
-                    }
-                },
-                animation: { 
-                    duration: 400,
-                    easing: 'easeInOutQuart'
-                }
-            }
-        };
-    }
-
-    expandFirstCard() {
-        const firstCard = document.querySelector('.report-card');
-        if (firstCard) {
-            firstCard.classList.add('expanded');
-            setTimeout(() => {
-                this.renderChartsInCard(firstCard);
-            }, 100);
-        }
-    }
-}
-
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js is not loaded! Make sure the CDN is accessible.');
-        return;
-    }
-    
-    new DrillingReportsVisualizer();
-});
-</script>
-
-{% if prognosis_segments %}
-<script>
-(function(){
-    const wrap = document.getElementById('prognosis-wrap');
-    const bar = document.getElementById('prognosis-bar');
-    const ticks = document.getElementById('prognosis-ticks');
-    const reportsContainer = document.getElementById('reports-container');
-    const chip = document.getElementById('prognosis-filter-chip');
-    const chipLabel = document.getElementById('filter-label');
-    const btnClear = document.getElementById('btn-clear-filter');
-    const btnExpandAll = document.getElementById('btn-expand-all');
-    const btnCollapseAll = document.getElementById('btn-collapse-all');
-    if (!bar) return;
-    
-    bar.querySelectorAll('.prognosis-spacer, .prognosis-segment').forEach(el => {
-        const h = parseFloat(el.getAttribute('data-height'));
-        if (!isNaN(h)) el.style.height = h + '%';
-        const color = el.getAttribute('data-color');
-        if (color) el.style.background = color;
-    });
-
-    function computeBarHeight() {
-        try {
-            const card = bar.closest('.card');
-            const rectTop = card.getBoundingClientRect().top;
-            const topOffset = Math.max(rectTop, 0);
-            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-            const targetHeight = Math.max(viewportHeight - 24 - (rectTop - topOffset), 280);
-            bar.style.height = targetHeight + 'px';
-            if (ticks) ticks.style.height = targetHeight + 'px';
-        } catch(e) { /* noop */ }
-    }
-
-    function niceStep(max) {
-        if (!max || max <= 0) return 50;
-        const raw = max / 12;
-        const candidates = [10, 20, 25, 50, 100, 200, 250, 500, 1000];
-        let best = candidates[0];
-        for (const c of candidates) {
-            if (raw <= c) { best = c; break; }
-            best = c;
-        }
-        return best;
-    }
-
-    function buildTicks() {
-        if (!ticks) return;
-        const min = parseFloat(ticks.getAttribute('data-min')) || 0;
-        const max = parseFloat(ticks.getAttribute('data-max')) || 0;
-        const step = niceStep(max);
-        const labels = [];
-        const start = Math.max(0, Math.floor(min / step) * step);
-        for (let v = start; v <= max; v += step) labels.push(v);
-        if (labels[0] !== 0) labels.unshift(0);
-        if (labels[labels.length - 1] !== max) labels.push(max);
-        ticks.innerHTML = '';
-        labels.forEach((value, idx) => {
-            const row = document.createElement('div');
-            row.className = 'prognosis-tick';
-            const line = document.createElement('span');
-            line.className = 'prognosis-tick-line';
-            const label = document.createElement('span');
-            label.textContent = value + ' m';
-            row.appendChild(line);
-            row.appendChild(label);
-            ticks.appendChild(row);
-        });
-    }
-
-    function renderLatestDepthMarker() {
-        const latestAttr = bar.getAttribute('data-latest-depth');
-        if (!latestAttr || !ticks) return;
-        const latest = parseFloat(latestAttr);
-        const max = parseFloat(ticks.getAttribute('data-max')) || 0;
-        if (!max || isNaN(latest)) return;
-        const clamped = Math.max(0, Math.min(latest, max));
-        const pct = (clamped / max) * 100;
-
-        let marker = bar.querySelector('.prognosis-marker');
-        let label = bar.querySelector('.prognosis-marker-label');
-        if (!marker) {
-            marker = document.createElement('div');
-            marker.className = 'prognosis-marker';
-            bar.appendChild(marker);
-        }
-        if (!label) {
-            label = document.createElement('div');
-            label.className = 'prognosis-marker-label';
-            bar.appendChild(label);
-        }
-        marker.style.top = pct + '%';
-        label.style.top = pct + '%';
-        label.textContent = 'Latest depth: ' + clamped.toFixed(1) + ' m';
-    }
-
-    function applyFilter(range) {
-        if (!reportsContainer) return;
-        const { from, to } = range;
-        const cards = reportsContainer.querySelectorAll('.report-card');
-        let visibleCount = 0;
-        cards.forEach(card => {
-            const ds = parseFloat(card.getAttribute('data-depth-start'));
-            const de = parseFloat(card.getAttribute('data-depth-end'));
-            const overlaps = !isNaN(ds) && !isNaN(de) && Math.max(ds, from) <= Math.min(de, to);
-            card.style.display = overlaps ? '' : 'none';
-            if (overlaps) visibleCount++;
-        });
-        if (chip) {
-            if (visibleCount > 0) {
-                chip.style.display = 'inline-flex';
-                if (chipLabel) chipLabel.textContent = `Depth ${from.toFixed(1)}–${to.toFixed(1)} m`;
-            } else {
-                chip.style.display = 'inline-flex';
-                if (chipLabel) chipLabel.textContent = `No reports in ${from.toFixed(1)}–${to.toFixed(1)} m`;
-            }
-        }
-    }
-
-    function clearFilter() {
-        if (!reportsContainer) return;
-        reportsContainer.querySelectorAll('.report-card').forEach(card => { card.style.display = ''; });
-        bar.querySelectorAll('.prognosis-segment.active').forEach(s => s.classList.remove('active'));
-        if (chip) chip.style.display = 'none';
-    }
-
-    function wireInteractions() {
-        bar.querySelectorAll('.prognosis-segment').forEach(seg => {
-            seg.setAttribute('tabindex', '0');
-            seg.addEventListener('click', () => {
-                const active = seg.classList.toggle('active');
-                if (active) {
-                    bar.querySelectorAll('.prognosis-segment').forEach(s => { if (s !== seg) s.classList.remove('active'); });
-                    const from = parseFloat(seg.getAttribute('data-from'));
-                    const to = parseFloat(seg.getAttribute('data-to'));
-                    if (!isNaN(from) && !isNaN(to)) applyFilter({ from, to });
-                } else {
-                    clearFilter();
-                }
-            });
-            seg.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seg.click(); }
-            });
-        });
-        if (btnClear) btnClear.addEventListener('click', clearFilter);
-        if (btnExpandAll) btnExpandAll.addEventListener('click', () => {
-            window.__bulkOp = true;
-            document.querySelectorAll('.report-card').forEach(c => {
-                if (!c.classList.contains('expanded')) c.querySelector('.card-header').click();
-            });
-            setTimeout(() => { window.__bulkOp = false; }, 0);
-        });
-        if (btnCollapseAll) btnCollapseAll.addEventListener('click', () => {
-            window.__bulkOp = true;
-            document.querySelectorAll('.report-card.expanded .card-header').forEach(h => h.click());
-            setTimeout(() => { window.__bulkOp = false; }, 0);
-        });
-    }
-
-    computeBarHeight();
-    buildTicks();
-    renderLatestDepthMarker();
-    wireInteractions();
-    window.addEventListener('resize', () => {
-        computeBarHeight();
-        renderLatestDepthMarker();
-    });
-})();
-</script>
-{% endif %}
-
-{% if gas_show_measurements_all %}
-<!-- Gas Show Measurements Modal -->
-<div class="modal fade" id="gasShowModal" tabindex="-1" aria-labelledby="gasShowModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="gasShowModalLabel">
-          <i class="bi bi-fire me-2"></i>Gas Show Measurements – All Reports
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="table-responsive">
-          <table class="table table-sm gas-show-table">
-            <thead>
-              <tr>
-                <th>Well</th>
-                <th>Date</th>
-                <th>Formation</th>
-                <th>Depth Range (m)</th>
-                <th>Max (%)</th>
-                <th>BG (%)</th>
-                <th>Above BG (%)</th>
-                <th>C1 (%)</th>
-                <th>C2 (%)</th>
-                <th>C3 (%)</th>
-                <th>iC4 (%)</th>
-                <th>nC5 (%)</th>
-                <th>Remarks</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for gsm in gas_show_measurements_all %}
-              <tr>
-                <td>{{ gsm.well_name }}</td>
-                <td>{% if gsm.report_date %}{{ gsm.report_date|date:"d M, Y" }}{% else %}—{% endif %}</td>
-                <td>{{ gsm.formation }}</td>
-                <td>{{ gsm.start_depth_m|floatformat:1 }} - {{ gsm.end_depth_m|floatformat:1 }} m</td>
-                <td>{{ gsm.max_percent|floatformat:1 }}</td>
-                <td>{{ gsm.bg_percent|floatformat:1 }}</td>
-                <td>{{ gsm.above_bg_percent|floatformat:1 }}</td>
-                <td>{{ gsm.c1_percent|floatformat:1 }}</td>
-                <td>{{ gsm.c2_percent|floatformat:1 }}</td>
-                <td>{{ gsm.c3_percent|floatformat:1 }}</td>
-                <td>{{ gsm.ic4_percent|floatformat:1 }}</td>
-                <td>{{ gsm.nc5_percent|floatformat:1 }}</td>
-                <td style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  {{ gsm.remarks }}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
 {% endblock %}
+
