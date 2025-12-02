@@ -1,5 +1,6 @@
 {# templates/plotter/bha/base_bha.html #}
 {% extends 'base.html' %}
+{% load survey_tags %}
 
 {% block content %}
 <div class="container-fluid h-100">
@@ -40,6 +41,7 @@
                     </a>
                 </li>
             </ul>
+            {% survey_tools %}
         </nav>
 
         <!-- Main Content Area -->
@@ -69,6 +71,41 @@
 
 {% block extra_js %}
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const convertForm = document.getElementById('depth-convert-form');
+    const convertBtn = document.getElementById('convert-depth-btn');
+    const resultEl = document.getElementById('convert-depth-result');
+
+    if (convertBtn && convertForm && resultEl) {
+        convertBtn.addEventListener('click', () => {
+            const formData = new FormData(convertForm);
+            if (!formData.get('md') && !formData.get('tvd')) {
+                resultEl.textContent = 'Enter MD or TVD to convert.';
+                return;
+            }
+            fetch('{% url "convert_depth" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken') || document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                if (data.error) {
+                    resultEl.textContent = data.error;
+                } else {
+                    resultEl.textContent = `MD: ${data.md} m | TVD: ${data.tvd} m`;
+                }
+            })
+            .catch(err => {
+                resultEl.textContent = 'Conversion failed.';
+                console.error(err);
+            });
+        });
+    }
+});
+
     function validateComponentCompatibility(prevComponentId, nextComponentId) {
         return fetch(`/bha/validate-compatibility/?prev_component=${prevComponentId}&next_component=${nextComponentId}`)
             .then(response => response.json());

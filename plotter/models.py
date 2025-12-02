@@ -1,7 +1,8 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import timedelta
+import math
 
 
 class Core(models.Model):
@@ -72,6 +73,163 @@ class Well(models.Model):
     
     def __str__(self):
         return self.name
+
+    # --- Survey utilities -------------------------------------------------
+    def survey_profile(self):
+        """Return survey stations ordered by MD."""
+        return list(self.survey_stations.order_by('md'))
+
+    def import_survey_from_text(self, text):
+        """Parse a directional survey text file and rebuild survey stations."""
+        points = self._parse_survey_text(text)
+        if len(points) < 2:
+            raise ValidationError("Survey file must contain at least two stations.")
+
+        with transaction.atomic():
+            self.survey_stations.all().delete()
+            for idx, point in enumerate(points):
+                WellSurveyStation.objects.create(
+                    well=self,
+                    sequence=idx,
+                    md=point['md'],
+                    inclination=point['inclination'],
+                    azimuth=point['azimuth']
+                )
+            self.recalculate_survey_geometry()
+
+    def recalculate_survey_geometry(self):
+        """Recompute TVD/northing/easting for all survey stations using minimum curvature."""
+        stations = self.survey_stations.order_by('md')
+        if not stations.exists():
+            return
+
+        prev = None
+        north = 0.0
+        east = 0.0
+        tvd = 0.0
+
+        for station in stations:
+            if prev is None:
+                station.tvd = 0.0
+                station.northing = 0.0
+                station.easting = 0.0
+                station.dogleg_severity = 0.0
+            else:
+                delta_md = station.md - prev.md
+                mc = self._minimum_curvature(
+                    delta_md,
+                    prev.inclination, station.inclination,
+                    prev.azimuth, station.azimuth
+                )
+                tvd += mc['delta_tvd']
+                north += mc['delta_north']
+                east += mc['delta_east']
+                station.dogleg_severity = mc['dogleg_severity']
+                station.tvd = tvd
+                station.northing = north
+                station.easting = east
+            station.save(update_fields=['tvd', 'northing', 'easting', 'dogleg_severity'])
+            prev = station
+
+    def md_to_tvd(self, md):
+        """Convert a measured depth to TVD using survey data."""
+        stations = self.survey_profile()
+        if not stations:
+            return None
+        if md <= stations[0].md:
+            return stations[0].tvd or 0.0
+        for idx in range(1, len(stations)):
+            current = stations[idx]
+            prev = stations[idx - 1]
+            if md <= current.md:
+                if current.md == prev.md:
+                    return current.tvd
+                ratio = (md - prev.md) / (current.md - prev.md)
+                return (prev.tvd or 0.0) + ratio * ((current.tvd or 0.0) - (prev.tvd or 0.0))
+        # Beyond last station
+        return stations[-1].tvd
+
+    def tvd_to_md(self, tvd_value):
+        """Convert a TVD to measured depth using survey data."""
+        stations = self.survey_profile()
+        if not stations:
+            return None
+        if tvd_value <= (stations[0].tvd or 0.0):
+            return stations[0].md
+        for idx in range(1, len(stations)):
+            current = stations[idx]
+            prev = stations[idx - 1]
+            tvd_prev = prev.tvd or 0.0
+            tvd_curr = current.tvd or 0.0
+            if tvd_value <= tvd_curr:
+                if tvd_curr == tvd_prev:
+                    return current.md
+                ratio = (tvd_value - tvd_prev) / (tvd_curr - tvd_prev)
+                return prev.md + ratio * (current.md - prev.md)
+        return stations[-1].md
+
+    @staticmethod
+    def _parse_survey_text(text):
+        """Parse raw survey text into a list of dicts."""
+        points = []
+        header_found = False
+        for raw_line in text.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            if "Casing" in line:
+                continue
+            if not header_found:
+                if line.upper().startswith("MD"):
+                    header_found = True
+                continue
+            parts = [p for p in line.replace('\t', ' ').split() if p]
+            if len(parts) < 3:
+                continue
+            try:
+                md = float(parts[0].replace(',', ''))
+                inclination = float(parts[1])
+                azimuth = float(parts[2])
+            except ValueError:
+                continue
+            points.append({
+                'md': md,
+                'inclination': inclination,
+                'azimuth': azimuth
+            })
+        return points
+
+    @staticmethod
+    def _minimum_curvature(delta_md, inc1, inc2, az1, az2):
+        """Return incremental displacements using the minimum curvature method."""
+        inc1_rad = math.radians(inc1)
+        inc2_rad = math.radians(inc2)
+        az1_rad = math.radians(az1)
+        az2_rad = math.radians(az2)
+
+        cos_dogleg = (
+            math.sin(inc1_rad) * math.sin(inc2_rad) * math.cos(az2_rad - az1_rad) +
+            math.cos(inc1_rad) * math.cos(inc2_rad)
+        )
+        cos_dogleg = max(-1.0, min(1.0, cos_dogleg))
+        dogleg = math.acos(cos_dogleg)
+        dogleg_deg = math.degrees(dogleg) if dogleg else 0.0
+
+        if dogleg == 0:
+            rf = 1.0
+        else:
+            rf = 2 / dogleg * math.tan(dogleg / 2)
+
+        delta_north = 0.5 * delta_md * (math.sin(inc1_rad) * math.cos(az1_rad) + math.sin(inc2_rad) * math.cos(az2_rad)) * rf
+        delta_east = 0.5 * delta_md * (math.sin(inc1_rad) * math.sin(az1_rad) + math.sin(inc2_rad) * math.sin(az2_rad)) * rf
+        delta_tvd = 0.5 * delta_md * (math.cos(inc1_rad) + math.cos(inc2_rad)) * rf
+
+        return {
+            'delta_north': delta_north,
+            'delta_east': delta_east,
+            'delta_tvd': delta_tvd,
+            'dogleg_severity': dogleg_deg / delta_md * 30 if delta_md else 0.0
+        }
 
 class ProductionData(models.Model):
     well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='production_data')
@@ -161,6 +319,25 @@ class GasShowMeasurement(models.Model):
     def __str__(self):
         return f"{self.drilling_report.well.name} - {self.formation} @ {self.start_depth_m}-{self.end_depth_m}m"
 
+
+class WellSurveyStation(models.Model):
+    """Directional survey station data for a well."""
+    well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='survey_stations')
+    sequence = models.PositiveIntegerField(help_text="Order of the station within the survey")
+    md = models.FloatField(help_text="Measured depth (m)")
+    inclination = models.FloatField(help_text="Inclination in degrees")
+    azimuth = models.FloatField(help_text="Azimuth in degrees")
+    tvd = models.FloatField(help_text="True vertical depth (m)", null=True, blank=True)
+    northing = models.FloatField(null=True, blank=True)
+    easting = models.FloatField(null=True, blank=True)
+    dogleg_severity = models.FloatField(null=True, blank=True, help_text="Dogleg severity (deg/30m)")
+
+    class Meta:
+        ordering = ['md']
+        unique_together = ('well', 'md')
+
+    def __str__(self):
+        return f"{self.well.name} - MD {self.md} m"
 
 class DrillingLithology(models.Model):
     drilling_report = models.ForeignKey(DailyDrillingReport, on_delete=models.CASCADE, related_name='lithologies')
@@ -615,3 +792,26 @@ class WellPrognosis(models.Model):
 
     def __str__(self):
         return f"{self.well.name} - {self.planned_depth_start}m ({self.lithology})"
+
+    @property
+    def planned_depth_start_md(self):
+        if self.planned_depth_start is None or not self.well:
+            return None
+        return self.well.tvd_to_md(float(self.planned_depth_start))
+
+    @property
+    def planned_depth_end_md(self):
+        if self.planned_depth_end is None or not self.well:
+            return None
+        return self.well.tvd_to_md(float(self.planned_depth_end))
+
+    def update_tvd_from_md(self, md_start=None, md_end=None):
+        """Helper to set TVD fields using MD values."""
+        if md_start is not None:
+            tvd_start = self.well.md_to_tvd(float(md_start))
+            if tvd_start is not None:
+                self.planned_depth_start = tvd_start
+        if md_end is not None:
+            tvd_end = self.well.md_to_tvd(float(md_end))
+            if tvd_end is not None:
+                self.planned_depth_end = tvd_end

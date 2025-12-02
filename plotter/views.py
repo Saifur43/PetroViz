@@ -24,11 +24,13 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 from .models import (
     WellData, Core, GrainSize, Mineralogy, Fossils,
     GasField, Well, ProductionData,
     ExplorationTimeline, ExplorationCategory, OperationActivity,
-    DailyDrillingReport, WellPrognosis, DrillingLithology, GasShowMeasurement
+    DailyDrillingReport, WellPrognosis, DrillingLithology, GasShowMeasurement,
+    WellSurveyStation
 )
 from .forms import DailyDrillingReportForm, DrillingLithologyForm
 
@@ -618,6 +620,69 @@ def upload_pdf_lithology(request):
         return JsonResponse({
             'error': f'Error parsing PDF: {str(e)}'
         }, status=500)
+
+
+@login_required
+@require_POST
+def upload_well_survey(request):
+    """Upload a text-based directional survey and rebuild the well survey stations."""
+    if not request.user.is_superuser:
+        messages.error(request, 'You do not have permission to upload surveys.')
+        return redirect('drilling_reports_index')
+
+    well_id = request.POST.get('well')
+    survey_file = request.FILES.get('survey_file')
+
+    if not well_id or not survey_file:
+        messages.error(request, 'Please select a well and a survey file.')
+        return redirect('drilling_reports_index')
+
+    well = get_object_or_404(Well, id=well_id)
+
+    try:
+        text = survey_file.read().decode('utf-8', errors='ignore')
+        well.import_survey_from_text(text)
+        messages.success(request, f'Survey uploaded for {well.name}')
+    except Exception as exc:
+        messages.error(request, f'Failed to import survey: {exc}')
+
+    return redirect('drilling_reports', well_id=well.id)
+
+
+@login_required
+@require_POST
+def convert_depth(request):
+    """Convert MD to TVD or vice versa using stored survey data."""
+    well_id = request.POST.get('well_id')
+    md_value = request.POST.get('md')
+    tvd_value = request.POST.get('tvd')
+
+    if not well_id:
+        return JsonResponse({'error': 'Well is required.'}, status=400)
+
+    well = get_object_or_404(Well, id=well_id)
+
+    if md_value:
+        try:
+            md_val = float(md_value)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid MD provided.'}, status=400)
+        tvd = well.md_to_tvd(md_val)
+        if tvd is None:
+            return JsonResponse({'error': 'Survey data unavailable for this well.'}, status=400)
+        return JsonResponse({'md': round(md_val, 3), 'tvd': round(tvd, 3)})
+
+    if tvd_value:
+        try:
+            tvd_val = float(tvd_value)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid TVD provided.'}, status=400)
+        md = well.tvd_to_md(tvd_val)
+        if md is None:
+            return JsonResponse({'error': 'Survey data unavailable for this well.'}, status=400)
+        return JsonResponse({'md': round(md, 3), 'tvd': round(tvd_val, 3)})
+
+    return JsonResponse({'error': 'Provide either MD or TVD to convert.'}, status=400)
 
 def calculate_drilling_efficiency(reports):
     """Calculate drilling efficiency based on daily progress and operational time"""

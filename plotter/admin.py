@@ -7,7 +7,8 @@ import pandas as pd
 from .models import (
     Well, ProductionData, GasField, ExplorationTimeline, OperationActivity, 
     Fossils, GrainSize, Mineralogy, DailyDrillingReport, DrillingLithology, 
-    WellPrognosis, BHAComponent, BHA, BHAComponentPosition, GasShowMeasurement
+    WellPrognosis, BHAComponent, BHA, BHAComponentPosition, GasShowMeasurement,
+    WellSurveyStation
 )
 
 
@@ -182,3 +183,10 @@ admin.site.register(WellPrognosis)
 admin.site.register(BHAComponent, BHAComponentAdmin)
 admin.site.register(BHA, BHAAdmin)
 admin.site.register(GasShowMeasurement)
+
+@admin.register(WellSurveyStation)
+class WellSurveyStationAdmin(admin.ModelAdmin):
+    list_display = ('well', 'sequence', 'md', 'tvd', 'inclination', 'azimuth', 'dogleg_severity')
+    list_filter = ('well',)
+    ordering = ('well', 'sequence')
+    search_fields = ('well__name',)
