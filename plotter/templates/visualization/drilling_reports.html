@@ -300,6 +300,72 @@
     font-size: 1rem;
 }
 
+.gas-show-summary-card {
+    background: linear-gradient(135deg, #fff8e1 0%, #fef3c7 100%);
+    border-left: 4px solid #f59e0b;
+    margin-bottom: 0.85rem;
+    padding: 0.85rem 1rem;
+}
+
+.gas-show-summary-card h6 {
+    font-size: 0.95rem;
+    margin-bottom: 0.35rem !important;
+}
+
+.gas-summary-metric {
+    display: flex;
+    flex-direction: column;
+    padding: 0.35rem 0;
+}
+
+.gas-summary-metric .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #b45309;
+    letter-spacing: 0.05em;
+}
+
+.gas-summary-metric .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #92400e;
+}
+
+.gas-summary-latest {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    font-size: 0.82rem;
+}
+
+.gas-show-table-wrapper {
+    border-radius: 10px;
+    border: 1px solid #fcd34d;
+    overflow: hidden;
+}
+
+.gas-show-table {
+    margin-bottom: 0;
+    font-size: 0.8rem;
+}
+
+.gas-show-table thead {
+    background: #fff7ed;
+    color: #9a3412;
+}
+
+.gas-show-table th {
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #fcd34d;
+}
+
+.gas-show-table td {
+    vertical-align: middle;
+}
+
 /* Lithology Section */
 .lithology-section {
     background-color: white;
@@ -663,6 +729,60 @@
                     
                     <!-- Statistics Cards -->
                     {% include 'daily_reports/report_stats.html' %}
+
+                    {% if gas_show_summary %}
+                    <div class="info-section-modern gas-show-summary-card" role="button"
+                         data-bs-toggle="modal" data-bs-target="#gasShowModal"
+                         style="cursor: pointer;">
+                        <h6>
+                            <i class="bi bi-fire"></i>Gas Show Measurements Snapshot
+                        </h6>
+                        <div class="row gy-3 align-items-center">
+                            <div class="col-6 col-md-4">
+                                <div class="gas-summary-metric">
+                                    <span class="label">Total entries</span>
+                                    <span class="value">{{ gas_show_summary.total_count }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="gas-summary-metric">
+                                    <span class="label">Peak Max (%)</span>
+                                    <span class="value">
+                                        {% if gas_show_summary.max_peak %}
+                                            {{ gas_show_summary.max_peak|floatformat:1 }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="gas-summary-metric">
+                                    <span class="label">Avg Above BG (%)</span>
+                                    <span class="value">
+                                        {% if gas_show_summary.avg_above_bg %}
+                                            {{ gas_show_summary.avg_above_bg|floatformat:1 }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            {% if gas_show_summary.latest %}
+                            <div class="col-12">
+                                <div class="gas-summary-latest">
+                                    <strong>Latest measurement:</strong>
+                                    {{ gas_show_summary.latest.drilling_report.well.name }}
+                                    on {{ gas_show_summary.latest.drilling_report.date|date:"d M, Y" }}
+                                    at {{ gas_show_summary.latest.depth_m|floatformat:1 }} m —
+                                    Formation {{ gas_show_summary.latest.formation }},
+                                    Max {{ gas_show_summary.latest.max_percent|floatformat:1 }}%
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                     
                     <!-- Reports toolbar -->
                     <div class="reports-toolbar">
@@ -1082,5 +1202,68 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 })();
 </script>
+{% endif %}
+
+{% if gas_show_measurements_all %}
+<!-- Gas Show Measurements Modal -->
+<div class="modal fade" id="gasShowModal" tabindex="-1" aria-labelledby="gasShowModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="gasShowModalLabel">
+          <i class="bi bi-fire me-2"></i>Gas Show Measurements – All Reports
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-sm gas-show-table">
+            <thead>
+              <tr>
+                <th>Well</th>
+                <th>Date</th>
+                <th>Formation</th>
+                <th>Depth Range (m)</th>
+                <th>Max (%)</th>
+                <th>BG (%)</th>
+                <th>Above BG (%)</th>
+                <th>C1 (%)</th>
+                <th>C2 (%)</th>
+                <th>C3 (%)</th>
+                <th>iC4 (%)</th>
+                <th>nC5 (%)</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for gsm in gas_show_measurements_all %}
+              <tr>
+                <td>{{ gsm.well_name }}</td>
+                <td>{% if gsm.report_date %}{{ gsm.report_date|date:"d M, Y" }}{% else %}—{% endif %}</td>
+                <td>{{ gsm.formation }}</td>
+                <td>{{ gsm.start_depth_m|floatformat:1 }} - {{ gsm.end_depth_m|floatformat:1 }} m</td>
+                <td>{{ gsm.max_percent|floatformat:1 }}</td>
+                <td>{{ gsm.bg_percent|floatformat:1 }}</td>
+                <td>{{ gsm.above_bg_percent|floatformat:1 }}</td>
+                <td>{{ gsm.c1_percent|floatformat:1 }}</td>
+                <td>{{ gsm.c2_percent|floatformat:1 }}</td>
+                <td>{{ gsm.c3_percent|floatformat:1 }}</td>
+                <td>{{ gsm.ic4_percent|floatformat:1 }}</td>
+                <td>{{ gsm.nc5_percent|floatformat:1 }}</td>
+                <td style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  {{ gsm.remarks }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endif %}
 {% endblock %}

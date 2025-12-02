@@ -1,6 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
-from django.db.models import Min, Max, Sum
+from django.db.models import Min, Max, Sum, Avg, Count
 from django.template.loader import get_template
 from datetime import datetime, timedelta
 from django.http import JsonResponse
@@ -28,7 +28,7 @@ from .models import (
     WellData, Core, GrainSize, Mineralogy, Fossils,
     GasField, Well, ProductionData,
     ExplorationTimeline, ExplorationCategory, OperationActivity,
-    DailyDrillingReport, WellPrognosis, DrillingLithology
+    DailyDrillingReport, WellPrognosis, DrillingLithology, GasShowMeasurement
 )
 from .forms import DailyDrillingReportForm, DrillingLithologyForm
 
@@ -426,6 +426,49 @@ def create_drilling_report(request):
         form = DailyDrillingReportForm(request.POST)
         if form.is_valid():
             report = form.save()
+
+            # Handle optional GasShowMeasurement rows submitted with the form
+            try:
+                row_count = int(request.POST.get('gas_show_row_count', '0') or 0)
+            except ValueError:
+                row_count = 0
+
+            created_rows = 0
+            for i in range(row_count):
+                prefix = f'gas_show_{i}_'
+                formation = request.POST.get(prefix + 'formation', '').strip()
+                depth = request.POST.get(prefix + 'depth_m')
+
+                # Skip completely empty rows
+                if not formation and not depth:
+                    continue
+
+                try:
+                    depth_val = float(depth) if depth not in (None, '',) else None
+                except (TypeError, ValueError):
+                    depth_val = None
+
+                GasShowMeasurement.objects.create(
+                    drilling_report=report,
+                    formation=formation or '',
+                    depth_m=depth_val or 0.0,
+                    max_percent=request.POST.get(prefix + 'max_percent') or 0.0,
+                    bg_percent=request.POST.get(prefix + 'bg_percent') or 0.0,
+                    above_bg_percent=request.POST.get(prefix + 'above_bg_percent') or 0.0,
+                    c1_percent=request.POST.get(prefix + 'c1_percent') or 0.0,
+                    c2_percent=request.POST.get(prefix + 'c2_percent') or 0.0,
+                    c3_percent=request.POST.get(prefix + 'c3_percent') or 0.0,
+                    ic4_percent=request.POST.get(prefix + 'ic4_percent') or 0.0,
+                    nc5_percent=request.POST.get(prefix + 'nc5_percent') or 0.0,
+                    remarks=request.POST.get(prefix + 'remarks', '').strip() or None,
+                )
+                created_rows += 1
+
+            # If any rows were created, make sure gas_show is flagged on the report
+            if created_rows and not report.gas_show:
+                report.gas_show = True
+                report.save(update_fields=['gas_show'])
+
             messages.success(request, 'Drilling report created successfully.')
             # Redirect to the drilling reports listing for the selected well
             return redirect('drilling_reports', well_id=report.well.id)
@@ -614,6 +657,8 @@ def drilling_reports(request, well_id=None):
         reports = reports.filter(depth_start__gte=float(depth_from))
     if depth_to:
         reports = reports.filter(depth_end__lte=float(depth_to))
+
+    filtered_reports = reports
         
     # Order by date (newest first)
     reports = reports.order_by('-date', '-depth_start')
@@ -636,9 +681,56 @@ def drilling_reports(request, well_id=None):
             'drilling_efficiency': calculate_drilling_efficiency(reports)
         }
     
+    # Build gas show summary for the current report selection
+    gas_show_summary = None
+    gas_show_measurements_all = []
+    report_ids = list(filtered_reports.values_list('id', flat=True))
+    if report_ids:
+        gas_measurements_qs = GasShowMeasurement.objects.filter(
+            drilling_report_id__in=report_ids
+        ).select_related('drilling_report__well')
+        if gas_measurements_qs.exists():
+            summary_data = gas_measurements_qs.aggregate(
+                total_count=Count('id'),
+                max_peak=Max('max_percent'),
+                avg_above_bg=Avg('above_bg_percent')
+            )
+            latest_measurement = (
+                gas_measurements_qs
+                .select_related('drilling_report__well')
+                .order_by('-drilling_report__date', '-start_depth_m')
+                .first()
+            )
+            gas_show_summary = {
+                'total_count': summary_data.get('total_count', 0),
+                'max_peak': summary_data.get('max_peak'),
+                'avg_above_bg': summary_data.get('avg_above_bg'),
+                'latest': latest_measurement,
+            }
+
+            # Flatten all gas show measurements for modal display
+            for gsm in gas_measurements_qs.order_by('drilling_report__date', 'start_depth_m'):
+                gas_show_measurements_all.append({
+                    'report_id': gsm.drilling_report_id,
+                    'well_name': gsm.drilling_report.well.name,
+                    'report_date': gsm.drilling_report.date,
+                    'start_depth_m': gsm.start_depth_m,
+                    'end_depth_m': gsm.end_depth_m,
+                    'formation': gsm.formation,
+                    'max_percent': gsm.max_percent,
+                    'bg_percent': gsm.bg_percent,
+                    'above_bg_percent': gsm.above_bg_percent,
+                    'c1_percent': gsm.c1_percent,
+                    'c2_percent': gsm.c2_percent,
+                    'c3_percent': gsm.c3_percent,
+                    'ic4_percent': gsm.ic4_percent,
+                    'nc5_percent': gsm.nc5_percent,
+                    'remarks': gsm.remarks,
+                })
+    
     # Prepare report data with all necessary calculations
     processed_reports = []
-    for report in reports.prefetch_related('lithologies'):
+    for report in reports.prefetch_related('lithologies', 'gas_show_measurements'):
         # Process lithologies for this report
         lithologies = []
         for litho in report.lithologies.all():
@@ -674,6 +766,23 @@ def drilling_reports(request, well_id=None):
                 'description': litho.description
             })
         
+        gas_show_measurements = []
+        for gsm in report.gas_show_measurements.all():
+            gas_show_measurements.append({
+                'formation': gsm.formation,
+                'start_depth_m': gsm.start_depth_m,
+                'end_depth_m': gsm.end_depth_m,
+                'max_percent': gsm.max_percent,
+                'bg_percent': gsm.bg_percent,
+                'above_bg_percent': gsm.above_bg_percent,
+                'c1_percent': gsm.c1_percent,
+                'c2_percent': gsm.c2_percent,
+                'c3_percent': gsm.c3_percent,
+                'ic4_percent': gsm.ic4_percent,
+                'nc5_percent': gsm.nc5_percent,
+                'remarks': gsm.remarks,
+            })
+        
         processed_reports.append({
             'id': report.id,
             'well_name': report.well.name,
@@ -686,11 +795,13 @@ def drilling_reports(request, well_id=None):
             'depth_end_tvd': report.depth_end_tvd,
             'current_operation': report.current_operation,
             'lithologies': lithologies,
-            'gas_show': report.gas_show,
+            'gas_show': bool(report.gas_show or gas_show_measurements),
             'comments': report.comments,
             'present_activity': report.present_activity,
             'next_program': report.next_program,
-            'daily_progress': report.depth_end - report.depth_start
+            'daily_progress': report.depth_end - report.depth_start,
+            'gas_show_measurements': gas_show_measurements,
+            'gas_show_peak': max((gsm['max_percent'] for gsm in gas_show_measurements), default=None) if gas_show_measurements else None,
         })
     
     # Get prognosis data for the selected well
@@ -750,6 +861,8 @@ def drilling_reports(request, well_id=None):
         'prognosis_data': prognosis_data,
         'prognosis_segments': prognosis_segments,
         'prognosis_range': prognosis_range,
+        'gas_show_summary': gas_show_summary,
+        'gas_show_measurements_all': gas_show_measurements_all,
     }
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -759,6 +872,39 @@ def drilling_reports(request, well_id=None):
         })
     
     return render(request, 'visualization/drilling_reports.html', context)
+
+@login_required
+def gas_show_measurements_view(request, report_id):
+    """Return structured GasShowMeasurement data for a specific drilling report."""
+    report = get_object_or_404(
+        DailyDrillingReport.objects.select_related('well').prefetch_related('gas_show_measurements'),
+        pk=report_id
+    )
+    measurements = [{
+        'formation': gsm.formation,
+        'start_depth_m': gsm.start_depth_m,
+        'end_depth_m': gsm.end_depth_m,
+        'max_percent': gsm.max_percent,
+        'bg_percent': gsm.bg_percent,
+        'above_bg_percent': gsm.above_bg_percent,
+        'c1_percent': gsm.c1_percent,
+        'c2_percent': gsm.c2_percent,
+        'c3_percent': gsm.c3_percent,
+        'ic4_percent': gsm.ic4_percent,
+        'nc5_percent': gsm.nc5_percent,
+        'remarks': gsm.remarks,
+    } for gsm in report.gas_show_measurements.all()]
+    
+    return JsonResponse({
+        'report': {
+            'id': report.id,
+            'well': report.well.name,
+            'date': report.date.strftime('%Y-%m-%d') if report.date else None,
+        },
+        'measurements': measurements,
+        'has_measurements': bool(measurements),
+    })
+
 
 @login_required
 def generate_drilling_reports_pdf(request):

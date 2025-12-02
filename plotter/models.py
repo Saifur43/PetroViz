@@ -118,7 +118,7 @@ class DailyDrillingReport(models.Model):
     csg = models.TextField(blank=True, null=True)
     last_csg = models.TextField(blank=True, null=True)
     next_program = models.TextField(blank=True, null=True)
-    gas_show = models.TextField(blank=True, null=True, help_text="Description of gas shows if any")
+    gas_show = models.BooleanField(default=False, help_text="Indicates if any gas show was observed during this report")
     comments = models.TextField(blank=True, null=True)
     
     @property
@@ -132,6 +132,34 @@ class DailyDrillingReport(models.Model):
         
     def __str__(self):
         return f"{self.well.name} - {self.date} ({self.depth_start}-{self.depth_end}m)"
+
+
+class GasShowMeasurement(models.Model):
+    drilling_report = models.ForeignKey(
+        DailyDrillingReport,
+        on_delete=models.CASCADE,
+        related_name='gas_show_measurements',
+    )
+    formation = models.CharField(max_length=100, help_text="Formation where the gas show was observed")
+    start_depth_m = models.FloatField(help_text="Start depth in meters")
+    end_depth_m = models.FloatField(help_text="End depth in meters")
+    max_percent = models.FloatField(help_text="Maximum gas percentage")
+    bg_percent = models.FloatField(help_text="Background gas percentage")
+    above_bg_percent = models.FloatField(help_text="Gas percentage above background")
+    c1_percent = models.FloatField(help_text="Methane (C1) percentage")
+    c2_percent = models.FloatField(help_text="Ethane (C2) percentage")
+    c3_percent = models.FloatField(help_text="Propane (C3) percentage")
+    ic4_percent = models.FloatField(help_text="Iso-butane (iC4) percentage")
+    nc5_percent = models.FloatField(help_text="Normal pentane (nC5) percentage")
+    remarks = models.TextField(blank=True, null=True, help_text="Additional notes for this gas show entry")
+
+    class Meta:
+        ordering = ['drilling_report', 'start_depth_m']
+        verbose_name = 'Gas Show Measurement'
+        verbose_name_plural = 'Gas Show Measurements'
+
+    def __str__(self):
+        return f"{self.drilling_report.well.name} - {self.formation} @ {self.start_depth_m}-{self.end_depth_m}m"
 
 
 class DrillingLithology(models.Model):

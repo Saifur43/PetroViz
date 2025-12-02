@@ -32,5 +32,6 @@ urlpatterns = [
     path('drilling-reports/upload-pdf/', views.upload_pdf_drilling_report, name='upload_pdf_drilling_report'),
     path('drilling-lithology/upload-pdf/', views.upload_pdf_lithology, name='upload_pdf_lithology'),
     path('drilling-reports/<int:well_id>/', views.drilling_reports, name='drilling_reports'),
+    path('drilling-reports/<int:report_id>/gas-shows/', views.gas_show_measurements_view, name='gas_show_measurements'),
     path('drilling-reports/pdf/', views.generate_drilling_reports_pdf, name='generate_drilling_reports_pdf'),
 ]

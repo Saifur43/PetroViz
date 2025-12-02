@@ -7,7 +7,7 @@ import pandas as pd
 from .models import (
     Well, ProductionData, GasField, ExplorationTimeline, OperationActivity, 
     Fossils, GrainSize, Mineralogy, DailyDrillingReport, DrillingLithology, 
-    WellPrognosis, BHAComponent, BHA, BHAComponentPosition
+    WellPrognosis, BHAComponent, BHA, BHAComponentPosition, GasShowMeasurement
 )
 
 
@@ -181,3 +181,4 @@ class DrillingLithologyAdmin(admin.ModelAdmin):
 admin.site.register(WellPrognosis)
 admin.site.register(BHAComponent, BHAComponentAdmin)
 admin.site.register(BHA, BHAAdmin)
+admin.site.register(GasShowMeasurement)

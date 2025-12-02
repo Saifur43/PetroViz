@@ -2,10 +2,15 @@
 
 {% block bha_content %}
 <style>
+  /* Page Background */
+  body {
+    background: radial-gradient(circle at top left, #e0ecff 0, #f8fafc 40%, #fdfdfd 100%);
+  }
+
   /* Form Container */
   .form-container {
-    max-width: 800px;
-    margin: 2rem auto;
+    max-width: 90%;
+    margin: 2.5rem auto;
   }
 
   /* Modern Form Card */
@@ -44,7 +49,8 @@
   }
 
   .form-card-body {
-    padding: 2rem;
+    padding: 2rem 2.25rem 2.25rem 2.25rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
   }
 
   /* Form Controls */
@@ -177,6 +183,78 @@
   .upload-status.info {
     color: #17a2b8;
   }
+
+  .form-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6c757d;
+    margin: 1.5rem 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .form-section-title i {
+    color: var(--primary-blue);
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem 1.5rem;
+  }
+
+  .field-full {
+    grid-column: 1 / -1;
+  }
+
+  .gas-show-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 999px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+  }
+
+  .gas-show-toggle input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    cursor: pointer;
+  }
+
+  .gas-show-toggle-label {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  /* Compact gas show table */
+  .gas-show-table {
+    font-size: 0.8rem;
+  }
+
+  .gas-show-table td,
+  .gas-show-table th {
+    padding: 0.25rem 0.4rem;
+    vertical-align: middle;
+  }
+
+  .gas-show-table input[type="text"],
+  .gas-show-table input[type="number"] {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.8rem;
+    height: 32px;
+  }
+
+  .gas-show-table-wrapper {
+    max-height: 260px;
+    overflow-y: auto;
+  }
 </style>
 
 <div class="container form-container">
@@ -217,15 +295,95 @@
 
         {{ form.non_field_errors }}
 
+        <div class="form-section-title">
+          <i class="bi bi-geo-alt"></i><span>Basic Information</span>
+        </div>
+        <div class="field-row">
+          {% for field in form.visible_fields %}
+            {% if field.name in 'well report_no date depth_start depth_end depth_start_tvd depth_end_tvd' %}
+            <div>
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field.errors }}
+              {{ field }}
+              {% if field.help_text %}
+                <div class="form-text">{{ field.help_text }}</div>
+              {% endif %}
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="form-section-title">
+          <i class="bi bi-clipboard-data"></i><span>Operations & Comments</span>
+        </div>
+        <div class="field-row">
+          {% for field in form.visible_fields %}
+            {% if field.name in 'current_operation present_activity csg last_csg next_program comments' %}
+            <div class="field-full">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field.errors }}
+              {{ field }}
+              {% if field.help_text %}
+                <div class="form-text">{{ field.help_text }}</div>
+              {% endif %}
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
         {% for field in form.visible_fields %}
+          {% if field.name == 'gas_show' %}
+          <div class="form-section-title">
+            <i class="bi bi-cloud-lightning"></i><span>Gas Show</span>
+          </div>
           <div class="mb-3">
-            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field.errors }}
-            {{ field }}
+            <label class="gas-show-toggle">
+              {{ field }}
+              <span class="gas-show-toggle-label">Gas show detected?</span>
+            </label>
             {% if field.help_text %}
-              <div class="form-text">{{ field.help_text }}</div>
+              <div class="form-text mt-1">{{ field.help_text }}</div>
             {% endif %}
           </div>
+
+          <div id="gas_show_details_section" style="display: none;">
+            <div class="info-section-modern gas-show-table-wrapper">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">
+                  <i class="bi bi-graph-up-arrow"></i>Gas Show Measurements
+                </h6>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="add_gas_show_row_btn">
+                  <i class="bi bi-plus-circle"></i> Add Row
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm gas-show-table align-middle" id="gas_show_table">
+                  <thead>
+                    <tr>
+                      <th>Formation</th>
+                      <th>Start Depth (m)</th>
+                      <th>End Depth (m)</th>
+                      <th>Max (%)</th>
+                      <th>BG (%)</th>
+                      <th>Above BG (%)</th>
+                      <th>C1 (%)</th>
+                      <th>C2 (%)</th>
+                      <th>C3 (%)</th>
+                      <th>iC4 (%)</th>
+                      <th>nC5 (%)</th>
+                      <th>Remarks</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="gas_show_tbody">
+                  </tbody>
+                </table>
+                <input type="hidden" name="gas_show_row_count" id="gas_show_row_count" value="0">
+              </div>
+            </div>
+          </div>
+          {% endif %}
         {% endfor %}
 
         <div class="d-flex justify-content-between mt-4">
@@ -248,6 +406,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const uploadContainer = document.getElementById('pdf_upload_container');
   const uploadStatus = document.getElementById('upload_status');
   const form = document.getElementById('drilling_report_form');
+  const gasShowField = form.querySelector('[name="gas_show"]');
+  const gasShowSection = document.getElementById('gas_show_details_section');
+  const addGasRowBtn = document.getElementById('add_gas_show_row_btn');
+  const gasTbody = document.getElementById('gas_show_tbody');
+  const gasRowCountInput = document.getElementById('gas_show_row_count');
+
+  let gasRowIndex = 0;
 
   // Click button to trigger file input
   pdfUploadBtn.addEventListener('click', function() {
@@ -359,6 +524,62 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadStatus.className = 'upload-status';
       }, 5000);
     }
+  }
+
+  // Gas show toggle logic
+  if (gasShowField) {
+    const updateGasShowVisibility = () => {
+      if (gasShowField.checked) {
+        gasShowSection.style.display = '';
+        if (gasRowIndex === 0) {
+          addGasRow();  // start with one empty row
+        }
+      } else {
+        gasShowSection.style.display = 'none';
+      }
+    };
+    gasShowField.addEventListener('change', updateGasShowVisibility);
+    updateGasShowVisibility();
+  }
+
+  function addGasRow() {
+    const idx = gasRowIndex++;
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><input type="text" class="form-control form-control-sm" name="gas_show_${idx}_formation"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_start_depth_m"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_end_depth_m"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_max_percent"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_bg_percent"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_above_bg_percent"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_c1_percent"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_c2_percent"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_c3_percent"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_ic4_percent"></td>
+      <td><input type="number" step="0.1" class="form-control form-control-sm" name="gas_show_${idx}_nc5_percent"></td>
+      <td><input type="text" class="form-control form-control-sm" name="gas_show_${idx}_remarks"></td>
+      <td class="text-end">
+        <button type="button" class="btn btn-sm btn-outline-danger gas-row-remove-btn">
+          <i class="bi bi-x-circle"></i>
+        </button>
+      </td>`;
+    gasTbody.appendChild(row);
+    gasRowCountInput.value = gasRowIndex.toString();
+  }
+
+  if (addGasRowBtn) {
+    addGasRowBtn.addEventListener('click', addGasRow);
+  }
+
+  if (gasTbody) {
+    gasTbody.addEventListener('click', function(e) {
+      if (e.target.closest('.gas-row-remove-btn')) {
+        const tr = e.target.closest('tr');
+        if (tr) {
+          tr.remove();
+        }
+      }
+    });
   }
 });
 </script>

@@ -1,10 +1,21 @@
 {% load static %}
-<div class="card report-card" data-report-id="{{ report.id }}" data-depth-start="{{ report.depth_start }}" data-depth-end="{{ report.depth_end }}">
+<div class="card report-card"
+    data-report-id="{{ report.id }}"
+    data-depth-start="{{ report.depth_start }}"
+    data-depth-end="{{ report.depth_end }}"
+    data-has-gas="{{ report.gas_show|yesno:'true,false' }}"
+    data-gas-measurements="{{ report.gas_show_measurements|length }}">
     <div class="card-header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center flex-wrap gap-2">
+            {% if report.report_no %}
+            <span class="badge bg-primary" style="font-size: 0.8rem;">
+                #{{ report.report_no }}
+            </span>
+            {% endif %}
             <span class="report-date">
                 <i class="bi bi-calendar-check"></i>{{ report.date}}
             </span>
+            
             <div class="depth-badges">
                 <span class="report-depth-md">
                     <i class="bi bi-arrows-expand"></i>{{ report.depth_start|floatformat:1 }} - {{ report.depth_end|floatformat:1 }} m
@@ -34,32 +45,120 @@
                     <h6>
                         <i class="bi bi-info-circle"></i>Report Details
                     </h6>
+
                     <div class="info-row-modern {% if report.gas_show %}gas-show-highlight{% endif %}">
-                        <strong><i class="bi bi-activity me-1"></i>Present Activity</strong> 
-                        <span>{{ report.present_activity|default:"Not specified"|safe }}</span>
+                        <div class="fw-semibold text-muted" style="font-size: 0.8rem;">
+                            <i class="bi bi-activity me-1"></i>Present Activity
+                        </div>
+                        <div class="mt-1">
+                            {{ report.present_activity|default:"Not specified"|safe }}
+                        </div>
                     </div>
+
                     <div class="info-row-modern">
-                        <strong><i class="bi bi-calendar4-event me-1"></i>Next Program</strong> 
-                        <span>{{ report.next_program|default:"Not specified"|safe }}</span>
+                        <div class="fw-semibold text-muted" style="font-size: 0.8rem;">
+                            <i class="bi bi-calendar4-event me-1"></i>Next Program
+                        </div>
+                        <div class="mt-1">
+                            {{ report.next_program|default:"Not specified"|safe }}
+                        </div>
                     </div>
+
                     <div class="info-row-modern {% if report.gas_show %}gas-show-highlight{% endif %}">
-                        <strong><i class="bi bi-cloud me-1"></i>Gas Show:</strong> 
-                        <span>{{ report.gas_show|default:"None" }}</span>
-                        {% if report.gas_show %}
-                        <span class="gas-show-badge">
-                            <i class="bi bi-exclamation-triangle-fill"></i>GAS DETECTED
-                        </span>
-                        {% endif %}
+                        <div class="fw-semibold text-muted d-flex align-items-center" style="font-size: 0.8rem;">
+                            <i class="bi bi-cloud me-1"></i>Gas Show
+                        </div>
+                        <div class="mt-1 d-flex flex-wrap align-items-center gap-2">
+                            <span>{{ report.gas_show|yesno:"Yes,No" }}</span>
+                            {% if report.gas_show %}
+                            <span class="gas-show-badge">
+                                <i class="bi bi-exclamation-triangle-fill"></i>GAS DETECTED
+                            </span>
+                            {% endif %}
+                            {% if report.gas_show_peak %}
+                            <span class="badge text-bg-warning" style="font-size: 0.75rem;">
+                                Peak {{ report.gas_show_peak|floatformat:1 }}%
+                            </span>
+                            {% endif %}
+                        </div>
                     </div>
+
                     <div class="info-row-modern">
-                        <strong><i class="bi bi-gear me-1"></i>Drilling Operation:</strong> 
-                        <span>{{ report.current_operation|default:"Not specified"|safe }}</span>
+                        <div class="fw-semibold text-muted" style="font-size: 0.8rem;">
+                            <i class="bi bi-gear me-1"></i>Drilling Operation
+                        </div>
+                        <div class="mt-1">
+                            {{ report.current_operation|default:"Not specified"|safe }}
+                        </div>
                     </div>
+
                     <div class="info-row-modern">
-                        <strong><i class="bi bi-chat-left-text me-1"></i>Comments:</strong> <br>
-                        <span style="margin-top: 4px; display: inline-block;">{{ report.comments|default:"No comments"|safe|linebreaksbr }}</span>
+                        <div class="fw-semibold text-muted" style="font-size: 0.8rem;">
+                            <i class="bi bi-chat-left-text me-1"></i>Comments
+                        </div>
+                        <div class="mt-1">
+                            {{ report.comments|default:"No comments"|safe|linebreaksbr }}
+                        </div>
                     </div>
                 </div>
+
+                {% if report.gas_show_measurements %}
+        <div class="mt-4">
+            <div class="info-section-modern gas-show-table-wrapper">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">
+                        <i class="bi bi-graph-up-arrow"></i>Gas Show Measurements
+                    </h6>
+                    <a class="btn btn-sm btn-outline-secondary"
+                       href="{% url 'gas_show_measurements' report.id %}"
+                       target="_blank">
+                        <i class="bi bi-braces"></i> JSON
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm gas-show-table">
+                        <thead>
+                            <tr>
+                                <th>Formation</th>
+                                <th>Depth Range (m)</th>
+                                <th>Max (%)</th>
+                                <th>BG (%)</th>
+                                <th>Above BG (%)</th>
+                                <th>C1 (%)</th>
+                                <th>C2 (%)</th>
+                                <th>C3 (%)</th>
+                                <th>iC4 (%)</th>
+                                <th>nC5 (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for measurement in report.gas_show_measurements %}
+                            <tr>
+                                <td>{{ measurement.formation }}</td>
+                                <td>{{ measurement.start_depth_m|floatformat:1 }} - {{ measurement.end_depth_m|floatformat:1 }}</td>
+                                <td>{{ measurement.max_percent|floatformat:1 }}</td>
+                                <td>{{ measurement.bg_percent|floatformat:1 }}</td>
+                                <td>{{ measurement.above_bg_percent|floatformat:1 }}</td>
+                                <td>{{ measurement.c1_percent|floatformat:1 }}</td>
+                                <td>{{ measurement.c2_percent|floatformat:1 }}</td>
+                                <td>{{ measurement.c3_percent|floatformat:1 }}</td>
+                                <td>{{ measurement.ic4_percent|floatformat:1 }}</td>
+                                <td>{{ measurement.nc5_percent|floatformat:1 }}</td>
+                            </tr>
+                            {% if measurement.remarks %}
+                            <tr>
+                                <td colspan="10" class="text-muted" style="font-size: 0.75rem;">
+                                    <i class="bi bi-chat-left-quote"></i> {{ measurement.remarks }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
             </div>
             <div class="col-md-6">
                 <div class="lithology-section">
@@ -131,5 +230,6 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>

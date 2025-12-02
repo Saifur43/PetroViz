@@ -135,7 +135,7 @@ class DailyDrillingReportForm(ModelForm):
             'csg': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
             'last_csg': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
             'next_program': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
-            'gas_show': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'gas_show': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'comments': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
 
