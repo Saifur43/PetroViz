@@ -1,0 +1,98 @@
+<div>
+    {% if prognosis_segments or lithology_segments %}
+    <div class="position-sticky" style="top: 0.8rem;">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0" style="color: #257358; font-weight: 600;">
+                        <i class="bi bi-layers me-1"></i>Lithology Comparison
+                    </h6>
+                    {% if combined_range %}
+                    <span class="text-muted" style="font-size: 0.8rem;">{{ combined_range.min }} - {{ combined_range.max }} m</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <div class="prognosis-legend" style="flex: 1;">
+                        <div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; color: #257358;">Prognosis:</div>
+                        <span class="legend-item"><span class="legend-color" style="background:#FFD700;"></span> Sand</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#CD853F;"></span> Clay</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#666666;"></span> Shale</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#DEB887;"></span> Silt</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#a10c07;"></span> Target</span>
+                    </div>
+                    <div class="prognosis-legend" style="flex: 1;">
+                        <div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; color: #257358;">Actual:</div>
+                        <span class="legend-item"><span class="legend-color" style="background:#FFD700;"></span> Sand</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#CD853F;"></span> Clay</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#666666;"></span> Shale</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#DEB887;"></span> Silt</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#9aa0a6; border: 1px dashed #666;"></span> No Data</span>
+                    </div>
+                </div>
+                <div class="combined-lithology-wrap" id="combined-lithology-wrap">
+                    <div class="combined-bars-container">
+                        <!-- Prognosis Bar -->
+                        {% if prognosis_segments %}
+                        <div class="prognosis-bar-v combined-bar" aria-label="Prognosis lithology by depth" id="prognosis-bar-combined"{% if stats and stats.latest_depth %} data-latest-depth="{{ stats.latest_depth }}"{% endif %}>
+                            {% if combined_range and combined_range.top_spacer_pct and combined_range.top_spacer_pct > 0 %}
+                                <div class="prognosis-spacer" data-height="{{ combined_range.top_spacer_pct }}"></div>
+                            {% endif %}
+                            {% for seg in prognosis_segments %}
+                                <div class="prognosis-segment {% if seg.is_target %}prognosis-target{% endif %}"
+                                     data-from="{{ seg.from }}" data-to="{{ seg.to }}"
+                                     data-height="{% if seg.height_pct_combined %}{{ seg.height_pct_combined }}{% else %}{{ seg.height_pct }}{% endif %}"
+                                     data-color="{% if seg.is_target %}#a10c07{% elif seg.lithology == 'sand' %}#FFD700{% elif seg.lithology == 'clay' %}#CD853F{% elif seg.lithology == 'shale' %}#666666{% elif seg.lithology == 'slit' or seg.lithology == 'silt' %}#DEB887{% else %}#9aa0a6{% endif %}"
+                                     data-tooltip="{{ seg.label }} • {{ seg.lithology|title }}">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Shared Depth Labels -->
+                        {% if combined_range %}
+                        <div class="prognosis-depth-labels-v combined-depth-labels" aria-hidden="true" id="combined-ticks"
+                             data-min="{{ combined_range.min }}" data-max="{{ combined_range.max }}">
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Lithology Bar -->
+                        {% if lithology_segments %}
+                        <div class="prognosis-bar-v combined-bar" aria-label="Actual lithology by depth" id="lithology-bar-combined"{% if stats and stats.latest_depth %} data-latest-depth="{{ stats.latest_depth }}"{% endif %}>
+                            {% if combined_range and combined_range.top_spacer_pct and combined_range.top_spacer_pct > 0 %}
+                                <div class="prognosis-spacer" data-height="{{ combined_range.top_spacer_pct }}"></div>
+                            {% endif %}
+                            {% for seg in lithology_segments %}
+                                {% if seg.is_gap %}
+                                    <div class="prognosis-segment lithology-gap"
+                                         data-from="{{ seg.from }}" data-to="{{ seg.to }}"
+                                         data-height="{% if seg.height_pct_combined %}{{ seg.height_pct_combined }}{% else %}{{ seg.height_pct }}{% endif %}"
+                                         data-color="#e9ecef"
+                                         data-tooltip="{{ seg.label }}">
+                                    </div>
+                                {% else %}
+                                    <div class="lithology-segment-container" 
+                                         data-from="{{ seg.from }}" 
+                                         data-to="{{ seg.to }}"
+                                         data-height="{% if seg.height_pct_combined %}{{ seg.height_pct_combined }}{% else %}{{ seg.height_pct }}{% endif %}"
+                                         data-tooltip="{{ seg.label }}{% if seg.percentages %} • Sand: {{ seg.percentages.sand }}%, Clay: {{ seg.percentages.clay }}%, Shale: {{ seg.percentages.shale }}%, Silt: {{ seg.percentages.slit }}%{% if seg.percentages.coal %}, Coal: {{ seg.percentages.coal }}%{% endif %}{% if seg.percentages.limestone %}, Limestone: {{ seg.percentages.limestone }}%{% endif %}{% endif %}">
+                                        {% for breakdown in seg.breakdown %}
+                                            <div class="lithology-sub-segment"
+                                                 data-type="{{ breakdown.type }}"
+                                                 data-percentage="{{ breakdown.percentage }}"
+                                                 data-height="{{ breakdown.height_pct }}"
+                                                 data-color="{% if breakdown.type == 'sand' %}#FFD700{% elif breakdown.type == 'clay' %}#CD853F{% elif breakdown.type == 'shale' %}#666666{% elif breakdown.type == 'slit' or breakdown.type == 'silt' %}#DEB887{% elif breakdown.type == 'coal' %}#2c2c2c{% elif breakdown.type == 'limestone' %}#f5f5dc{% else %}#9aa0a6{% endif %}">
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+

@@ -846,6 +846,51 @@ def drilling_reports(request, well_id=None):
         except Well.DoesNotExist:
             lithology_segments = None
 
+    # Calculate combined depth range for shared visualization
+    combined_range = None
+    if well_id:
+        # Collect all depth ranges
+        depth_mins = []
+        depth_maxs = []
+        
+        if prognosis_range:
+            depth_mins.append(prognosis_range['min'])
+            depth_maxs.append(prognosis_range['max'])
+        
+        if lithology_range:
+            depth_mins.append(lithology_range['min'])
+            depth_maxs.append(lithology_range['max'])
+        
+        if stats and stats.get('latest_depth'):
+            depth_maxs.append(float(stats['latest_depth']))
+        
+        if depth_mins and depth_maxs:
+            combined_min = min(depth_mins)
+            combined_max = max(depth_maxs)
+            combined_total = max(combined_max, 1e-6)
+            
+            combined_range = {
+                'min': round(combined_min, 1),
+                'max': round(combined_max, 1),
+                'top_spacer_pct': (combined_min / combined_total) * 100.0 if combined_max > 0 else 0.0
+            }
+            
+            # Recalculate height percentages for prognosis segments using combined range
+            if prognosis_segments:
+                for seg in prognosis_segments:
+                    start = seg['from']
+                    end = seg['to']
+                    length = max(end - start, 0)
+                    seg['height_pct_combined'] = (length / combined_total) * 100.0
+            
+            # Recalculate height percentages for lithology segments using combined range
+            if lithology_segments:
+                for seg in lithology_segments:
+                    start = seg['from']
+                    end = seg['to']
+                    length = max(end - start, 0)
+                    seg['height_pct_combined'] = (length / combined_total) * 100.0
+
     context = {
         'reports': processed_reports,
         'wells': wells,
@@ -860,6 +905,7 @@ def drilling_reports(request, well_id=None):
         'prognosis_range': prognosis_range,
         'lithology_segments': lithology_segments,
         'lithology_range': lithology_range,
+        'combined_range': combined_range,
         'gas_show_summary': gas_show_summary,
         'gas_show_measurements_all': gas_show_measurements_all,
         'trajectory_data': trajectory_data,
