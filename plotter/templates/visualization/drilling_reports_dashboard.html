@@ -460,6 +460,8 @@
     justify-content: center;
     font-size: 1.75rem;
     flex-shrink: 0;
+    background: transparent;
+    color: #333333;
 }
 
 .stats-card-reports .stats-icon {
@@ -579,10 +581,29 @@
     border: 1px solid #e0e0e0; 
 }
 
+#lithology-bar {
+    gap: 0;
+    line-height: 0;
+}
+
+#lithology-bar > * {
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+}
+
 .prognosis-segment { 
     height: 100%; 
     position: relative; 
     cursor: pointer; 
+    margin: 0;
+    padding: 0;
+}
+
+#lithology-bar .prognosis-segment {
+    margin: 0;
+    padding: 0;
+    border: none;
 }
 
 .prognosis-segment:focus { 
@@ -597,20 +618,22 @@
 .prognosis-segment:hover::after { 
     content: attr(data-tooltip); 
     position: absolute; 
-    left: 4px; 
-    right: 4px; 
+    left: 0; 
+    right: 0; 
     top: 50%; 
     transform: translateY(-50%); 
-    background: rgba(0,0,0,0.85); 
+    background: rgba(0,0,0,0.9); 
     color: #fff; 
-    padding: 3px 6px; 
-    border-radius: 3px; 
+    padding: 8px 12px; 
+    border-radius: 4px; 
     white-space: normal; 
     word-break: break-word; 
-    font-size: 11px; 
+    font-size: 9px; 
+    line-height: 1.4;
     z-index: 2; 
-    text-align: center; 
-    max-width: calc(100% - 8px); 
+    text-align: left; 
+    max-width: 100%; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .prognosis-legend .legend-item { 
@@ -658,6 +681,71 @@
     outline-offset: -2px; 
 }
 
+.lithology-gap {
+    background: #e9ecef !important;
+    border: none;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+.lithology-gap::after {
+    content: '?';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #adb5bd;
+    font-size: 0.7rem;
+    font-weight: bold;
+    opacity: 0.5;
+}
+
+.lithology-segment-container {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.lithology-sub-segment {
+    flex-shrink: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    transition: opacity 0.2s ease;
+}
+
+.lithology-segment-container:hover .lithology-sub-segment {
+    opacity: 0.9;
+}
+
+.lithology-segment-container:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.9);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    white-space: normal;
+    word-break: break-word;
+    font-size: 9px;
+    line-height: 1.4;
+    z-index: 10;
+    text-align: left;
+    pointer-events: none;
+    max-width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
 .prognosis-wrap { 
     display: flex; 
     align-items: stretch; 
@@ -693,6 +781,12 @@
 }
 
 /* Responsive adjustments */
+@media (max-width: 1200px) {
+    .col-lg-3.col-xl-3 {
+        margin-bottom: 1rem;
+    }
+}
+
 @media (max-width: 768px) {
     .report-card {
         margin-left: 30px;
@@ -706,6 +800,10 @@
         flex-direction: column;
         align-items: flex-start;
     }
+    
+    .col-lg-3.col-xl-3 {
+        margin-bottom: 1.5rem;
+    }
 }
 </style>
 
@@ -714,7 +812,7 @@
         <main class="col-12 px-4 pt-3">
             {% if selected_well %}
             <div class="row g-2">
-                <div class="col-lg-9 col-xl-9">
+                <div class="col-lg-6 col-xl-6">
                     <div class="mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div>
                             <h1 class="display-5 fw-bold mb-0">
@@ -807,8 +905,16 @@
                     
                 </div>
                 
-                <!-- Prognosis Sidebar -->
-                {% include 'daily_reports/prognosis_sidebar.html' %}
+                <!-- Sidebars -->
+                <div class="col-lg-3 col-xl-3">
+                    <!-- Prognosis Sidebar -->
+                    {% include 'daily_reports/prognosis_sidebar.html' %}
+                </div>
+                
+                <div class="col-lg-3 col-xl-3">
+                    <!-- Lithology Sidebar -->
+                    {% include 'daily_reports/lithology_sidebar.html' %}
+                </div>
             </div>
             {% else %}
             <div class="text-center mt-5">
@@ -823,6 +929,8 @@
     </div>
 </div>
 
+
+{% include 'daily_reports/lithology_script.html' %}
 
 {% if prognosis_segments %}
 <script>

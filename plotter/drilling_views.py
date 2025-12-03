@@ -11,8 +11,9 @@ import importlib.util
 from .models import (
     Well,
     DailyDrillingReport, WellPrognosis, DrillingLithology, GasShowMeasurement,
-    WellSurveyStation
+    WellSurveyStation, DrillingStats
 )
+from decimal import Decimal
 from .forms import DailyDrillingReportForm, DrillingLithologyForm
 
 # Load the `plotter/utils/pdf_parser.py` module directly to avoid
@@ -434,11 +435,28 @@ def drilling_reports(request, well_id=None):
         earliest_report = reports.last()
         total_days = (latest_report.date - earliest_report.date).days or 1
         
+        # Get latest drilling stats for this well
+        latest_drilling_stats = None
+        try:
+            latest_drilling_stats = DrillingStats.objects.filter(well_id=well_id).order_by('-id').first()
+        except Exception:
+            pass
+        
+        # Prepare stats with drilling stats data
         stats = {
             'total_reports': reports.count(),
             'latest_depth': latest_report.depth_end,
-            'drilling_efficiency': calculate_drilling_efficiency(reports)
+            'drilling_efficiency': calculate_drilling_efficiency(reports),
         }
+        
+        # Add drilling stats if available
+        if latest_drilling_stats:
+            stats['rop_latest'] = latest_drilling_stats.rop_latest
+            stats['mud_weight_latest'] = latest_drilling_stats.mud_weight_latest
+            if latest_drilling_stats.present_event:
+                stats['present_event'] = latest_drilling_stats.get_present_event_display()
+            if latest_drilling_stats.present_formation:
+                stats['present_formation'] = latest_drilling_stats.get_present_formation_display()
     
     # Build gas show summary for the current report selection
     gas_show_summary = None
@@ -700,6 +718,134 @@ def drilling_reports(request, well_id=None):
         except Well.DoesNotExist:
             trajectory_data = None
 
+    # Get lithology data for the selected well - gather all lithology entries
+    lithology_segments = None
+    lithology_range = None
+    if well_id:
+        try:
+            selected_well_obj = Well.objects.get(id=well_id)
+            # Get all lithology entries for this well across all reports
+            all_lithologies = DrillingLithology.objects.filter(
+                drilling_report__well_id=well_id
+            ).order_by('depth_from', 'depth_to')
+            
+            if all_lithologies.exists():
+                # Convert to list and process
+                lithology_list = list(all_lithologies)
+                
+                # Find overall depth range
+                starts = [float(l.depth_from) for l in lithology_list]
+                ends = [float(l.depth_to) for l in lithology_list]
+                min_depth = min(starts) if starts else 0
+                max_depth = max(ends) if ends else 0
+                
+                # Use latest depth from stats if available, otherwise use max from lithology
+                if stats and stats.get('latest_depth'):
+                    max_depth = max(max_depth, float(stats['latest_depth']))
+                
+                total_range = max(max_depth - min_depth, 1e-6)
+                zero_origin_total = max(max_depth, 1e-6)
+                
+                # Build segments - handle gaps by creating empty segments
+                lithology_segments = []
+                current_depth = min_depth
+                
+                for litho in lithology_list:
+                    start = float(litho.depth_from)
+                    end = float(litho.depth_to)
+                    
+                    # If there's a gap before this lithology, add an empty segment
+                    if current_depth < start:
+                        gap_length = start - current_depth
+                        gap_height_pct = (gap_length / zero_origin_total) * 100.0
+                        lithology_segments.append({
+                            'from': round(current_depth, 1),
+                            'to': round(start, 1),
+                            'lithology': 'unknown',
+                            'is_gap': True,
+                            'height_pct': gap_height_pct,
+                            'label': f"{round(current_depth,1)}-{round(start,1)} m (No data)"
+                        })
+                    
+                    # Get all lithology percentages
+                    lithology_percentages = {
+                        'sand': float(litho.sand_percentage or 0),
+                        'clay': float(litho.clay_percentage or 0),
+                        'shale': float(litho.shale_percentage or 0),
+                        'slit': float(litho.slit_percentage or 0),
+                        'coal': float(litho.coal_percentage or 0),
+                        'limestone': float(litho.limestone_percentage or 0),
+                    }
+                    
+                    # Calculate total percentage
+                    total_pct = sum(lithology_percentages.values())
+                    
+                    # Only add segment if there's significant lithology data
+                    if total_pct > 0:
+                        length = max(end - start, 0)
+                        segment_height_pct = (length / zero_origin_total) * 100.0
+                        
+                        # Create breakdown segments for each lithology type
+                        # Order by percentage (highest first) for visual stacking
+                        sorted_lithos = sorted(
+                            [(k, v) for k, v in lithology_percentages.items() if v > 0],
+                            key=lambda x: x[1],
+                            reverse=True
+                        )
+                        
+                        # Create a container segment with sub-segments
+                        segment_data = {
+                            'from': round(start, 1),
+                            'to': round(end, 1),
+                            'is_gap': False,
+                            'height_pct': segment_height_pct,
+                            'label': f"{round(start,1)}-{round(end,1)} m",
+                            'breakdown': []
+                        }
+                        
+                        # Add each lithology type as a sub-segment
+                        for litho_type, pct in sorted_lithos:
+                            if pct > 0:
+                                segment_data['breakdown'].append({
+                                    'type': litho_type,
+                                    'percentage': round(pct, 1),
+                                    'height_pct': (pct / total_pct) * 100.0 if total_pct > 0 else 0
+                                })
+                        
+                        segment_data['percentages'] = {
+                            'sand': round(lithology_percentages['sand'], 1),
+                            'clay': round(lithology_percentages['clay'], 1),
+                            'shale': round(lithology_percentages['shale'], 1),
+                            'slit': round(lithology_percentages['slit'], 1),
+                            'coal': round(lithology_percentages['coal'], 1),
+                            'limestone': round(lithology_percentages['limestone'], 1),
+                        }
+                        
+                        lithology_segments.append(segment_data)
+                    
+                    current_depth = max(current_depth, end)
+                
+                # Add gap at the end if needed
+                if current_depth < max_depth:
+                    gap_length = max_depth - current_depth
+                    gap_height_pct = (gap_length / zero_origin_total) * 100.0
+                    lithology_segments.append({
+                        'from': round(current_depth, 1),
+                        'to': round(max_depth, 1),
+                        'lithology': 'unknown',
+                        'is_gap': True,
+                        'height_pct': gap_height_pct,
+                        'label': f"{round(current_depth,1)}-{round(max_depth,1)} m (No data)"
+                    })
+                
+                lithology_range = {
+                    'min': round(min_depth, 1),
+                    'max': round(max_depth, 1),
+                    'top_spacer_pct': (min_depth / zero_origin_total) * 100.0 if max_depth > 0 else 0.0
+                }
+        except Well.DoesNotExist:
+            lithology_segments = None
+
     context = {
         'reports': processed_reports,
         'wells': wells,
@@ -712,6 +858,8 @@ def drilling_reports(request, well_id=None):
         'prognosis_data': prognosis_data,
         'prognosis_segments': prognosis_segments,
         'prognosis_range': prognosis_range,
+        'lithology_segments': lithology_segments,
+        'lithology_range': lithology_range,
         'gas_show_summary': gas_show_summary,
         'gas_show_measurements_all': gas_show_measurements_all,
         'trajectory_data': trajectory_data,

@@ -1,0 +1,126 @@
+{% if lithology_segments %}
+<script>
+(function(){
+    const wrap = document.getElementById('lithology-wrap');
+    const bar = document.getElementById('lithology-bar');
+    const ticks = document.getElementById('lithology-ticks');
+    if (!bar) return;
+    
+    // Handle spacers and gap segments
+    bar.querySelectorAll('.prognosis-spacer, .prognosis-segment.lithology-gap').forEach(el => {
+        const h = parseFloat(el.getAttribute('data-height'));
+        if (!isNaN(h)) el.style.height = h + '%';
+        const color = el.getAttribute('data-color');
+        if (color) el.style.background = color;
+    });
+    
+    // Handle lithology segments with breakdown
+    bar.querySelectorAll('.lithology-segment-container').forEach(container => {
+        const containerHeight = parseFloat(container.getAttribute('data-height'));
+        if (!isNaN(containerHeight)) {
+            container.style.height = containerHeight + '%';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'row';
+            container.style.position = 'relative';
+            container.style.width = '100%';
+        }
+        
+        // Set up sub-segments (horizontal layout)
+        const subSegments = container.querySelectorAll('.lithology-sub-segment');
+        subSegments.forEach(subSeg => {
+            const subWidth = parseFloat(subSeg.getAttribute('data-height')); // Using height attribute for width percentage
+            if (!isNaN(subWidth)) {
+                subSeg.style.width = subWidth + '%';
+                subSeg.style.height = '100%';
+                subSeg.style.flexShrink = '0';
+            }
+            const color = subSeg.getAttribute('data-color');
+            if (color) subSeg.style.background = color;
+        });
+    });
+
+    function computeBarHeight() {
+        try {
+            const card = bar.closest('.card');
+            const rectTop = card.getBoundingClientRect().top;
+            const topOffset = Math.max(rectTop, 0);
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+            const targetHeight = Math.max(viewportHeight - 24 - (rectTop - topOffset), 280);
+            bar.style.height = targetHeight + 'px';
+            if (ticks) ticks.style.height = targetHeight + 'px';
+        } catch(e) { /* noop */ }
+    }
+
+    function niceStep(max) {
+        if (!max || max <= 0) return 50;
+        const raw = max / 12;
+        const candidates = [10, 20, 25, 50, 100, 200, 250, 500, 1000];
+        let best = candidates[0];
+        for (const c of candidates) {
+            if (raw <= c) { best = c; break; }
+            best = c;
+        }
+        return best;
+    }
+
+    function buildTicks() {
+        if (!ticks) return;
+        const min = parseFloat(ticks.getAttribute('data-min')) || 0;
+        const max = parseFloat(ticks.getAttribute('data-max')) || 0;
+        const step = niceStep(max);
+        const labels = [];
+        const start = Math.max(0, Math.floor(min / step) * step);
+        for (let v = start; v <= max; v += step) labels.push(v);
+        if (labels[0] !== 0) labels.unshift(0);
+        if (labels[labels.length - 1] !== max) labels.push(max);
+        ticks.innerHTML = '';
+        labels.forEach((value, idx) => {
+            const row = document.createElement('div');
+            row.className = 'prognosis-tick';
+            const line = document.createElement('span');
+            line.className = 'prognosis-tick-line';
+            const label = document.createElement('span');
+            label.textContent = value + ' m';
+            row.appendChild(line);
+            row.appendChild(label);
+            ticks.appendChild(row);
+        });
+    }
+
+    function renderLatestDepthMarker() {
+        const latestAttr = bar.getAttribute('data-latest-depth');
+        if (!latestAttr || !ticks) return;
+        const latest = parseFloat(latestAttr);
+        const max = parseFloat(ticks.getAttribute('data-max')) || 0;
+        if (!max || isNaN(latest)) return;
+        const clamped = Math.max(0, Math.min(latest, max));
+        const pct = (clamped / max) * 100;
+
+        let marker = bar.querySelector('.prognosis-marker');
+        let label = bar.querySelector('.prognosis-marker-label');
+        if (!marker) {
+            marker = document.createElement('div');
+            marker.className = 'prognosis-marker';
+            bar.appendChild(marker);
+        }
+        if (!label) {
+            label = document.createElement('div');
+            label.className = 'prognosis-marker-label';
+            bar.appendChild(label);
+        }
+        marker.style.top = pct + '%';
+        label.style.top = pct + '%';
+        label.textContent = 'Latest depth: ' + clamped.toFixed(1) + ' m';
+    }
+
+    computeBarHeight();
+    buildTicks();
+    renderLatestDepthMarker();
+    window.addEventListener('resize', () => {
+        computeBarHeight();
+        renderLatestDepthMarker();
+    });
+})();
+</script>
+{% endif %}
+

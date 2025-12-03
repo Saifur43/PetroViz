@@ -1,9 +1,9 @@
 {% if stats %}
 <div class="row g-3 mb-4">
-    <div class="col-xl-6 col-md-6">
-        <div class="stats-card-modern stats-card-reports">
+    <div class="col-xl-4 col-md-6">
+        <div class="stats-card-modern">
             <div class="stats-icon">
-                <i class="bi bi-file-earmark-text"></i>
+                <i class="bi bi-card-list"></i>
             </div>
             <div class="stats-content">
                 <h6 class="stats-label">Total Reports</h6>
@@ -12,10 +12,10 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-6 col-md-6">
-        <div class="stats-card-modern stats-card-depth">
+    <div class="col-xl-4 col-md-6">
+        <div class="stats-card-modern">
             <div class="stats-icon">
-                <i class="bi bi-geo-alt"></i>
+                <i class="bi bi-arrow-down"></i>
             </div>
             <div class="stats-content">
                 <h6 class="stats-label">Latest Depth</h6>
@@ -24,5 +24,61 @@
             </div>
         </div>
     </div>
+    {% if stats.rop_latest %}
+    <div class="col-xl-4 col-md-6">
+        <div class="stats-card-modern stats-card-rop">
+            <div class="stats-icon">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <div class="stats-content">
+                <h6 class="stats-label">ROP Latest</h6>
+                <h3 class="stats-value">{{ stats.rop_latest|floatformat:2 }}</h3>
+                <p class="stats-unit">m/h</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if stats.mud_weight_latest %}
+    <div class="col-xl-4 col-md-6">
+        <div class="stats-card-modern stats-card-mud">
+            <div class="stats-icon">
+                <i class="bi bi-droplet"></i>
+            </div>
+            <div class="stats-content">
+                <h6 class="stats-label">Mud Weight Latest</h6>
+                <h3 class="stats-value">{{ stats.mud_weight_latest|floatformat:2 }}</h3>
+                <p class="stats-unit">kg/m³</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if stats.present_event %}
+    <div class="col-xl-4 col-md-6">
+        <div class="stats-card-modern stats-card-event">
+            <div class="stats-icon">
+                <i class="bi bi-gear"></i>
+            </div>
+            <div class="stats-content">
+                <h6 class="stats-label">Present Event</h6>
+                <h3 class="stats-value">{{ stats.present_event }}</h3>
+                <p class="stats-unit">current activity</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if stats.present_formation %}
+    <div class="col-xl-4 col-md-6">
+        <div class="stats-card-modern stats-card-formation">
+            <div class="stats-icon">
+                <i class="bi bi-stack"></i>
+            </div>
+            <div class="stats-content">
+                <h6 class="stats-label">Present Formation</h6>
+                <h3 class="stats-value">{{ stats.present_formation }}</h3>
+                <p class="stats-unit">formation</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endif %}

@@ -263,6 +263,31 @@ class ExplorationTimeline(models.Model):
     def __str__(self):
         return f"{self.year} - {self.title}"
 
+
+class DrillingStats(models.Model):
+
+    FORMATION_CHOICES = [
+    ('bokabil', 'Bokabil'),
+    ('duptila', 'Duptila'),
+    ('tipam', 'Tipam'),
+    ('bhuvan', 'Bhuvan'),
+    ('other', 'Other'),
+    ]
+
+    well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='drilling_stats')
+    present_event = models.CharField(max_length=255, choices=[('drilling', 'Drilling'), ('logging', 'Logging'), ('completion', 'Completion'),('maintenance', 'Maintenance'), ('other', 'Other')])
+    present_formation = models.CharField(max_length=255,choices=FORMATION_CHOICES, blank=True, null=True)
+    rop_latest = models.FloatField(help_text="ROP latest in meters per hour")
+    mud_weight_latest = models.FloatField(help_text="Mud weight latest in kg/m3")
+
+    def __str__(self):
+        return f"{self.well.name} - {self.present_event} - {self.present_formation}"
+    
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Drilling Stats'
+        verbose_name_plural = 'Drilling Stats'
+
 class DailyDrillingReport(models.Model):
     well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='drilling_reports')
     report_no = models.IntegerField(blank=True, null=True)
@@ -778,8 +803,8 @@ class WellPrognosis(models.Model):
     ]
     
     well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='prognoses')
-    planned_depth_start = models.DecimalField(max_digits=10, decimal_places=2, help_text="Planned start depth (m)")
-    planned_depth_end = models.DecimalField(max_digits=10, decimal_places=2, help_text="Planned end depth (m)")
+    planned_depth_start = models.DecimalField(max_digits=10, decimal_places=2, help_text="Planned start depth tvd in meters")
+    planned_depth_end = models.DecimalField(max_digits=10, decimal_places=2, help_text="Planned end depth tvd in meters")
     lithology = models.CharField(max_length=50, choices=FORMATION_CHOICES, help_text="Expected lithology at this depth")
     target_depth = models.BooleanField(default=False, help_text="Is this a target depth?")
     casing_size = models.CharField(max_length=50, blank=True, null=True)
@@ -814,4 +839,4 @@ class WellPrognosis(models.Model):
         if md_end is not None:
             tvd_end = self.well.md_to_tvd(float(md_end))
             if tvd_end is not None:
-                self.planned_depth_end = tvd_end
+                        self.planned_depth_end = tvd_end

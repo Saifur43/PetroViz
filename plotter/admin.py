@@ -8,7 +8,7 @@ from .models import (
     Well, ProductionData, GasField, ExplorationTimeline, OperationActivity, 
     Fossils, GrainSize, Mineralogy, DailyDrillingReport, DrillingLithology, 
     WellPrognosis, BHAComponent, BHA, BHAComponentPosition, GasShowMeasurement,
-    WellSurveyStation
+    WellSurveyStation, DrillingStats
 )
 
 
@@ -190,3 +190,10 @@ class WellSurveyStationAdmin(admin.ModelAdmin):
     list_filter = ('well',)
     ordering = ('well', 'sequence')
     search_fields = ('well__name',)
+
+@admin.register(DrillingStats)
+class DrillingStatsAdmin(admin.ModelAdmin):
+    list_display = ('well', 'present_event', 'present_formation', 'rop_latest', 'mud_weight_latest')
+    list_filter = ('well', 'present_event', 'present_formation')
+    ordering = ('-id',)
+    search_fields = ('well__name', 'present_event', 'present_formation')
