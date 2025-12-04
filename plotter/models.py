@@ -314,7 +314,7 @@ class DailyDrillingReport(models.Model):
         verbose_name_plural = 'Daily Drilling Reports'
         
     def __str__(self):
-        return f"{self.well.name} - {self.date} ({self.depth_start}-{self.depth_end}m)"
+        return f"{self.well.name} - {self.report_no} - {self.date} ({self.depth_start}-{self.depth_end}m)"
 
 
 class GasShowMeasurement(models.Model):

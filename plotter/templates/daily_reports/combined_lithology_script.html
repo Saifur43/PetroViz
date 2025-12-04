@@ -65,6 +65,26 @@
                     if (color) subSeg.style.background = color;
                 });
             });
+            
+            // Position gas show markers
+            lithologyBar.querySelectorAll('.gas-show-marker').forEach(marker => {
+                const depth = parseFloat(marker.getAttribute('data-depth'));
+                if (!isNaN(depth)) {
+                    const topPct = (depth / combinedTotal) * 100.0;
+                    marker.style.position = 'absolute';
+                    marker.style.top = topPct + '%';
+                    marker.style.left = '50%';
+                    marker.style.transform = 'translate(-50%, -50%)';
+                    marker.style.width = '8px';
+                    marker.style.height = '8px';
+                    marker.style.borderRadius = '50%';
+                    marker.style.background = '#ff6b35';
+                    marker.style.border = '2px solid #fff';
+                    marker.style.boxShadow = '0 0 4px rgba(255, 107, 53, 0.8), 0 0 8px rgba(255, 107, 53, 0.4)';
+                    marker.style.zIndex = '5';
+                    marker.style.cursor = 'pointer';
+                }
+            });
         }
     }
     

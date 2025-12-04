@@ -330,6 +330,7 @@ def extract_lithology_data(text: str) -> List[Dict[str, Any]]:
     """
     Extract lithology data from PDF text.
     Based on the structure from populate_lithology.py JSON format.
+    Handles both paragraph format and table format.
     
     Returns a list of dictionaries, each representing a lithology interval.
     """
@@ -337,6 +338,94 @@ def extract_lithology_data(text: str) -> List[Dict[str, Any]]:
     original_text = text
     text_upper = text.upper()
     
+    # First, try to detect if it's in table format (like SKL_DGR_34_27_11_2025.pdf)
+    # Table format: Depth range appears once, then multiple lithology rows follow
+    # Example:
+    #   2080-2090 | Sand | 10 Sand: Description...
+    #              | Shale | 90 Shale: Description...
+    #   2090-2095 | Sand | 20 A/A
+    #              | Shale | 80 A/A
+    
+    # Look for the lithology section header first
+    lithology_section = re.search(r'Depth\s*\(m\)|Lithology|Lithological\s*Description', text, re.IGNORECASE)
+    if lithology_section:
+        # Start searching from the lithology section
+        search_start = lithology_section.end()
+    else:
+        search_start = 0
+    
+    # Look for depth ranges - pattern that matches "2080-2090" or "2080-2090 m"
+    # This should appear before lithology entries
+    depth_range_pattern = r'(\d+\.?\d*)\s*[-–]\s*(\d+\.?\d*)\s*(?:m\b)?'
+    all_depth_matches = list(re.finditer(depth_range_pattern, text[search_start:], re.IGNORECASE))
+    # Adjust positions to account for search_start offset
+    all_depth_matches = [type('Match', (), {
+        'group': lambda self, n: m.group(n),
+        'start': lambda self: m.start() + search_start,
+        'end': lambda self: m.end() + search_start
+    })() for m in all_depth_matches]
+    
+    # Filter to only depth ranges that appear in lithology context
+    # (not in other sections like "2085-2169" in drilling parameters)
+    depth_matches = []
+    for match in all_depth_matches:
+        # Check if this depth range is in a lithology context
+        # Look for nearby keywords like "Sand", "Shale", "Lithology", "Depth (m)"
+        context_start = max(search_start, match.start() - 100)
+        context_end = min(len(text), match.end() + 500)
+        context = text[context_start:context_end].upper()
+        
+        # Check if this looks like a lithology depth range
+        # Must have lithology keywords nearby and not be in other sections
+        has_lithology_keywords = any(keyword in context for keyword in ['SAND', 'SHALE', 'CLAY', 'SILT', 'LITHOLOGY', 'DEPTH (M)', 'LITHOLOGICAL'])
+        not_in_other_section = not any(keyword in context for keyword in ['DRILLING PARAMETERS', 'MUD PARAMETERS', 'BIT', 'HOLE DEPTH'])
+        
+        if has_lithology_keywords and not_in_other_section:
+            depth_matches.append(match)
+    
+    if depth_matches:
+        # Process table format - group lithology entries by depth range
+        i = 0
+        while i < len(depth_matches):
+            depth_match = depth_matches[i]
+            depth_from = _safe_float(depth_match.group(1))
+            depth_to = _safe_float(depth_match.group(2))
+            
+            if depth_from >= depth_to:
+                i += 1
+                continue
+            
+            # Find all lithology entries for this depth range
+            # Look for text between this depth and the next depth (or end of section)
+            start_pos = depth_match.end()
+            
+            # Find where this depth range's lithology entries end
+            if i + 1 < len(depth_matches):
+                # Next depth range starts the next interval
+                end_pos = depth_matches[i + 1].start()
+            else:
+                # Look for next section (FORMATION GAS, DRILLING PARAMETERS, etc.)
+                next_section = re.search(r'\n\s*(?:FORMATION\s*GAS|DRILLING\s*PARAMETERS|MUD\s*PARAMETERS|BIT|SUMMARY|REMARKS)', text[start_pos:], re.IGNORECASE)
+                if next_section:
+                    end_pos = start_pos + next_section.start()
+                else:
+                    end_pos = len(text)
+            
+            interval_text = text[start_pos:end_pos]
+            interval_text_upper = interval_text.upper()
+            
+            # Extract lithology data for this interval
+            litho_data = _extract_lithology_from_interval(interval_text, interval_text_upper, depth_from, depth_to)
+            
+            if litho_data:
+                lithologies.append(litho_data)
+            
+            i += 1
+        
+        if lithologies:
+            return lithologies
+    
+    # Fallback to paragraph format - original logic
     # Pattern to find depth intervals like "185-210 m" or "720-730m"
     depth_interval_pattern = r'(\d+\.?\d*)\s*[-–]\s*(\d+\.?\d*)\s*m\b'
     depth_matches = list(re.finditer(depth_interval_pattern, text, re.IGNORECASE))
@@ -365,91 +454,133 @@ def extract_lithology_data(text: str) -> List[Dict[str, Any]]:
         interval_text = text[start_pos:end_pos]
         interval_text_upper = interval_text.upper()
         
-        litho_data = {
-            'depth_from': depth_from,
-            'depth_to': depth_to,
-            'shale_percentage': 0.0,
-            'sand_percentage': 0.0,
-            'clay_percentage': 0.0,
-            'slit_percentage': 0.0,
-            'coal_percentage': 0.0,
-            'limestone_percentage': 0.0,
-            'shale_description': '',
-            'sand_description': '',
-            'clay_description': '',
-            'slit_description': '',
-            'coal_description': '',
-            'limestone_description': '',
-            'description': ''
-        }
+        # Extract lithology data for this interval
+        litho_data = _extract_lithology_from_interval(interval_text, interval_text_upper, depth_from, depth_to)
         
-        # Extract lithology components - look for patterns like:
-        # "Sand: 80%" or "Sand: 80.0" or "Sand 80%" or "Sand 80"
-        # Also handle "Trace" as percentage
-        lithology_types = [
-            ('sand', 'sand_percentage', 'sand_description'),
-            ('shale', 'shale_percentage', 'shale_description'),
-            ('clay', 'clay_percentage', 'clay_description'),
-            ('silt', 'slit_percentage', 'slit_description'),
-            ('slit', 'slit_percentage', 'slit_description'),  # Handle typo
-            ('coal', 'coal_percentage', 'coal_description'),
-            ('limestone', 'limestone_percentage', 'limestone_description'),
-            ('lime', 'limestone_percentage', 'limestone_description'),
-        ]
+        if litho_data:
+            lithologies.append(litho_data)
+    
+    return lithologies
+
+
+def _extract_lithology_from_interval(interval_text: str, interval_text_upper: str, depth_from: float, depth_to: float) -> Optional[Dict[str, Any]]:
+    """
+    Extract lithology data from a depth interval text block.
+    Handles both table format and paragraph format.
+    """
+    litho_data = {
+        'depth_from': depth_from,
+        'depth_to': depth_to,
+        'shale_percentage': 0.0,
+        'sand_percentage': 0.0,
+        'clay_percentage': 0.0,
+        'slit_percentage': 0.0,
+        'coal_percentage': 0.0,
+        'limestone_percentage': 0.0,
+        'shale_description': '',
+        'sand_description': '',
+        'clay_description': '',
+        'slit_description': '',
+        'coal_description': '',
+        'limestone_description': '',
+        'description': ''
+    }
+    
+    # Extract lithology components - look for patterns like:
+    # Table format: "Sand | 10" or "Sand 10" or "Sand: 10 Sand: Description"
+    # Paragraph format: "Sand: 80%" or "Sand: 80.0" or "Sand 80%" or "Sand 80"
+    # Also handle "Trace" as percentage
+    lithology_types = [
+        ('sand', 'sand_percentage', 'sand_description'),
+        ('shale', 'shale_percentage', 'shale_description'),
+        ('clay', 'clay_percentage', 'clay_description'),
+        ('silt', 'slit_percentage', 'slit_description'),
+        ('slit', 'slit_percentage', 'slit_description'),  # Handle typo
+        ('coal', 'coal_percentage', 'coal_description'),
+        ('limestone', 'limestone_percentage', 'limestone_description'),
+        ('lime', 'limestone_percentage', 'limestone_description'),
+    ]
+    
+    descriptions = []
+    
+    for lith_type, pct_key, desc_key in lithology_types:
+        # Pattern 1: Table format - "Sand | 10" or "| Sand | 10" (with pipes)
+        # Handles: "Sand | 10", "| Sand | 10", "Sand: 10"
+        pattern_table1 = rf'(?:^\s*\|\s*)?{lith_type}[:\s]*\s*\|?\s*(\d+\.?\d*)\s*%?'
+        match_table1 = re.search(pattern_table1, interval_text_upper, re.IGNORECASE | re.MULTILINE)
         
-        descriptions = []
+        # Pattern 2: Table format - "Sand" followed by number (space or pipe separated)
+        # Handles: "Sand 10", "Sand: 10", "Sand\n10"
+        pattern_table2 = rf'{lith_type}[:\s]+\s*(\d+\.?\d*)\s*%?'
+        match_table2 = re.search(pattern_table2, interval_text_upper, re.IGNORECASE | re.MULTILINE)
         
-        for lith_type, pct_key, desc_key in lithology_types:
-            # Pattern 1: "Sand: 80%" or "Sand: 80.0" or "Sand 80%"
-            pattern1 = rf'{lith_type}[:\s]+(\d+\.?\d*)\s*%?'
-            match1 = re.search(pattern1, interval_text_upper, re.IGNORECASE)
+        # Pattern 3: Table format - "Sand" on one line, "10" on next line (with optional pipe)
+        pattern_table3 = rf'{lith_type}[:\s]*(?:\s*\|\s*)?(?:\n\s*)?\|?\s*(\d+\.?\d*)\s*%?'
+        match_table3 = re.search(pattern_table3, interval_text_upper, re.IGNORECASE | re.MULTILINE)
+        
+        # Pattern 4: Paragraph format - "Sand: 80%" or "Sand: 80.0" or "Sand 80%"
+        pattern1 = rf'{lith_type}[:\s]+(\d+\.?\d*)\s*%?'
+        match1 = re.search(pattern1, interval_text_upper, re.IGNORECASE)
+        
+        # Pattern 5: "Sand" followed by percentage on same or next line
+        pattern2 = rf'{lith_type}[:\s]*(?:\n\s*)?(\d+\.?\d*)\s*%?'
+        match2 = re.search(pattern2, interval_text_upper, re.IGNORECASE | re.MULTILINE)
+        
+        # Pattern 6: Handle "Trace" or "Tr"
+        pattern3 = rf'{lith_type}[:\s]*(?:trace|tr)\b'
+        match3 = re.search(pattern3, interval_text_upper, re.IGNORECASE)
+        
+        pct_value = 0.0
+        if match_table1:
+            pct_value = _safe_float(match_table1.group(1))
+        elif match_table2:
+            pct_value = _safe_float(match_table2.group(1))
+        elif match_table3:
+            pct_value = _safe_float(match_table3.group(1))
+        elif match1:
+            pct_value = _safe_float(match1.group(1))
+        elif match2:
+            pct_value = _safe_float(match2.group(1))
+        elif match3:
+            pct_value = 1.0  # Trace = 1.0 as per populate_lithology.py
+        
+        if pct_value > 0:
+            litho_data[pct_key] = pct_value
             
-            # Pattern 2: "Sand" followed by percentage on same or next line
-            pattern2 = rf'{lith_type}[:\s]*(?:\n\s*)?(\d+\.?\d*)\s*%?'
-            match2 = re.search(pattern2, interval_text_upper, re.IGNORECASE | re.MULTILINE)
+            # Extract description - look for text after the type and percentage
+            # Handle formats like:
+            # Table: "Sand | 10 Sand: Colorless to white..." or "Sand 10 Sand: Description"
+            # Table: "| Sand | 10 Sand: Description" (with leading pipe)
+            # Paragraph: "Sand: 80% Description text" or "Sand: Description text"
+            desc_patterns = [
+                # Table format: "Sand | 10 Sand: Description" (lithology type repeated)
+                rf'{lith_type}[:\s]*\s*\|?\s*\d+\.?\d*\s*%?\s*{lith_type}[:\s]+(.+?)(?:\n\s*(?:^\s*\|\s*(?:Sand|Shale|Clay|Silt|Slit|Coal|Limestone|Lime)|\d+\s*[-–]|\d+\s*m\b|FORMATION|GAS|DRILLING|$))',
+                # Table format: "Sand | 10 Description" (no second lithology type, description follows)
+                rf'{lith_type}[:\s]*\s*\|?\s*\d+\.?\d*\s*%?\s*[:\s]+(.+?)(?:\n\s*(?:^\s*\|\s*(?:Sand|Shale|Clay|Silt|Slit|Coal|Limestone|Lime)|\d+\s*[-–]|\d+\s*m\b|FORMATION|GAS|DRILLING|$))',
+                # Table format: "| Sand | 10 Description" (with leading pipe)
+                rf'(?:^\s*\|\s*)?{lith_type}[:\s]*\s*\|?\s*\d+\.?\d*\s*%?\s*[:\s]+(.+?)(?:\n\s*(?:^\s*\|\s*(?:Sand|Shale|Clay|Silt|Slit|Coal|Limestone|Lime)|\d+\s*[-–]|\d+\s*m\b|FORMATION|GAS|DRILLING|$))',
+                # Pattern with percentage: "Sand: 80% Description"
+                rf'{lith_type}[:\s]+\d+\.?\d*\s*%?\s*[:\s]+(.+?)(?:\n\s*(?:Sand|Shale|Clay|Silt|Slit|Coal|Limestone|Lime|\d+\s*[-–]|\d+\s*m\b|$))',
+                # Pattern without percentage: "Sand: Description"
+                rf'{lith_type}[:\s]+(.+?)(?:\n\s*(?:Sand|Shale|Clay|Silt|Slit|Coal|Limestone|Lime|\d+\s*[-–]|\d+\s*m\b|$))',
+                # Pattern: "Sand Description" (no colon)
+                rf'{lith_type}\s+(.+?)(?:\n\s*(?:Sand|Shale|Clay|Silt|Slit|Coal|Limestone|Lime|\d+\s*[-–]|\d+\s*m\b|$))',
+            ]
             
-            # Pattern 3: Handle "Trace"
-            pattern3 = rf'{lith_type}[:\s]*(?:trace|tr)'
-            match3 = re.search(pattern3, interval_text_upper, re.IGNORECASE)
-            
-            pct_value = 0.0
-            if match1:
-                pct_value = _safe_float(match1.group(1))
-            elif match2:
-                pct_value = _safe_float(match2.group(1))
-            elif match3:
-                pct_value = 1.0  # Trace = 1.0 as per populate_lithology.py
-            
-            if pct_value > 0:
-                litho_data[pct_key] = pct_value
-                
-                # Extract description - look for text after the type and percentage
-                # Handle formats like:
-                # "Sand: 80% Description text"
-                # "Sand: Description text"  
-                # "Sand Description text"
-                # "Sand: Colorless to white, loose, transparent..."
-                desc_patterns = [
-                    # Pattern with percentage: "Sand: 80% Description"
-                    rf'{lith_type}[:\s]+\d+\.?\d*\s*%?\s*[:\s]+(.+?)(?:\n\s*(?:Sand|Shale|Clay|Silt|Slit|Coal|Limestone|Lime|\d+\s*[-–]|\d+\s*m\b|$))',
-                    # Pattern without percentage: "Sand: Description"
-                    rf'{lith_type}[:\s]+(.+?)(?:\n\s*(?:Sand|Shale|Clay|Silt|Slit|Coal|Limestone|Lime|\d+\s*[-–]|\d+\s*m\b|$))',
-                    # Pattern: "Sand Description" (no colon)
-                    rf'{lith_type}\s+(.+?)(?:\n\s*(?:Sand|Shale|Clay|Silt|Slit|Coal|Limestone|Lime|\d+\s*[-–]|\d+\s*m\b|$))',
-                ]
-                
-                for desc_pattern in desc_patterns:
-                    desc_match = re.search(desc_pattern, interval_text, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-                    if desc_match:
-                        desc = desc_match.group(1).strip()
-                        # Clean up description - remove leading percentage if present
-                        desc = re.sub(r'^\d+\.?\d*\s*%?\s*[:\s]*', '', desc)
-                        # Remove common prefixes
-                        desc = re.sub(r'^(colorless|sand|shale|clay|silt|coal|limestone|lime)[:\s]+', '', desc, flags=re.IGNORECASE)
-                        desc = desc.strip()
-                        
-                        # Skip if description is just a number or too short
-                        if desc and len(desc) > 5 and not desc.replace('.', '').replace(',', '').isdigit():
+            for desc_pattern in desc_patterns:
+                desc_match = re.search(desc_pattern, interval_text, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+                if desc_match:
+                    desc = desc_match.group(1).strip()
+                    # Clean up description - remove leading percentage if present
+                    desc = re.sub(r'^\d+\.?\d*\s*%?\s*[:\s]*', '', desc)
+                    # Remove common prefixes
+                    desc = re.sub(r'^(colorless|sand|shale|clay|silt|coal|limestone|lime)[:\s]+', '', desc, flags=re.IGNORECASE)
+                    desc = desc.strip()
+                    
+                    # Skip if description is just "A/A" or too short
+                    if desc and desc.upper() != 'A/A' and len(desc) > 2:
+                        # Skip if description is just a number or too short meaningful text
+                        if not desc.replace('.', '').replace(',', '').isdigit() and (len(desc) > 5 or desc.upper() in ['TR', 'TRACE']):
                             # Limit description length
                             if len(desc) > 200:
                                 desc = desc[:197] + '...'
@@ -458,19 +589,19 @@ def extract_lithology_data(text: str) -> List[Dict[str, Any]]:
                             desc_entry = f"{lith_type.title()}: {desc}"
                             if desc_entry not in descriptions:
                                 descriptions.append(desc_entry)
-                        break
-        
-        # Build general description from all components
-        if descriptions:
-            litho_data['description'] = '\n\n'.join(descriptions)
-        
-        # Only add if at least one percentage is non-zero
-        if any(litho_data.get(k, 0) > 0 for k in ['shale_percentage', 'sand_percentage', 
-                                                   'clay_percentage', 'slit_percentage',
-                                                   'coal_percentage', 'limestone_percentage']):
-            lithologies.append(litho_data)
+                    break
     
-    return lithologies
+    # Build general description from all components
+    if descriptions:
+        litho_data['description'] = '\n\n'.join(descriptions)
+    
+    # Only return if at least one percentage is non-zero
+    if any(litho_data.get(k, 0) > 0 for k in ['shale_percentage', 'sand_percentage', 
+                                               'clay_percentage', 'slit_percentage',
+                                               'coal_percentage', 'limestone_percentage']):
+        return litho_data
+    
+    return None
 
 
 def parse_pdf_text(pdf_file) -> str:
