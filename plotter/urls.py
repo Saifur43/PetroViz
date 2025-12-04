@@ -35,7 +35,9 @@ urlpatterns = [
     path('drilling-reports/create/', drilling_views.create_drilling_report, name='create_drilling_report'),
     path('drilling-reports/upload-pdf/', drilling_views.upload_pdf_drilling_report, name='upload_pdf_drilling_report'),
     path('drilling-lithology/upload-pdf/', drilling_views.upload_pdf_lithology, name='upload_pdf_lithology'),
+    path('drilling-reports/survey-tools/', drilling_views.survey_tools, name='survey_tools'),
     path('drilling-reports/upload-survey/', drilling_views.upload_well_survey, name='upload_well_survey'),
     path('drilling-reports/convert-depth/', drilling_views.convert_depth, name='convert_depth'),
+    path('drilling-reports/populate-prognosis-md/', drilling_views.populate_prognosis_md, name='populate_prognosis_md'),
     path('drilling-reports/pdf/', drilling_views.generate_drilling_reports_pdf, name='generate_drilling_reports_pdf'),
 ]

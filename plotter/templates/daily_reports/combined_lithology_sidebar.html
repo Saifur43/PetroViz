@@ -33,17 +33,23 @@
                     <div class="combined-bars-container">
                         <!-- Prognosis Bar -->
                         {% if prognosis_segments %}
-                        <div class="prognosis-bar-v combined-bar" aria-label="Prognosis lithology by depth" id="prognosis-bar-combined"{% if stats and stats.latest_depth %} data-latest-depth="{{ stats.latest_depth }}"{% endif %}>
-                            {% if combined_range and combined_range.top_spacer_pct and combined_range.top_spacer_pct > 0 %}
-                                <div class="prognosis-spacer" data-height="{{ combined_range.top_spacer_pct }}"></div>
-                            {% endif %}
+                        <div class="prognosis-bar-v combined-bar" aria-label="Prognosis lithology by depth" id="prognosis-bar-combined"{% if stats and stats.latest_depth %} data-latest-depth="{{ stats.latest_depth }}"{% endif %} style="position: relative;">
                             {% for seg in prognosis_segments %}
-                                <div class="prognosis-segment {% if seg.is_target %}prognosis-target{% endif %}"
-                                     data-from="{{ seg.from }}" data-to="{{ seg.to }}"
-                                     data-height="{% if seg.height_pct_combined %}{{ seg.height_pct_combined }}{% else %}{{ seg.height_pct }}{% endif %}"
-                                     data-color="{% if seg.is_target %}#a10c07{% elif seg.lithology == 'sand' %}#FFD700{% elif seg.lithology == 'clay' %}#CD853F{% elif seg.lithology == 'shale' %}#666666{% elif seg.lithology == 'slit' or seg.lithology == 'silt' %}#DEB887{% else %}#9aa0a6{% endif %}"
-                                     data-tooltip="{{ seg.label }} • {{ seg.lithology|title }}">
-                                </div>
+                                {% if seg.is_gap %}
+                                    <div class="prognosis-segment lithology-gap"
+                                         data-from="{{ seg.from }}" data-to="{{ seg.to }}"
+                                         data-height="{% if seg.height_pct_combined %}{{ seg.height_pct_combined }}{% else %}{{ seg.height_pct }}{% endif %}"
+                                         data-color="#e9ecef"
+                                         data-tooltip="{{ seg.label }}">
+                                    </div>
+                                {% else %}
+                                    <div class="prognosis-segment {% if seg.is_target %}prognosis-target{% endif %}"
+                                         data-from="{{ seg.from }}" data-to="{{ seg.to }}"
+                                         data-height="{% if seg.height_pct_combined %}{{ seg.height_pct_combined }}{% else %}{{ seg.height_pct }}{% endif %}"
+                                         data-color="{% if seg.is_target %}#a10c07{% elif seg.lithology == 'sand' %}#FFD700{% elif seg.lithology == 'clay' %}#CD853F{% elif seg.lithology == 'shale' %}#666666{% elif seg.lithology == 'slit' or seg.lithology == 'silt' %}#DEB887{% else %}#9aa0a6{% endif %}"
+                                         data-tooltip="{{ seg.label }} • {{ seg.lithology|title }}">
+                                    </div>
+                                {% endif %}
                             {% endfor %}
                         </div>
                         {% endif %}
@@ -57,10 +63,7 @@
                         
                         <!-- Lithology Bar -->
                         {% if lithology_segments %}
-                        <div class="prognosis-bar-v combined-bar" aria-label="Actual lithology by depth" id="lithology-bar-combined"{% if stats and stats.latest_depth %} data-latest-depth="{{ stats.latest_depth }}"{% endif %}>
-                            {% if combined_range and combined_range.top_spacer_pct and combined_range.top_spacer_pct > 0 %}
-                                <div class="prognosis-spacer" data-height="{{ combined_range.top_spacer_pct }}"></div>
-                            {% endif %}
+                        <div class="prognosis-bar-v combined-bar" aria-label="Actual lithology by depth" id="lithology-bar-combined"{% if stats and stats.latest_depth %} data-latest-depth="{{ stats.latest_depth }}"{% endif %} style="position: relative;">
                             {% for seg in lithology_segments %}
                                 {% if seg.is_gap %}
                                     <div class="prognosis-segment lithology-gap"

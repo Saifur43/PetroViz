@@ -805,6 +805,8 @@ class WellPrognosis(models.Model):
     well = models.ForeignKey(Well, on_delete=models.CASCADE, related_name='prognoses')
     planned_depth_start = models.DecimalField(max_digits=10, decimal_places=2, help_text="Planned start depth tvd in meters")
     planned_depth_end = models.DecimalField(max_digits=10, decimal_places=2, help_text="Planned end depth tvd in meters")
+    md_depth_start = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Measured depth start in meters (calculated from TVD)")
+    md_depth_end = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Measured depth end in meters (calculated from TVD)")
     lithology = models.CharField(max_length=50, choices=FORMATION_CHOICES, help_text="Expected lithology at this depth")
     target_depth = models.BooleanField(default=False, help_text="Is this a target depth?")
     casing_size = models.CharField(max_length=50, blank=True, null=True)

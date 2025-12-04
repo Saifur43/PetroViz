@@ -333,30 +333,44 @@ def upload_pdf_lithology(request):
 
 
 @login_required
+def survey_tools(request):
+    """Display survey tools page with upload and conversion forms."""
+    if not request.user.is_superuser:
+        messages.error(request, 'You do not have permission to access survey tools.')
+        return redirect('drilling_reports_index')
+    
+    wells = Well.objects.all().order_by('name')
+    
+    return render(request, 'daily_reports/survey_tools.html', {
+        'wells': wells,
+    })
+
+
+@login_required
 @require_POST
 def upload_well_survey(request):
     """Upload a text-based directional survey and rebuild the well survey stations."""
     if not request.user.is_superuser:
         messages.error(request, 'You do not have permission to upload surveys.')
-        return redirect('drilling_reports_index')
+        return redirect('survey_tools')
 
     well_id = request.POST.get('well')
     survey_file = request.FILES.get('survey_file')
 
     if not well_id or not survey_file:
         messages.error(request, 'Please select a well and a survey file.')
-        return redirect('drilling_reports_index')
+        return redirect('survey_tools')
 
     well = get_object_or_404(Well, id=well_id)
 
     try:
         text = survey_file.read().decode('utf-8', errors='ignore')
         well.import_survey_from_text(text)
-        messages.success(request, f'Survey uploaded for {well.name}')
+        messages.success(request, f'Survey uploaded successfully for {well.name}')
     except Exception as exc:
         messages.error(request, f'Failed to import survey: {exc}')
 
-    return redirect('drilling_reports', well_id=well.id)
+    return redirect('survey_tools')
 
 
 @login_required
@@ -393,6 +407,66 @@ def convert_depth(request):
         return JsonResponse({'md': round(md, 3), 'tvd': round(tvd_val, 3)})
 
     return JsonResponse({'error': 'Provide either MD or TVD to convert.'}, status=400)
+
+
+@login_required
+@require_POST
+def populate_prognosis_md(request):
+    """Populate MD depth fields for all WellPrognosis entries of a specific well using TVD to MD conversion."""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Permission denied'}, status=403)
+    
+    well_id = request.POST.get('well_id')
+    if not well_id:
+        return JsonResponse({'error': 'Well ID is required.'}, status=400)
+    
+    well = get_object_or_404(Well, id=well_id)
+    
+    # Check if well has survey data
+    if not well.survey_stations.exists():
+        return JsonResponse({'error': 'Survey data not available for this well. Please upload survey data first.'}, status=400)
+    
+    try:
+        prognoses = WellPrognosis.objects.filter(well=well)
+        updated_count = 0
+        errors = []
+        
+        for prognosis in prognoses:
+            try:
+                # Convert TVD start to MD
+                if prognosis.planned_depth_start:
+                    md_start = well.tvd_to_md(float(prognosis.planned_depth_start))
+                    if md_start is not None:
+                        prognosis.md_depth_start = Decimal(str(round(md_start, 2)))
+                
+                # Convert TVD end to MD
+                if prognosis.planned_depth_end:
+                    md_end = well.tvd_to_md(float(prognosis.planned_depth_end))
+                    if md_end is not None:
+                        prognosis.md_depth_end = Decimal(str(round(md_end, 2)))
+                
+                prognosis.save(update_fields=['md_depth_start', 'md_depth_end'])
+                updated_count += 1
+            except Exception as e:
+                errors.append(f"Error updating prognosis {prognosis.id}: {str(e)}")
+        
+        if errors:
+            return JsonResponse({
+                'success': True,
+                'updated_count': updated_count,
+                'total_count': prognoses.count(),
+                'warnings': errors,
+                'message': f'Updated {updated_count} of {prognoses.count()} prognosis entries. Some errors occurred.'
+            })
+        else:
+            return JsonResponse({
+                'success': True,
+                'updated_count': updated_count,
+                'total_count': prognoses.count(),
+                'message': f'Successfully updated MD depths for {updated_count} prognosis entries.'
+            })
+    except Exception as e:
+        return JsonResponse({'error': f'Failed to populate MD depths: {str(e)}'}, status=500)
 
 
 @login_required
@@ -591,38 +665,129 @@ def drilling_reports(request, well_id=None):
             prognosis_data = selected_well_obj.prognoses.all()
             # Prepare prognosis segments for visualization (normalized widths)
             if prognosis_data.exists():
-                # Convert Decimal to float and compute overall range
-                starts = [float(p.planned_depth_start) for p in prognosis_data]
-                ends = [float(p.planned_depth_end) for p in prognosis_data]
-                min_depth = min(starts)
-                max_depth = max(ends)
-                total_range = max(max_depth - min_depth, 1e-6)
-                zero_origin_total = max(max_depth, 1e-6)
+                # Use MD depths if available, convert TVD to MD if MD not available
+                # This ensures alignment with lithology data which is in MD
+                starts = []
+                ends = []
+                for p in prognosis_data:
+                    # Prefer MD depth, convert TVD to MD if MD not available
+                    start_md = None
+                    if p.md_depth_start is not None:
+                        start_md = float(p.md_depth_start)
+                    elif p.planned_depth_start is not None and selected_well_obj.survey_stations.exists():
+                        # Convert TVD to MD using survey data
+                        start_md = selected_well_obj.tvd_to_md(float(p.planned_depth_start))
+                    
+                    if start_md is not None:
+                        starts.append(start_md)
+                    
+                    end_md = None
+                    if p.md_depth_end is not None:
+                        end_md = float(p.md_depth_end)
+                    elif p.planned_depth_end is not None and selected_well_obj.survey_stations.exists():
+                        # Convert TVD to MD using survey data
+                        end_md = selected_well_obj.tvd_to_md(float(p.planned_depth_end))
+                    
+                    if end_md is not None:
+                        ends.append(end_md)
+                
+                if starts and ends:
+                    min_depth = min(starts)
+                    max_depth = max(ends)
+                    total_range = max(max_depth - min_depth, 1e-6)
+                    zero_origin_total = max(max_depth, 1e-6)
 
-                # Sort by start depth and build segments
-                ordered = sorted(prognosis_data, key=lambda p: float(p.planned_depth_start))
-                prognosis_segments = []
-                for p in ordered:
-                    start = float(p.planned_depth_start)
-                    end = float(p.planned_depth_end)
-                    length = max(end - start, 0)
-                    width_pct = (length / total_range) * 100.0
-                    height_pct = (length / zero_origin_total) * 100.0
-                    prognosis_segments.append({
-                        'from': round(start, 1),
-                        'to': round(end, 1),
-                        'lithology': p.lithology,
-                        'is_target': p.target_depth,
-                        'width_pct': width_pct,
-                        'height_pct': height_pct,
-                        'label': f"{round(start,1)}-{round(end,1)} m"
-                    })
+                    # Build segments - all in MD, with gap handling
+                    raw_segments = []
+                    for p in prognosis_data:
+                        # Use MD depth if available, convert TVD to MD if needed
+                        start = None
+                        if p.md_depth_start is not None:
+                            start = float(p.md_depth_start)
+                        elif p.planned_depth_start is not None and selected_well_obj.survey_stations.exists():
+                            start = selected_well_obj.tvd_to_md(float(p.planned_depth_start))
+                        
+                        if start is None:
+                            continue  # Skip if no depth data or conversion failed
+                        
+                        end = None
+                        if p.md_depth_end is not None:
+                            end = float(p.md_depth_end)
+                        elif p.planned_depth_end is not None and selected_well_obj.survey_stations.exists():
+                            end = selected_well_obj.tvd_to_md(float(p.planned_depth_end))
+                        
+                        if end is None:
+                            continue  # Skip if no depth data or conversion failed
+                        
+                        raw_segments.append({
+                            'from': round(start, 1),
+                            'to': round(end, 1),
+                            'lithology': p.lithology,
+                            'is_target': p.target_depth,
+                        })
+                    
+                    # Sort segments by start depth
+                    raw_segments.sort(key=lambda s: s['from'])
+                    
+                    # Build final segments with gap handling
+                    prognosis_segments = []
+                    current_depth = min_depth
+                    
+                    for seg in raw_segments:
+                        start = seg['from']
+                        end = seg['to']
+                        
+                        # If there's a gap before this segment, add a gap segment
+                        if current_depth < start:
+                            gap_length = start - current_depth
+                            gap_height_pct = (gap_length / zero_origin_total) * 100.0
+                            prognosis_segments.append({
+                                'from': round(current_depth, 1),
+                                'to': round(start, 1),
+                                'lithology': 'unknown',
+                                'is_gap': True,
+                                'is_target': False,
+                                'height_pct': gap_height_pct,
+                                'label': f"{round(current_depth,1)}-{round(start,1)} m (No data)"
+                            })
+                        
+                        # Add the actual segment
+                        length = max(end - start, 0)
+                        width_pct = (length / total_range) * 100.0
+                        height_pct = (length / zero_origin_total) * 100.0
+                        prognosis_segments.append({
+                            'from': round(start, 1),
+                            'to': round(end, 1),
+                            'lithology': seg['lithology'],
+                            'is_target': seg['is_target'],
+                            'is_gap': False,
+                            'width_pct': width_pct,
+                            'height_pct': height_pct,
+                            'label': f"{round(start,1)}-{round(end,1)} m"
+                        })
+                        
+                        current_depth = max(current_depth, end)
+                    
+                    # Add gap at the end if needed
+                    if current_depth < max_depth:
+                        gap_length = max_depth - current_depth
+                        gap_height_pct = (gap_length / zero_origin_total) * 100.0
+                        prognosis_segments.append({
+                            'from': round(current_depth, 1),
+                            'to': round(max_depth, 1),
+                            'lithology': 'unknown',
+                            'is_gap': True,
+                            'is_target': False,
+                            'height_pct': gap_height_pct,
+                            'label': f"{round(current_depth,1)}-{round(max_depth,1)} m (No data)"
+                        })
 
-                prognosis_range = {
-                    'min': round(min_depth, 1),
-                    'max': round(max_depth, 1),
-                    'top_spacer_pct': (min_depth / zero_origin_total) * 100.0 if max_depth > 0 else 0.0
-                }
+                    if prognosis_segments:
+                        prognosis_range = {
+                            'min': round(min_depth, 1),
+                            'max': round(max_depth, 1),
+                            'top_spacer_pct': (min_depth / zero_origin_total) * 100.0 if max_depth > 0 else 0.0
+                        }
         except Well.DoesNotExist:
             prognosis_data = None
 
@@ -875,16 +1040,31 @@ def drilling_reports(request, well_id=None):
                 'top_spacer_pct': (combined_min / combined_total) * 100.0 if combined_max > 0 else 0.0
             }
             
-            # Recalculate height percentages for prognosis segments using combined range
+            # Recalculate height percentages and positions for prognosis segments using combined range
             if prognosis_segments:
+                # Sort segments by start depth to ensure proper ordering
+                prognosis_segments.sort(key=lambda s: s['from'])
+                prev_end = combined_min
                 for seg in prognosis_segments:
                     start = seg['from']
                     end = seg['to']
                     length = max(end - start, 0)
+                    
+                    # Calculate height percentage based on length
                     seg['height_pct_combined'] = (length / combined_total) * 100.0
+                    
+                    # If there's a gap before this segment, we need to account for it
+                    # The spacer at the top handles the offset from 0 to combined_min
+                    # Any gaps between segments will be handled by the sequential stacking
+                    if start > prev_end:
+                        # There's a gap - this will create a visual gap in the chart
+                        # We could add a gap segment here, but for now we'll let it be handled by spacing
+                        pass
+                    prev_end = max(prev_end, end)
             
-            # Recalculate height percentages for lithology segments using combined range
+            # Recalculate height percentages and positions for lithology segments using combined range
             if lithology_segments:
+                # Lithology segments already include gap segments, so we just need to recalc heights
                 for seg in lithology_segments:
                     start = seg['from']
                     end = seg['to']

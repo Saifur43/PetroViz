@@ -7,50 +7,70 @@
     const ticks = document.getElementById('combined-ticks');
     if (!wrap) return;
     
-    // Handle spacers and segments for prognosis bar
-    if (prognosisBar) {
-        prognosisBar.querySelectorAll('.prognosis-spacer, .prognosis-segment').forEach(el => {
-            const h = parseFloat(el.getAttribute('data-height'));
-            if (!isNaN(h)) el.style.height = h + '%';
-            const color = el.getAttribute('data-color');
-            if (color) el.style.background = color;
-        });
-    }
+    // Get combined range for positioning
+    const ticksMin = ticks ? parseFloat(ticks.getAttribute('data-min')) || 0 : 0;
+    const ticksMax = ticks ? parseFloat(ticks.getAttribute('data-max')) || 0 : 0;
+    const combinedTotal = Math.max(ticksMax, 1e-6);
     
-    // Handle spacers and gap segments for lithology bar
-    if (lithologyBar) {
-        lithologyBar.querySelectorAll('.prognosis-spacer, .prognosis-segment.lithology-gap').forEach(el => {
-            const h = parseFloat(el.getAttribute('data-height'));
-            if (!isNaN(h)) el.style.height = h + '%';
-            const color = el.getAttribute('data-color');
-            if (color) el.style.background = color;
+    // Position segments based on absolute depth values
+    function positionSegments(bar, isLithology) {
+        if (!bar) return;
+        
+        // Ensure bar is positioned relatively
+        bar.style.position = 'relative';
+        
+        // Get all segments (including gaps and containers)
+        const allSegments = bar.querySelectorAll('.prognosis-segment, .lithology-segment-container');
+        allSegments.forEach(seg => {
+            const from = parseFloat(seg.getAttribute('data-from'));
+            const to = parseFloat(seg.getAttribute('data-to'));
+            
+            if (!isNaN(from) && !isNaN(to)) {
+                // Calculate position based on absolute depth within combined range
+                const topPct = (from / combinedTotal) * 100.0;
+                const bottomPct = (to / combinedTotal) * 100.0;
+                const calculatedHeight = Math.max(bottomPct - topPct, 0.1); // Minimum 0.1% to ensure visibility
+                
+                // Use absolute positioning to place segments at correct depths
+                seg.style.position = 'absolute';
+                seg.style.top = topPct + '%';
+                seg.style.height = calculatedHeight + '%';
+                seg.style.width = '100%';
+                seg.style.left = '0';
+                
+                // Set color if it's a simple segment (not a container)
+                if (!seg.classList.contains('lithology-segment-container')) {
+                    const color = seg.getAttribute('data-color');
+                    if (color) seg.style.background = color;
+                }
+            }
         });
         
-        // Handle lithology segments with breakdown
-        lithologyBar.querySelectorAll('.lithology-segment-container').forEach(container => {
-            const containerHeight = parseFloat(container.getAttribute('data-height'));
-            if (!isNaN(containerHeight)) {
-                container.style.height = containerHeight + '%';
+        // Handle lithology sub-segments (horizontal breakdown)
+        if (isLithology) {
+            lithologyBar.querySelectorAll('.lithology-segment-container').forEach(container => {
                 container.style.display = 'flex';
                 container.style.flexDirection = 'row';
-                container.style.position = 'relative';
-                container.style.width = '100%';
-            }
-            
-            // Set up sub-segments (horizontal layout)
-            const subSegments = container.querySelectorAll('.lithology-sub-segment');
-            subSegments.forEach(subSeg => {
-                const subWidth = parseFloat(subSeg.getAttribute('data-height')); // Using height attribute for width percentage
-                if (!isNaN(subWidth)) {
-                    subSeg.style.width = subWidth + '%';
-                    subSeg.style.height = '100%';
-                    subSeg.style.flexShrink = '0';
-                }
-                const color = subSeg.getAttribute('data-color');
-                if (color) subSeg.style.background = color;
+                // Position is already set above
+                
+                const subSegments = container.querySelectorAll('.lithology-sub-segment');
+                subSegments.forEach(subSeg => {
+                    const subWidth = parseFloat(subSeg.getAttribute('data-height'));
+                    if (!isNaN(subWidth)) {
+                        subSeg.style.width = subWidth + '%';
+                        subSeg.style.height = '100%';
+                        subSeg.style.flexShrink = '0';
+                    }
+                    const color = subSeg.getAttribute('data-color');
+                    if (color) subSeg.style.background = color;
+                });
             });
-        });
+        }
     }
+    
+    // Position segments for both bars
+    positionSegments(prognosisBar, false);
+    positionSegments(lithologyBar, true);
 
     function computeBarHeight() {
         try {

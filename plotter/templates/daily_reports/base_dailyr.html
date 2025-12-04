@@ -1,6 +1,5 @@
 {# templates/plotter/bha/base_bha.html #}
 {% extends 'base.html' %}
-{% load survey_tags %}
 
 {% block content %}
 <div class="container-fluid h-100">
@@ -31,6 +30,11 @@
                         <i class="bi bi-plus-circle me-2"></i>
                         <span>Add Lithology to Reports</span>
                     </a>
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'survey_tools' %}active{% endif %}"
+                       href="{% url 'survey_tools' %}">
+                        <i class="bi bi-map-fill me-2"></i>
+                        <span>Survey Tools</span>
+                    </a>
                     {% endif %}
                 </li>
                 <li class="nav-item">
@@ -41,7 +45,6 @@
                     </a>
                 </li>
             </ul>
-            {% survey_tools %}
         </nav>
 
         <!-- Main Content Area -->
