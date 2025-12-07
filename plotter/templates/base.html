@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}BAPEX Dashboard{% endblock %}</title>
+    <title>{% block title %}BAPEX PETROVIS{% endblock %}</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
@@ -58,6 +58,10 @@
         
         .navbar-brand:hover {
             transform: scale(1.02);
+        }
+        
+        .navbar-brand span {
+            color: #78B890 !important;
         }
 
         .nav-link { 
@@ -286,9 +290,8 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'dashboard' %}">
-                <img src="https://upload.wikimedia.org/wikipedia/en/f/fa/Bangladesh_Petroleum_Exploration_and_Production_Company_%28logo%29.png" alt="BAPEX Logo" height="40" class="me-2">
-                <span class="fw-bold">PetroVis Dashboard</span>
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'dashboard' %}" style="text-decoration: none;">
+                <span style="font-size: 1.5rem; font-weight: 500; letter-spacing: 1px; color: #78B890; text-transform: uppercase; font-family: 'Inter', sans-serif;">BAPEX PETROVIS</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -302,13 +305,7 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'production_fields' %}active{% endif %}" href="{% url 'production_fields' %}">Production</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'exploration_timeline' %}active{% endif %}" href="{% url 'exploration_timeline' %}">Exp Time Line</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'drilling_reports_index' %}active{% endif %}" href="{% url 'drilling_reports_index' %}">Drilling Reports</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'bha_list' %}active{% endif %}" href="{% url 'bha_list' %}">BHA</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'drilling_reports_index' %}active{% endif %}" href="{% url 'drilling_reports_index' %}">Drilling</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
@@ -364,7 +361,7 @@
                         <li><a href="{% url 'dashboard' %}"><i class="bi bi-chevron-right"></i>Dashboard</a></li>
                         <li><a href="{% url 'graph_view' %}"><i class="bi bi-chevron-right"></i>Petro Physical</a></li>
                         <li><a href="{% url 'production_fields' %}"><i class="bi bi-chevron-right"></i>Production</a></li>
-                        <li><a href="{% url 'exploration_timeline' %}"><i class="bi bi-chevron-right"></i>Exploration Timeline</a></li>
+                        <li><a href="{% url 'credits' %}"><i class="bi bi-chevron-right"></i>Credits</a></li>
                     </ul>
                 </div>
                 

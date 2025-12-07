@@ -12,12 +12,20 @@
             </div>
             <ul class="nav flex-column sidebar-menu">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'drilling_reports_index' %}active{% endif %}"
-                       href="{% url 'drilling_reports_index' %}">
-                        <i class="bi bi-list-ul me-2"></i>
-                        <span>Reports List</span>
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'survey_tools' %}active{% endif %}"
+                    href="{% url 'survey_tools' %}">
+                     <i class="bi bi-map-fill me-2"></i>
+                     <span>Survey Tools</span>
+                 </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'bha_list' %}active{% endif %}"
+                       href="{% url 'bha_list' %}">
+                        <i class="bi bi-tools me-2"></i>
+                        <span>BHA Management</span>
                     </a>
                 </li>
+                <hr>
                 <li class="nav-item">
                     {% if request.user.is_superuser %}
                     <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'create_drilling_report' %}active{% endif %}"
@@ -30,11 +38,7 @@
                         <i class="bi bi-plus-circle me-2"></i>
                         <span>Add Lithology to Reports</span>
                     </a>
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'survey_tools' %}active{% endif %}"
-                       href="{% url 'survey_tools' %}">
-                        <i class="bi bi-map-fill me-2"></i>
-                        <span>Survey Tools</span>
-                    </a>
+                    
                     {% endif %}
                 </li>
                 <li class="nav-item">
