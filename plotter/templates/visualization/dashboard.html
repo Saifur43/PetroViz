@@ -3,138 +3,166 @@
 {% block title %}BAPEX PETROVIS{% endblock %}
 
 {% block content %}
-<div class="container-fluid h-100">
-    <div class="row h-100">
+<div class="dashboard-container">
+    <div class="dashboard-layout">
         <!-- Sidebar Navigation -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar" style="background: linear-gradient(180deg, var(--tertiary-green) 0%, #1a5943 100%); color: white; padding: 20px 16px; min-height: 100vh; box-shadow: 2px 0 10px rgba(0,0,0,0.1);">
-            <div class="mb-4 d-flex align-items-center" style="gap:10px; padding-bottom: 15px; border-bottom: 2px solid rgba(245,158,11,0.3);">
-                <i class="bi bi-grid-3x3-gap" style="font-size: 1.2rem; color:var(--secondary-amber);"></i>
-                <h5 class="mb-0" style="color:var(--secondary-amber); font-weight:700; letter-spacing: 0.5px;">DASHBOARD</h5>
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-icon-wrapper">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                </div>
+                <h5 class="sidebar-title">DASHBOARD</h5>
             </div>
-            <ul class="nav flex-column sidebar-menu">
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'exploration_timeline' %}active{% endif %}"
-                       href="{% url 'exploration_timeline' %}">
-                        <i class="bi bi-clock-history me-2"></i>
-                        <span>Exploration Timeline</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'credits' %}active{% endif %}"
-                       href="{% url 'credits' %}">
-                        <i class="bi bi-people me-2"></i>
-                        <span>Credits</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+            <nav class="sidebar-nav">
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item">
+                        <a class="sidebar-link {% if request.resolver_match.url_name == 'exploration_timeline' %}active{% endif %}"
+                           href="{% url 'exploration_timeline' %}">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Exploration Timeline</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link {% if request.resolver_match.url_name == 'credits' %}active{% endif %}"
+                           href="{% url 'credits' %}">
+                            <i class="bi bi-people"></i>
+                            <span>Credits</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
         <!-- Main Content Area -->
-        <main class="col-md-9 col-lg-10 ms-sm-auto px-4 pt-3">
-            <div class="row">
-                <div class="col-md-12 mb-4">
-                    <h2 class="text-dark" style="font-weight:700;">Operations Dashboard</h2>
+        <main class="dashboard-main">
+            <!-- Page Header -->
+            <div class="dashboard-header">
+                <div class="header-content">
+                    <h1 class="page-title">Operations Dashboard</h1>
+                    <p class="page-subtitle">Monitor and manage your operations at a glance</p>
                 </div>
             </div>
 
-            <div class="row">
-                <!-- Key Performance Indicators -->
-                <div class="col-md-3 mb-4">
-                    <div class="card stats-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Daily Production</h5>
-                            <h2 class="card-text">25,000 BBL</h2>
-                            <p class="text-muted">Oil Production</p>
+            <!-- Key Performance Indicators -->
+            <section class="kpi-section">
+                <div class="kpi-grid">
+                    <div class="kpi-card kpi-card-primary">
+                        <div class="kpi-icon-wrapper">
+                            <i class="bi bi-droplet-fill"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h6 class="kpi-label">Daily Production</h6>
+                            <h2 class="kpi-value">25,000</h2>
+                            <p class="kpi-unit">BBL</p>
+                            <span class="kpi-description">Oil Production</span>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <div class="card stats-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Total Fields</h5>
-                            <h2 class="card-text">12</h2>
-                            <p class="text-muted">Operational Status</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <div class="card stats-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Active Wells</h5>
-                            <h2 class="card-text">42</h2>
-                            <p class="text-muted">Operational Status</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <div class="card stats-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Gas Production</h5>
-                            <h2 class="card-text">150 MCF</h2>
-                            <p class="text-muted">Daily Output</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="row">
-                <!-- Operations Activity -->
-                <div class="col-md-12">
-                    <div class="card modern-card">
-                        <div class="card-header text-white" style="background: linear-gradient(135deg, #1353A3 0%, #1a6bc4 100%); border: none;">
-                            <h5 class="mb-0" style="font-weight:700;"><i class="bi bi-graph-up-arrow me-2"></i>Recent Operations</h5>
+                    <div class="kpi-card kpi-card-success">
+                        <div class="kpi-icon-wrapper">
+                            <i class="bi bi-map-fill"></i>
                         </div>
-                        <div class="card-body p-0">
-                            {% if recent_activities %}
-                                <div class="activity-list">
-                                    {% for activity in recent_activities %}
-                                    <div class="activity-item">
-                                        <div class="activity-content">
-                                            {% if activity.image %}
-                                            <div class="activity-image-wrapper" data-bs-toggle="modal" data-bs-target="#imageModal{{ activity.id }}" style="cursor: pointer;">
-                                                <img src="{{ activity.image.url }}" alt="{{ activity.title }}" class="activity-image">
-                                                <div class="image-overlay">
-                                                    <i class="bi bi-zoom-in"></i>
-                                                </div>
+                        <div class="kpi-content">
+                            <h6 class="kpi-label">Total Fields</h6>
+                            <h2 class="kpi-value">12</h2>
+                            <p class="kpi-unit"></p>
+                            <span class="kpi-description">Operational Status</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card kpi-card-info">
+                        <div class="kpi-icon-wrapper">
+                            <i class="bi bi-diagram-3-fill"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h6 class="kpi-label">Active Wells</h6>
+                            <h2 class="kpi-value">42</h2>
+                            <p class="kpi-unit"></p>
+                            <span class="kpi-description">Operational Status</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card kpi-card-warning">
+                        <div class="kpi-icon-wrapper">
+                            <i class="bi bi-fire"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h6 class="kpi-label">Gas Production</h6>
+                            <h2 class="kpi-value">93.0512</h2>
+                            <p class="kpi-unit">MMscf</p>
+                            <span class="kpi-description">03-12-25</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Operations -->
+            <section class="operations-section">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-content">
+                            <i class="bi bi-graph-up-arrow section-icon"></i>
+                            <div>
+                                <h3 class="section-title">Recent Operations</h3>
+                                <p class="section-subtitle">Latest activity updates and reports</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        {% if recent_activities %}
+                            <div class="activity-list">
+                                {% for activity in recent_activities %}
+                                <article class="activity-card">
+                                    {% if activity.image %}
+                                    <div class="activity-image-container" 
+                                         data-bs-toggle="modal" 
+                                         data-bs-target="#imageModal{{ activity.id }}">
+                                        <img src="{{ activity.image.url }}" 
+                                             alt="{{ activity.title }}" 
+                                             class="activity-image">
+                                        <div class="image-overlay">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="activity-body">
+                                        <div class="activity-header">
+                                            <h4 class="activity-title">{{ activity.title }}</h4>
+                                            {% if activity.priority %}
+                                            <span class="priority-badge priority-{{ activity.priority }}">
+                                                {{ activity.priority|capfirst }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="activity-description">{{ activity.description }}</p>
+                                        <div class="activity-footer">
+                                            {% if activity.location %}
+                                            <div class="activity-meta-item">
+                                                <i class="bi bi-geo-alt-fill"></i>
+                                                <span>{{ activity.location }}</span>
                                             </div>
                                             {% endif %}
-                                            <div class="activity-details">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <h6 class="activity-title mb-0">{{ activity.title }}</h6>
-                                                    <div class="activity-meta">
-                                                        {% if activity.priority == 'critical' %}
-                                                            <span class="badge priority-badge priority-critical">Critical</span>
-                                                        {% elif activity.priority == 'high' %}
-                                                            <span class="badge priority-badge priority-high">High</span>
-                                                        {% elif activity.priority == 'medium' %}
-                                                            <span class="badge priority-badge priority-medium">Medium</span>
-                                                        {% else %}
-                                                            <span class="badge priority-badge priority-low">Low</span>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                                <p class="activity-description">{{ activity.description }}</p>
-                                                <div class="activity-footer">
-                                                    {% if activity.location %}
-                                                        <span class="activity-location"><i class="bi bi-geo-alt-fill me-1"></i>{{ activity.location }}</span>
-                                                    {% endif %}
-                                                    <span class="activity-time"><i class="bi bi-clock me-1"></i>{{ activity.get_time_ago }}</span>
-                                                </div>
+                                            <div class="activity-meta-item">
+                                                <i class="bi bi-clock"></i>
+                                                <span>{{ activity.get_time_ago }}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    {% endfor %}
+                                </article>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i class="bi bi-inbox"></i>
                                 </div>
-                            {% else %}
-                                <div class="text-center py-5">
-                                    <i class="bi bi-info-circle" style="font-size: 3rem; color: #6c757d; opacity: 0.5;"></i>
-                                    <p class="text-muted mt-3 mb-0">No recent operation activities found.</p>
-                                </div>
-                            {% endif %}
-                        </div>
+                                <h4 class="empty-state-title">No Activities Found</h4>
+                                <p class="empty-state-text">No recent operation activities to display.</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-            </div>
+            </section>
         </main>
     </div>
 </div>
@@ -145,13 +173,15 @@
         {% if activity.image %}
         <div class="modal fade" id="imageModal{{ activity.id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ activity.id }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content" style="background: transparent; border: none;">
-                    <div class="modal-header" style="border: none; padding-bottom: 10px;">
-                        <h5 class="modal-title text-white" id="imageModalLabel{{ activity.id }}">{{ activity.title }}</h5>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel{{ activity.id }}">{{ activity.title }}</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body p-0" style="text-align: center;">
-                        <img src="{{ activity.image.url }}" alt="{{ activity.title }}" class="img-fluid modal-expanded-image" style="border-radius: 8px; max-height: 80vh; width: auto;">
+                    <div class="modal-body">
+                        <img src="{{ activity.image.url }}" 
+                             alt="{{ activity.title }}" 
+                             class="modal-image">
                     </div>
                 </div>
             </div>
@@ -161,258 +191,605 @@
 {% endif %}
 
 <style>
-    .sidebar { border-right: 1px solid rgba(255,255,255,0.12); }
-    .sidebar-menu { gap: 6px; }
-    .sidebar .nav-link { 
-        color: #f8fafc; 
-        padding: 12px 14px; 
-        border-radius: 8px; 
-        transition: all 0.3s ease; 
-        font-size: 0.95rem;
-        font-weight: 500;
+    /* Dashboard Container */
+    .dashboard-container {
+        min-height: calc(100vh - 65px);
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
     }
-    .sidebar .nav-link:hover { 
-        background-color: rgba(255, 255, 255, 0.15); 
-        transform: translateX(4px);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+    .dashboard-layout {
+        display: flex;
+        min-height: calc(100vh - 65px);
     }
-    .sidebar .nav-link.active { 
-        background-color: rgba(255, 255, 255, 0.2);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+
+    /* Sidebar Styles */
+    .dashboard-sidebar {
+        width: 280px;
+        background: linear-gradient(180deg, var(--tertiary-green) 0%, #1a5943 100%);
+        color: white;
+        padding: 2rem 1.5rem;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 65px;
+        height: calc(100vh - 65px);
+        overflow-y: auto;
     }
-    
-    /* Modern Card Styling */
-    .modern-card {
-        border: none;
+
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .sidebar-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.15);
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--secondary-amber);
+    }
+
+    .sidebar-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+        color: var(--secondary-amber);
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+        font-size: 0.95rem;
+        position: relative;
         overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
     }
-    
-    .modern-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.08);
+
+    .sidebar-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--secondary-amber);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
     }
-    
-    /* Activity List Styling */
+
+    .sidebar-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateX(4px);
+        color: white;
+    }
+
+    .sidebar-link.active {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar-link.active::before {
+        transform: scaleY(1);
+    }
+
+    .sidebar-link i {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+    }
+
+    /* Main Content */
+    .dashboard-main {
+        flex: 1;
+        padding: 2rem 2.5rem;
+        overflow-y: auto;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .page-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #212529;
+        margin: 0 0 0.5rem 0;
+        letter-spacing: -0.5px;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    /* KPI Section */
+    .kpi-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .kpi-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-start;
+        gap: 1.25rem;
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--secondary-amber);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .kpi-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .kpi-card-primary .kpi-icon-wrapper {
+        background: linear-gradient(135deg, #1353A3 0%, #0d3d7a 100%);
+    }
+
+    .kpi-card-success .kpi-icon-wrapper {
+        background: linear-gradient(135deg, var(--tertiary-green) 0%, #1a5943 100%);
+    }
+
+    .kpi-card-info .kpi-icon-wrapper {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+
+    .kpi-card-warning .kpi-icon-wrapper {
+        background: linear-gradient(135deg, var(--secondary-amber) 0%, #d97706 100%);
+    }
+
+    .kpi-icon-wrapper {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.75rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .kpi-content {
+        flex: 1;
+    }
+
+    .kpi-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin: 0 0 0.5rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #212529;
+        margin: 0;
+        line-height: 1;
+        display: flex;
+        align-items: baseline;
+        gap: 0.25rem;
+    }
+
+    .kpi-unit {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .kpi-description {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    /* Operations Section */
+    .operations-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .section-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #1a6bc4 100%);
+        padding: 1.75rem 2rem;
+        color: white;
+    }
+
+    .section-header-content {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .section-icon {
+        font-size: 2rem;
+        color: var(--secondary-amber);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .section-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .section-body {
+        padding: 0;
+    }
+
+    /* Activity List */
     .activity-list {
         display: flex;
         flex-direction: column;
     }
-    
-    .activity-item {
-        padding: 20px;
+
+    .activity-card {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.75rem 2rem;
         border-bottom: 1px solid #e9ecef;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s ease;
     }
-    
-    .activity-item:last-child {
+
+    .activity-card:last-child {
         border-bottom: none;
     }
-    
-    .activity-item:hover {
+
+    .activity-card:hover {
         background-color: #f8f9fa;
     }
-    
-    .activity-content {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-    }
-    
-    /* Activity Image Styling */
-    .activity-image-wrapper {
+
+    .activity-image-container {
         flex-shrink: 0;
-        width: 180px;
-        height: 180px;
+        width: 200px;
+        height: 200px;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         background: #f0f0f0;
         position: relative;
-        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
-    .activity-image-wrapper:hover {
+
+    .activity-image-container:hover {
         transform: translateY(-4px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
-    
+
     .activity-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.3s;
+        transition: transform 0.3s ease;
     }
-    
-    .activity-image-wrapper:hover .activity-image {
-        transform: scale(1.08);
+
+    .activity-image-container:hover .activity-image {
+        transform: scale(1.1);
     }
-    
-    /* Image Overlay for Zoom Icon */
+
     .image-overlay {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
         opacity: 0;
-        transition: opacity 0.3s;
-        border-radius: 12px;
+        transition: opacity 0.3s ease;
     }
-    
-    .activity-image-wrapper:hover .image-overlay {
+
+    .activity-image-container:hover .image-overlay {
         opacity: 1;
     }
-    
+
     .image-overlay i {
-        font-size: 2.5rem;
+        font-size: 3rem;
         color: white;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
-    
-    /* Modal Styling */
-    .modal-content {
-        background: rgba(0, 0, 0, 0.85) !important;
-        backdrop-filter: blur(10px);
-    }
-    
-    .modal-expanded-image {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    }
-    
-    .modal-backdrop {
-        background-color: rgba(0, 0, 0, 0.8);
-    }
-    
-    /* Activity Details */
-    .activity-details {
+
+    .activity-body {
         flex: 1;
-        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
     }
-    
+
+    .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
     .activity-title {
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         font-weight: 600;
         color: #212529;
-        margin-bottom: 8px;
+        margin: 0;
+        flex: 1;
     }
-    
+
     .activity-description {
         color: #6c757d;
         font-size: 0.95rem;
         line-height: 1.6;
-        margin-bottom: 12px;
+        margin: 0;
     }
-    
+
     .activity-footer {
         display: flex;
-        gap: 20px;
+        gap: 1.5rem;
         align-items: center;
         flex-wrap: wrap;
+        margin-top: auto;
     }
-    
-    .activity-location,
-    .activity-time {
-        font-size: 0.85rem;
-        color: #6c757d;
+
+    .activity-meta-item {
         display: flex;
         align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #6c757d;
     }
-    
-    .activity-location i,
-    .activity-time i {
-        color: #1353A3;
+
+    .activity-meta-item i {
+        color: var(--primary-blue);
+        font-size: 1rem;
     }
-    
-    /* Priority Badge Styling */
+
+    /* Priority Badges */
     .priority-badge {
-        padding: 6px 12px;
+        padding: 0.375rem 0.875rem;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        white-space: nowrap;
     }
-    
+
     .priority-critical {
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         color: white;
     }
-    
+
     .priority-high {
         background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
         color: #212529;
     }
-    
+
     .priority-medium {
         background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
         color: white;
     }
-    
+
     .priority-low {
         background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
         color: white;
     }
-    
-    /* Stats Card Enhancement */
-    .stats-card {
-        border-left: 4px solid var(--secondary-amber);
-        border-radius: 8px;
-        transition: transform 0.2s, box-shadow 0.2s;
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
     }
-    
-    .stats-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
     }
-    
-    .stats-card .card-body {
+
+    .empty-state-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #495057;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .empty-state-text {
+        color: #6c757d;
+        margin: 0;
+    }
+
+    /* Modal */
+    .modal-content {
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 12px;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         padding: 1.5rem;
     }
-    
-    .stats-card .card-title {
-        font-size: 0.9rem;
-        color: #6c757d;
-        font-weight: 500;
-        margin-bottom: 0.5rem;
+
+    .modal-title {
+        color: white;
+        font-weight: 600;
     }
-    
-    .stats-card .card-text {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #212529;
-        margin-bottom: 0.25rem;
+
+    .modal-body {
+        padding: 1.5rem;
+        text-align: center;
     }
-    
+
+    .modal-image {
+        max-width: 100%;
+        max-height: 70vh;
+        border-radius: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
     /* Responsive Design */
+    @media (max-width: 1200px) {
+        .dashboard-main {
+            padding: 1.5rem 2rem;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .dashboard-sidebar {
+            width: 240px;
+            padding: 1.5rem 1rem;
+        }
+
+        .dashboard-main {
+            padding: 1.5rem;
+        }
+
+        .kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
     @media (max-width: 768px) {
-        .activity-content {
+        .dashboard-layout {
             flex-direction: column;
         }
-        
-        .activity-image-wrapper {
+
+        .dashboard-sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+            top: 0;
+            padding: 1.5rem;
+        }
+
+        .sidebar-header {
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-main {
+            padding: 1.5rem 1rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+        }
+
+        .kpi-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .activity-card {
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+
+        .activity-image-container {
             width: 100%;
             height: 250px;
         }
-        
+
         .activity-footer {
             flex-direction: column;
             align-items: flex-start;
-            gap: 8px;
+            gap: 0.75rem;
         }
-        
-        .modal-dialog {
-            margin: 10px;
+
+        .section-header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
         }
-        
-        .modal-expanded-image {
-            max-height: 70vh !important;
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-main {
+            padding: 1rem;
+        }
+
+        .kpi-card {
+            padding: 1.25rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+        }
+
+        .activity-card {
+            padding: 1rem;
         }
     }
 </style>

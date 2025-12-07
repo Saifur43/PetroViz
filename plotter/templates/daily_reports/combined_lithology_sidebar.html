@@ -19,6 +19,7 @@
                     <span class="legend-item"><span class="legend-color" style="background:#DEB887;"></span> Silt</span>
                     <span class="legend-item"><span class="legend-color" style="background:#a10c07;"></span> Target</span>
                     <span class="legend-item"><span class="legend-color" style="background:#9aa0a6; border: 1px dashed #666;"></span> No Data</span>
+                    <span class="legend-item"><span class="legend-color" style="background:#ff6b35;"></span> Gas Show</span>
                 </div>
                 <div class="combined-lithology-wrap" id="combined-lithology-wrap">
                     <div class="combined-bars-container">
@@ -86,7 +87,7 @@
                                     {% if gsm.start_depth_m and gsm.end_depth_m %}
                                         <div class="gas-show-marker" 
                                              data-depth="{{ gsm.start_depth_m }}"
-                                             data-tooltip="Gas Show: {{ gsm.formation }} ({{ gsm.start_depth_m|floatformat:1 }}-{{ gsm.end_depth_m|floatformat:1 }} m) - Max: {{ gsm.max_percent|floatformat:1 }}%">
+                                             data-tooltip="Gas Show: {{ gsm.formation }} - Max: {{ gsm.max_percent|floatformat:1 }}%">
                                         </div>
                                     {% endif %}
                                 {% endfor %}
