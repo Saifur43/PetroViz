@@ -163,7 +163,8 @@ def create_drilling_report(request):
                 GasShowMeasurement.objects.create(
                     drilling_report=report,
                     formation=formation or '',
-                    depth_m=depth_val or 0.0,
+                    start_depth_m=request.POST.get(prefix + 'start_depth_m') or 0.0,
+                    end_depth_m=request.POST.get(prefix + 'end_depth_m') or 0.0,
                     max_percent=request.POST.get(prefix + 'max_percent') or 0.0,
                     bg_percent=request.POST.get(prefix + 'bg_percent') or 0.0,
                     above_bg_percent=request.POST.get(prefix + 'above_bg_percent') or 0.0,
