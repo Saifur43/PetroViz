@@ -370,16 +370,22 @@ class DrillingLithology(models.Model):
     depth_to = models.FloatField(help_text="End depth in meters")
     shale_percentage = models.FloatField(default=0, help_text="Percentage of shale")
     shale_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of shale type")
+    shale_trace = models.BooleanField(default=False, help_text="Trace of shale")
     sand_percentage = models.FloatField(default=0, help_text="Percentage of sand")
-    sand_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of sand type")   
+    sand_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of sand type")
+    sand_trace = models.BooleanField(default=False, help_text="Trace of sand")
     clay_percentage = models.FloatField(default=0, help_text="Percentage of clay")
     clay_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of clay type")
-    slit_percentage = models.FloatField(default=0, help_text="Percentage of slit")
-    slit_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of slit type")
+    clay_trace = models.BooleanField(default=False, help_text="Trace of clay")
+    silt_percentage = models.FloatField(default=0, help_text="Percentage of silt")
+    silt_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of silt type")
+    silt_trace = models.BooleanField(default=False, help_text="Trace of silt")
     coal_percentage = models.FloatField(default=0, help_text="Percentage of coal")
     coal_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of coal type")
+    coal_trace = models.BooleanField(default=False, help_text="Trace of coal")
     limestone_percentage = models.FloatField(default=0, help_text="Percentage of limestone")
     limestone_description = models.CharField(max_length=200, blank=True, null=True, help_text="Description of limestone type")
+    limestone_trace = models.BooleanField(default=False, help_text="Trace of limestone")
     description = models.TextField(blank=True, null=True)
     
     class Meta:
@@ -395,7 +401,9 @@ class DrillingLithology(models.Model):
             self.shale_percentage + 
             self.sand_percentage + 
             self.clay_percentage + 
-            self.slit_percentage
+            self.silt_percentage +
+            self.coal_percentage +
+            self.limestone_percentage
         )
         if total_percentage > 100:
             raise ValidationError("Lithology percentages cannot exceed 100%")
@@ -795,10 +803,11 @@ class WellPrognosis(models.Model):
         ('sand', 'sand'),
         ('lime', 'lime'),
         ('shale', 'shale'),
-        ('slit', 'slit'),
+        ('silt', 'silt'),
         ('dolomite', 'dolomite'),
         ('coal', 'coal'),
         ('clay', 'clay'),
+        ('alteration', 'alteration of sand and shale'),
         # Add more formations as needed
     ]
     
@@ -809,6 +818,7 @@ class WellPrognosis(models.Model):
     md_depth_end = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Measured depth end in meters (calculated from TVD)")
     lithology = models.CharField(max_length=50, choices=FORMATION_CHOICES, help_text="Expected lithology at this depth")
     target_depth = models.BooleanField(default=False, help_text="Is this a target depth?")
+    target_name = models.CharField(max_length=200, blank=True, null=True, help_text="Name of the target depth")
     casing_size = models.CharField(max_length=50, blank=True, null=True)
     drilling_fluid = models.CharField(max_length=100, blank=True, null=True)
     remarks = models.TextField(blank=True, null=True)

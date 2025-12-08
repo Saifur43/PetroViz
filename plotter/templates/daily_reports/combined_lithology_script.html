@@ -41,7 +41,14 @@
                 // Set color if it's a simple segment (not a container)
                 if (!seg.classList.contains('lithology-segment-container')) {
                     const color = seg.getAttribute('data-color');
-                    if (color) seg.style.background = color;
+                    const lithology = seg.getAttribute('data-lithology');
+                    if (color) {
+                        seg.style.background = color;
+                        // Apply alteration pattern (sand with lines)
+                        if (lithology === 'alteration') {
+                            seg.style.backgroundImage = 'repeating-linear-gradient(45deg, #FFD700, #FFD700 4px, #FFA500 4px, #FFA500 8px)';
+                        }
+                    }
                 }
             }
         });
@@ -62,7 +69,14 @@
                         subSeg.style.flexShrink = '0';
                     }
                     const color = subSeg.getAttribute('data-color');
-                    if (color) subSeg.style.background = color;
+                    const type = subSeg.getAttribute('data-type');
+                    if (color) {
+                        subSeg.style.background = color;
+                        // Apply alteration pattern (sand with lines)
+                        if (type === 'alteration') {
+                            subSeg.style.backgroundImage = 'repeating-linear-gradient(45deg, #FFD700, #FFD700 4px, #FFA500 4px, #FFA500 8px)';
+                        }
+                    }
                 });
             });
             

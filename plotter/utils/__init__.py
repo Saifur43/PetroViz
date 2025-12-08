@@ -21,8 +21,8 @@ def compare_lithology_with_prognosis(lithology, well):
         actual_formations.append('shale')
     if lithology.sand_percentage and lithology.sand_percentage >= 20:
         actual_formations.append('sand')
-    if lithology.slit_percentage and lithology.slit_percentage >= 20:
-        actual_formations.append('slit')
+    if lithology.silt_percentage and lithology.silt_percentage >= 20:
+        actual_formations.append('silt')
     if lithology.clay_percentage and lithology.clay_percentage >= 20:
         actual_formations.append('clay')
     

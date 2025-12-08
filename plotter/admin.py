@@ -179,7 +179,12 @@ class DrillingLithologyAdmin(admin.ModelAdmin):
         return obj.drilling_report.date
     get_report_date.short_description = 'Report Date'
     
-admin.site.register(WellPrognosis)
+@admin.register(WellPrognosis)
+class WellPrognosisAdmin(admin.ModelAdmin):
+    list_display = ('well', 'planned_depth_start', 'planned_depth_end', 'lithology', 'target_depth', 'target_name')
+    list_filter = ('well', 'lithology', 'target_depth')
+    search_fields = ('well__name', 'target_name', 'lithology')
+    ordering = ('well', 'planned_depth_start')
 admin.site.register(BHAComponent, BHAComponentAdmin)
 admin.site.register(BHA, BHAAdmin)
 admin.site.register(GasShowMeasurement)

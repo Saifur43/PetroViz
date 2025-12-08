@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 from .utils import compare_lithology_with_prognosis
 import os
 import importlib.util
+import pandas as pd
 from .models import (
     Well,
     DailyDrillingReport, WellPrognosis, DrillingLithology, GasShowMeasurement,
@@ -591,7 +592,7 @@ def drilling_reports(request, well_id=None):
                 'shale': litho.shale_percentage or 0,
                 'sand': litho.sand_percentage or 0,
                 'clay': litho.clay_percentage or 0,
-                'slit': litho.slit_percentage or 0
+                'silt': litho.silt_percentage or 0
             }
             # Find the dominant lithology (highest percentage)
             dominant_lithology = max(lithology_percentages, key=lithology_percentages.get)
@@ -606,11 +607,13 @@ def drilling_reports(request, well_id=None):
                 'shale': round(litho.shale_percentage or 0, 1),
                 'sand': round(litho.sand_percentage or 0, 1),
                 'clay': round(litho.clay_percentage or 0, 1),
-                'slit': round(litho.slit_percentage or 0, 1),
+                'silt': round(litho.silt_percentage or 0, 1),
                 'total': round((litho.shale_percentage or 0) + 
                              (litho.sand_percentage or 0) + 
                              (litho.clay_percentage or 0) + 
-                             (litho.slit_percentage or 0), 1),
+                             (litho.silt_percentage or 0) +
+                             (litho.coal_percentage or 0) +
+                             (litho.limestone_percentage or 0), 1),
                 'dominant_lithology': dominant_lithology,
                 'dominant_percentage': round(lithology_percentages[dominant_lithology], 1),
                 'prognosis_comparison': prognosis_comparison,
@@ -725,6 +728,7 @@ def drilling_reports(request, well_id=None):
                             'to': round(end, 1),
                             'lithology': p.lithology,
                             'is_target': p.target_depth,
+                            'target_name': p.target_name or '',
                         })
                     
                     # Sort segments by start depth
@@ -756,15 +760,19 @@ def drilling_reports(request, well_id=None):
                         length = max(end - start, 0)
                         width_pct = (length / total_range) * 100.0
                         height_pct = (length / zero_origin_total) * 100.0
+                        label = f"{round(start,1)}-{round(end,1)} m"
+                        if seg['is_target'] and seg.get('target_name'):
+                            label += f" • {seg['target_name']}"
                         prognosis_segments.append({
                             'from': round(start, 1),
                             'to': round(end, 1),
                             'lithology': seg['lithology'],
                             'is_target': seg['is_target'],
+                            'target_name': seg.get('target_name', ''),
                             'is_gap': False,
                             'width_pct': width_pct,
                             'height_pct': height_pct,
-                            'label': f"{round(start,1)}-{round(end,1)} m"
+                            'label': label
                         })
                         
                         current_depth = max(current_depth, end)
@@ -938,7 +946,7 @@ def drilling_reports(request, well_id=None):
                         'sand': float(litho.sand_percentage or 0),
                         'clay': float(litho.clay_percentage or 0),
                         'shale': float(litho.shale_percentage or 0),
-                        'slit': float(litho.slit_percentage or 0),
+                        'silt': float(litho.silt_percentage or 0),
                         'coal': float(litho.coal_percentage or 0),
                         'limestone': float(litho.limestone_percentage or 0),
                     }
@@ -982,9 +990,19 @@ def drilling_reports(request, well_id=None):
                             'sand': round(lithology_percentages['sand'], 1),
                             'clay': round(lithology_percentages['clay'], 1),
                             'shale': round(lithology_percentages['shale'], 1),
-                            'slit': round(lithology_percentages['slit'], 1),
+                            'silt': round(lithology_percentages['silt'], 1),
                             'coal': round(lithology_percentages['coal'], 1),
                             'limestone': round(lithology_percentages['limestone'], 1),
+                        }
+                        
+                        # Add trace information
+                        segment_data['traces'] = {
+                            'shale': litho.shale_trace,
+                            'sand': litho.sand_trace,
+                            'clay': litho.clay_trace,
+                            'silt': litho.silt_trace,
+                            'coal': litho.coal_trace,
+                            'limestone': litho.limestone_trace,
                         }
                         
                         lithology_segments.append(segment_data)
@@ -1151,7 +1169,7 @@ def drilling_report_detail(request, report_id):
             'shale': litho.shale_percentage or 0,
             'sand': litho.sand_percentage or 0,
             'clay': litho.clay_percentage or 0,
-            'slit': litho.slit_percentage or 0
+            'silt': litho.silt_percentage or 0
         }
         dominant_lithology = max(lithology_percentages, key=lithology_percentages.get)
         
@@ -1164,11 +1182,13 @@ def drilling_report_detail(request, report_id):
             'shale': round(litho.shale_percentage or 0, 1),
             'sand': round(litho.sand_percentage or 0, 1),
             'clay': round(litho.clay_percentage or 0, 1),
-            'slit': round(litho.slit_percentage or 0, 1),
+            'silt': round(litho.silt_percentage or 0, 1),
             'total': round((litho.shale_percentage or 0) + 
                          (litho.sand_percentage or 0) + 
                          (litho.clay_percentage or 0) + 
-                         (litho.slit_percentage or 0), 1),
+                         (litho.silt_percentage or 0) +
+                         (litho.coal_percentage or 0) +
+                         (litho.limestone_percentage or 0), 1),
             'dominant_lithology': dominant_lithology,
             'dominant_percentage': round(lithology_percentages[dominant_lithology], 1),
             'prognosis_comparison': prognosis_comparison,
@@ -1282,16 +1302,22 @@ def generate_drilling_reports_pdf(request):
             })
         
         # Add Silt
-        if litho.slit_percentage and litho.slit_percentage > 0:
+        if litho.silt_percentage and litho.silt_percentage > 0:
             silt_desc = "Silt: Milky white to white with dark spotted, highly reacts with HCL."
             if hasattr(litho, 'description') and litho.description == "A/A":
                 silt_desc = "A/A"
             
-            percentage_display = "Tr" if litho.slit_percentage < 5 else int(litho.slit_percentage)
+            percentage_display = "Tr" if litho.silt_percentage < 5 else int(litho.silt_percentage)
             litho_items.append({
                 'type': 'Silt',
                 'percentage': percentage_display,
                 'description': silt_desc
+            })
+        elif litho.silt_trace:
+            litho_items.append({
+                'type': 'Silt',
+                'percentage': 'Tr',
+                'description': "Silt: Trace"
             })
         
         # Add Clay
@@ -1355,4 +1381,194 @@ def generate_drilling_reports_pdf(request):
     }
     
     return render(request, 'visualization/drilling_reports_pdf.html', context)
+
+
+@login_required
+def upload_prognosis_excel(request):
+    """Display form to upload prognosis data from Excel file."""
+    if not request.user.is_superuser:
+        messages.error(request, 'You do not have permission to upload prognosis data.')
+        return redirect('drilling_reports_index')
+    
+    wells = Well.objects.all().order_by('name')
+    
+    if request.method == 'POST':
+        well_id = request.POST.get('well')
+        excel_file = request.FILES.get('excel_file')
+        
+        if not well_id or not excel_file:
+            messages.error(request, 'Please select a well and upload an Excel file.')
+            return render(request, 'daily_reports/upload_prognosis_excel.html', {
+                'wells': wells,
+            })
+        
+        well = get_object_or_404(Well, id=well_id)
+        
+        # Validate file type
+        if not excel_file.name.lower().endswith(('.xlsx', '.xls')):
+            messages.error(request, 'File must be an Excel file (.xlsx or .xls)')
+            return render(request, 'daily_reports/upload_prognosis_excel.html', {
+                'wells': wells,
+            })
+        
+        try:
+            # Read Excel file
+            df = pd.read_excel(excel_file)
+            
+            # Normalize column names (handle variations)
+            df.columns = df.columns.str.strip()
+            
+            # Map common column name variations
+            column_mapping = {
+                'Interval (TVD)': 'interval',
+                'Interval': 'interval',
+                'TVD': 'interval',
+                'Depth': 'interval',
+                'Major Lith': 'lithology',
+                'Major Lithology': 'lithology',
+                'Lithology': 'lithology',
+                'Lith': 'lithology',
+                'Target': 'target',
+                'Target Name': 'target_name',
+            }
+            
+            # Rename columns
+            for old_name, new_name in column_mapping.items():
+                if old_name in df.columns:
+                    df.rename(columns={old_name: new_name}, inplace=True)
+            
+            # Check required columns
+            if 'interval' not in df.columns or 'lithology' not in df.columns:
+                messages.error(request, 'Excel file must contain "Interval (TVD)" and "Major Lith" columns.')
+                return render(request, 'daily_reports/upload_prognosis_excel.html', {
+                    'wells': wells,
+                })
+            
+            # Map lithology names to model choices
+            lithology_mapping = {
+                'sand': 'sand',
+                'sandstone': 'sand',
+                'clay': 'clay',
+                'shale': 'shale',
+                'silt': 'silt',
+                'lime': 'lime',
+                'limestone': 'lime',
+                'dolomite': 'dolomite',
+                'coal': 'coal',
+                'alt': 'alteration',
+                'alteration': 'alteration',
+                'alteration of sand and shale': 'alteration',
+            }
+            
+            created_count = 0
+            updated_count = 0
+            errors = []
+            
+            # Process each row
+            for idx, row in df.iterrows():
+                try:
+                    # Parse interval (e.g., "50 - 460" or "50-460")
+                    interval_str = str(row['interval']).strip()
+                    if pd.isna(row['interval']) or not interval_str:
+                        continue
+                    
+                    # Extract depth range
+                    interval_parts = interval_str.replace(' ', '').split('-')
+                    if len(interval_parts) != 2:
+                        errors.append(f"Row {idx + 2}: Invalid interval format '{interval_str}'")
+                        continue
+                    
+                    try:
+                        depth_start = Decimal(str(interval_parts[0]))
+                        depth_end = Decimal(str(interval_parts[1]))
+                    except (ValueError, IndexError):
+                        errors.append(f"Row {idx + 2}: Could not parse depths from '{interval_str}'")
+                        continue
+                    
+                    # Get lithology
+                    lithology_str = str(row['lithology']).strip().lower() if pd.notna(row['lithology']) else ''
+                    if not lithology_str:
+                        errors.append(f"Row {idx + 2}: Missing lithology")
+                        continue
+                    
+                    # Map lithology
+                    lithology = None
+                    for key, value in lithology_mapping.items():
+                        if key in lithology_str:
+                            lithology = value
+                            break
+                    
+                    if not lithology:
+                        errors.append(f"Row {idx + 2}: Unknown lithology '{row['lithology']}'")
+                        continue
+                    
+                    # Get target information
+                    target_depth = False
+                    target_name = None
+                    
+                    if 'target' in df.columns and pd.notna(row.get('target')):
+                        target_str = str(row['target']).strip().lower()
+                        if target_str in ('yes', 'y', '1', 'true'):
+                            target_depth = True
+                    
+                    if 'target_name' in df.columns and pd.notna(row.get('target_name')):
+                        target_name = str(row['target_name']).strip()
+                        if target_name:
+                            target_depth = True  # If target_name is provided, mark as target
+                    
+                    # Check if prognosis already exists for this interval
+                    existing = WellPrognosis.objects.filter(
+                        well=well,
+                        planned_depth_start=depth_start,
+                        planned_depth_end=depth_end
+                    ).first()
+                    
+                    if existing:
+                        # Update existing
+                        existing.lithology = lithology
+                        existing.target_depth = target_depth
+                        if target_name:
+                            existing.target_name = target_name
+                        existing.save()
+                        updated_count += 1
+                    else:
+                        # Create new
+                        WellPrognosis.objects.create(
+                            well=well,
+                            planned_depth_start=depth_start,
+                            planned_depth_end=depth_end,
+                            lithology=lithology,
+                            target_depth=target_depth,
+                            target_name=target_name if target_name else None,
+                        )
+                        created_count += 1
+                
+                except Exception as e:
+                    errors.append(f"Row {idx + 2}: {str(e)}")
+            
+            # Success message
+            if created_count > 0 or updated_count > 0:
+                msg = f'Successfully processed {created_count} new and {updated_count} updated prognosis entries.'
+                if errors:
+                    msg += f' {len(errors)} errors occurred.'
+                messages.success(request, msg)
+            
+            if errors:
+                # Show first 10 errors
+                error_msg = 'Errors:\n' + '\n'.join(errors[:10])
+                if len(errors) > 10:
+                    error_msg += f'\n... and {len(errors) - 10} more errors.'
+                messages.warning(request, error_msg)
+            
+            if created_count == 0 and updated_count == 0:
+                messages.warning(request, 'No prognosis entries were created or updated. Please check the Excel file format.')
+            
+        except ImportError:
+            messages.error(request, 'pandas library is required. Please install it: pip install pandas openpyxl')
+        except Exception as e:
+            messages.error(request, f'Error processing Excel file: {str(e)}')
+    
+    return render(request, 'daily_reports/upload_prognosis_excel.html', {
+        'wells': wells,
+    })
 

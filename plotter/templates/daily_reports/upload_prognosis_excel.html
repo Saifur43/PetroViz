@@ -1,0 +1,164 @@
+{% extends 'daily_reports/base_dailyr.html' %}
+
+{% block bha_content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-0" style="color: #257358; font-weight: 700;">
+                <i class="bi bi-upload me-2"></i>Upload Prognosis from Excel
+            </h3>
+            <p class="text-muted mt-2">Upload prognosis lithology data from an Excel file (.xlsx or .xls)</p>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header" style="background: linear-gradient(135deg, #257358 0%, #1a5943 100%); color: white;">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Upload Excel File</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="upload-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="well" class="form-label fw-bold">Select Well <span class="text-danger">*</span></label>
+                            <select name="well" id="well" class="form-select" required>
+                                <option value="">-- Select a Well --</option>
+                                {% for well in wells %}
+                                    <option value="{{ well.id }}">{{ well.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="excel_file" class="form-label fw-bold">Excel File <span class="text-danger">*</span></label>
+                            <input type="file" name="excel_file" id="excel_file" class="form-control" accept=".xlsx,.xls" required>
+                            <div class="form-text">Accepted formats: .xlsx, .xls</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload me-2"></i>Upload and Process
+                            </button>
+                            <a href="{% url 'drilling_reports_index' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header" style="background: linear-gradient(135deg, #1353A3 0%, #1a6bc4 100%); color: white;">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Excel Format Guide</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Required Columns:</h6>
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Interval (TVD)</strong> - Depth range (e.g., "50 - 460" or "50-460")
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Major Lith</strong> - Lithology type
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-circle text-muted me-2"></i>
+                            <strong>Target</strong> - "Yes" or empty (optional)
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-circle text-muted me-2"></i>
+                            <strong>Target Name</strong> - Name of target (optional)
+                        </li>
+                    </ul>
+
+                    <h6 class="fw-bold mb-3">Supported Lithology Types:</h6>
+                    <div class="small">
+                        <span class="badge bg-secondary me-1">Sand/Sandstone</span>
+                        <span class="badge bg-secondary me-1">Clay</span>
+                        <span class="badge bg-secondary me-1">Shale</span>
+                        <span class="badge bg-secondary me-1">Silt</span>
+                        <span class="badge bg-secondary me-1">Lime/Limestone</span>
+                        <span class="badge bg-secondary me-1">Dolomite</span>
+                        <span class="badge bg-secondary me-1">Coal</span>
+                        <span class="badge bg-secondary me-1">Alt/Alteration</span>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="fw-bold mb-3">Example:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Interval (TVD)</th>
+                                    <th>Major Lith</th>
+                                    <th>Target</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>50 - 460</td>
+                                    <td>Sandstone</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>460 - 480</td>
+                                    <td>Clay</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>1974 - 1990</td>
+                                    <td>Sandstone</td>
+                                    <td>Yes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-info mt-3 mb-0">
+                        <small>
+                            <i class="bi bi-lightbulb me-1"></i>
+                            <strong>Note:</strong> Existing prognosis entries with the same well and depth range will be updated.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+    
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+    
+    .form-select, .form-control {
+        border-radius: 6px;
+    }
+    
+    .btn {
+        border-radius: 6px;
+    }
+</style>
+{% endblock %}
+

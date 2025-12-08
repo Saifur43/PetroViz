@@ -17,12 +17,27 @@
                     <span class="legend-item"><span class="legend-color" style="background:#CD853F;"></span> Clay</span>
                     <span class="legend-item"><span class="legend-color" style="background:#666666;"></span> Shale</span>
                     <span class="legend-item"><span class="legend-color" style="background:#DEB887;"></span> Silt</span>
+                    <span class="legend-item"><span class="legend-color legend-alteration" style="background:#FFD700;"></span> Alteration</span>
                     <span class="legend-item"><span class="legend-color" style="background:#a10c07;"></span> Target</span>
                     <span class="legend-item"><span class="legend-color" style="background:#9aa0a6; border: 1px dashed #666;"></span> No Data</span>
                     <span class="legend-item"><span class="legend-color" style="background:#ff6b35;"></span> Gas Show</span>
                 </div>
+
+                <!-- Bar Labels Row -->
+                <div class="bar-labels-row" style="display: flex; justify-content: space-around; margin-bottom: 8px; font-size: 0.75rem; font-weight: 600; color: #257358;">
+                    {% if prognosis_segments %}
+                    <div class="bar-label" style="flex: 1; text-align: center;">Prognosis</div>
+                    {% endif %}
+                    <div class="bar-label" style="flex: 0 0 80px; text-align: center;">Depth</div>
+                    {% if lithology_segments %}
+                    <div class="bar-label" style="flex: 1; text-align: center;">Actual Lithology</div>
+                    {% endif %}
+                </div>
+                
                 <div class="combined-lithology-wrap" id="combined-lithology-wrap">
                     <div class="combined-bars-container">
+                        
+                        
                         <!-- Prognosis Bar -->
                         {% if prognosis_segments %}
                         <div class="prognosis-bar-v combined-bar" aria-label="Prognosis lithology by depth" id="prognosis-bar-combined"{% if stats and stats.latest_depth %} data-latest-depth="{{ stats.latest_depth }}"{% endif %} style="position: relative;">
@@ -38,7 +53,8 @@
                                     <div class="prognosis-segment {% if seg.is_target %}prognosis-target{% endif %}"
                                          data-from="{{ seg.from }}" data-to="{{ seg.to }}"
                                          data-height="{% if seg.height_pct_combined %}{{ seg.height_pct_combined }}{% else %}{{ seg.height_pct }}{% endif %}"
-                                         data-color="{% if seg.is_target %}#a10c07{% elif seg.lithology == 'sand' %}#FFD700{% elif seg.lithology == 'clay' %}#CD853F{% elif seg.lithology == 'shale' %}#666666{% elif seg.lithology == 'slit' or seg.lithology == 'silt' %}#DEB887{% else %}#9aa0a6{% endif %}"
+                                         data-color="{% if seg.is_target %}#a10c07{% elif seg.lithology == 'sand' %}#FFD700{% elif seg.lithology == 'clay' %}#CD853F{% elif seg.lithology == 'shale' %}#666666{% elif seg.lithology == 'silt' %}#DEB887{% elif seg.lithology == 'alteration' %}#FFD700{% else %}#9aa0a6{% endif %}"
+                                         data-lithology="{{ seg.lithology }}"
                                          data-tooltip="{{ seg.label }} • {{ seg.lithology|title }}">
                                     </div>
                                 {% endif %}
@@ -69,13 +85,13 @@
                                          data-from="{{ seg.from }}" 
                                          data-to="{{ seg.to }}"
                                          data-height="{% if seg.height_pct_combined %}{{ seg.height_pct_combined }}{% else %}{{ seg.height_pct }}{% endif %}"
-                                         data-tooltip="{{ seg.label }}{% if seg.percentages %} • Sand: {{ seg.percentages.sand }}%, Clay: {{ seg.percentages.clay }}%, Shale: {{ seg.percentages.shale }}%, Silt: {{ seg.percentages.slit }}%{% if seg.percentages.coal %}, Coal: {{ seg.percentages.coal }}%{% endif %}{% if seg.percentages.limestone %}, Limestone: {{ seg.percentages.limestone }}%{% endif %}{% endif %}">
+                                         data-tooltip="{{ seg.label }}{% if seg.percentages %} • Sand: {{ seg.percentages.sand }}%, Clay: {{ seg.percentages.clay }}%, Shale: {{ seg.percentages.shale }}%, Silt: {{ seg.percentages.silt }}%{% if seg.percentages.coal %}, Coal: {{ seg.percentages.coal }}%{% endif %}{% if seg.percentages.limestone %}, Limestone: {{ seg.percentages.limestone }}%{% endif %}{% endif %}{% if seg.traces %}{% if seg.traces.shale %} • Shale: Tr{% endif %}{% if seg.traces.sand %} • Sand: Tr{% endif %}{% if seg.traces.clay %} • Clay: Tr{% endif %}{% if seg.traces.silt %} • Silt: Tr{% endif %}{% if seg.traces.coal %} • Coal: Tr{% endif %}{% if seg.traces.limestone %} • Limestone: Tr{% endif %}{% endif %}">
                                         {% for breakdown in seg.breakdown %}
                                             <div class="lithology-sub-segment"
                                                  data-type="{{ breakdown.type }}"
                                                  data-percentage="{{ breakdown.percentage }}"
                                                  data-height="{{ breakdown.height_pct }}"
-                                                 data-color="{% if breakdown.type == 'sand' %}#FFD700{% elif breakdown.type == 'clay' %}#CD853F{% elif breakdown.type == 'shale' %}#666666{% elif breakdown.type == 'slit' or breakdown.type == 'silt' %}#DEB887{% elif breakdown.type == 'coal' %}#2c2c2c{% elif breakdown.type == 'limestone' %}#f5f5dc{% else %}#9aa0a6{% endif %}">
+                                                 data-color="{% if breakdown.type == 'sand' %}#FFD700{% elif breakdown.type == 'clay' %}#CD853F{% elif breakdown.type == 'shale' %}#666666{% elif breakdown.type == 'silt' %}#DEB887{% elif breakdown.type == 'coal' %}#2c2c2c{% elif breakdown.type == 'limestone' %}#f5f5dc{% elif breakdown.type == 'alteration' %}#FF8C00{% else %}#9aa0a6{% endif %}">
                                             </div>
                                         {% endfor %}
                                     </div>
@@ -102,3 +118,9 @@
     {% endif %}
 </div>
 
+<style>
+.legend-alteration {
+    background: #FFD700 !important;
+    background-image: repeating-linear-gradient(45deg, #FFD700, #FFD700 3px, #FFA500 3px, #FFA500 6px) !important;
+}
+</style>

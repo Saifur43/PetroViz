@@ -40,4 +40,5 @@ urlpatterns = [
     path('drilling-reports/convert-depth/', drilling_views.convert_depth, name='convert_depth'),
     path('drilling-reports/populate-prognosis-md/', drilling_views.populate_prognosis_md, name='populate_prognosis_md'),
     path('drilling-reports/pdf/', drilling_views.generate_drilling_reports_pdf, name='generate_drilling_reports_pdf'),
+    path('drilling-reports/upload-prognosis-excel/', drilling_views.upload_prognosis_excel, name='upload_prognosis_excel'),
 ]

@@ -153,12 +153,12 @@ class DrillingLithologyForm(ModelForm):
         model = DrillingLithology
         fields = [
             'drilling_report', 'depth_from', 'depth_to',
-            'shale_percentage', 'shale_description',
-            'sand_percentage', 'sand_description',
-            'clay_percentage', 'clay_description',
-            'slit_percentage', 'slit_description',
-            'coal_percentage', 'coal_description',
-            'limestone_percentage', 'limestone_description',
+            'shale_percentage', 'shale_description', 'shale_trace',
+            'sand_percentage', 'sand_description', 'sand_trace',
+            'clay_percentage', 'clay_description', 'clay_trace',
+            'silt_percentage', 'silt_description', 'silt_trace',
+            'coal_percentage', 'coal_description', 'coal_trace',
+            'limestone_percentage', 'limestone_description', 'limestone_trace',
             'description'
         ]
         widgets = {
@@ -167,16 +167,22 @@ class DrillingLithologyForm(ModelForm):
             'depth_to': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'shale_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
             'shale_description': forms.TextInput(attrs={'class': 'form-control'}),
+            'shale_trace': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'sand_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
             'sand_description': forms.TextInput(attrs={'class': 'form-control'}),
+            'sand_trace': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'clay_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
             'clay_description': forms.TextInput(attrs={'class': 'form-control'}),
-            'slit_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'slit_description': forms.TextInput(attrs={'class': 'form-control'}),
+            'clay_trace': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'silt_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+            'silt_description': forms.TextInput(attrs={'class': 'form-control'}),
+            'silt_trace': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'coal_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
             'coal_description': forms.TextInput(attrs={'class': 'form-control'}),
+            'coal_trace': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'limestone_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
             'limestone_description': forms.TextInput(attrs={'class': 'form-control'}),
+            'limestone_trace': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
@@ -190,7 +196,7 @@ class DrillingLithologyForm(ModelForm):
         # Validate percentages (include coal and limestone)
         percentage_keys = (
             'shale_percentage', 'sand_percentage', 'clay_percentage',
-            'slit_percentage', 'coal_percentage', 'limestone_percentage'
+            'silt_percentage', 'coal_percentage', 'limestone_percentage'
         )
         total = 0
         for k in percentage_keys:

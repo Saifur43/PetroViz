@@ -475,10 +475,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 shale: parseFloat(canvas.dataset.shale) || 0,
                 sand: parseFloat(canvas.dataset.sand) || 0,
                 clay: parseFloat(canvas.dataset.clay) || 0,
-                slit: parseFloat(canvas.dataset.slit) || 0,
+                silt: parseFloat(canvas.dataset.silt) || 0,
             };
             
-            ['shale', 'sand', 'clay', 'slit'].forEach(key => {
+            ['shale', 'sand', 'clay', 'silt'].forEach(key => {
                 if (isNaN(data[key])) data[key] = 0;
                 data[key] = parseFloat(data[key].toFixed(1));
             });
@@ -511,7 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         },
                         {
                             label: 'Silt',
-                            data: [data.slit],
+                            data: [data.silt],
                             backgroundColor: '#DEB887',
                             borderColor: '#D2691E',
                             borderWidth: 0

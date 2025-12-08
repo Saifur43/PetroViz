@@ -389,9 +389,65 @@
           <div class="col-md-3">
             <div class="input-group">
               <span class="input-group-text">Silt %</span>
-              {{ form.slit_percentage }}
+              {{ form.silt_percentage }}
             </div>
-            {{ form.slit_percentage.errors }}
+            {{ form.silt_percentage.errors }}
+          </div>
+
+          <!-- Trace Fields -->
+          <div class="col-12">
+            <div class="section-header">
+              <h6><i class="bi bi-check-square"></i>Trace Indicators</h6>
+            </div>
+          </div>
+
+          <div class="col-md-2">
+            <div class="form-check">
+              {{ form.shale_trace }}
+              <label class="form-check-label" for="{{ form.shale_trace.id_for_label }}">
+                Shale Trace
+              </label>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-check">
+              {{ form.sand_trace }}
+              <label class="form-check-label" for="{{ form.sand_trace.id_for_label }}">
+                Sand Trace
+              </label>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-check">
+              {{ form.clay_trace }}
+              <label class="form-check-label" for="{{ form.clay_trace.id_for_label }}">
+                Clay Trace
+              </label>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-check">
+              {{ form.silt_trace }}
+              <label class="form-check-label" for="{{ form.silt_trace.id_for_label }}">
+                Silt Trace
+              </label>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-check">
+              {{ form.coal_trace }}
+              <label class="form-check-label" for="{{ form.coal_trace.id_for_label }}">
+                Coal Trace
+              </label>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-check">
+              {{ form.limestone_trace }}
+              <label class="form-check-label" for="{{ form.limestone_trace.id_for_label }}">
+                Limestone Trace
+              </label>
+            </div>
           </div>
 
           <!-- Lithology Descriptions -->
@@ -418,8 +474,8 @@
           </div>
           <div class="col-md-6">
             <label class="form-label small">Silt description</label>
-            {{ form.slit_description }}
-            {{ form.slit_description.errors }}
+            {{ form.silt_description }}
+            {{ form.silt_description.errors }}
           </div>
 
           <!-- Other Components -->
@@ -598,12 +654,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if (litho.sand_percentage > 0) percentages.push(`Sand: ${litho.sand_percentage}%`);
       if (litho.shale_percentage > 0) percentages.push(`Shale: ${litho.shale_percentage}%`);
       if (litho.clay_percentage > 0) percentages.push(`Clay: ${litho.clay_percentage}%`);
-      if (litho.slit_percentage > 0) percentages.push(`Silt: ${litho.slit_percentage}%`);
+      if (litho.silt_percentage > 0) percentages.push(`Silt: ${litho.silt_percentage}%`);
       if (litho.coal_percentage > 0) percentages.push(`Coal: ${litho.coal_percentage}%`);
       if (litho.limestone_percentage > 0) percentages.push(`Limestone: ${litho.limestone_percentage}%`);
       
       const totalPct = (litho.sand_percentage || 0) + (litho.shale_percentage || 0) + 
-                       (litho.clay_percentage || 0) + (litho.slit_percentage || 0) + 
+                       (litho.clay_percentage || 0) + (litho.silt_percentage || 0) + 
                        (litho.coal_percentage || 0) + (litho.limestone_percentage || 0);
       
       item.innerHTML = `
